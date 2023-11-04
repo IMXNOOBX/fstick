@@ -1,17 +1,32 @@
 #include "../tools/utilities.h"
 #include "../classes/globals.h"
 
-struct MenuItem
-{
-	const char *name;
-	MenuItem *submenu;
+struct MenuAction {
+    const char* name;
+    void (*action)(); // Function pointer for action
 };
 
+struct MenuItem {
+    const char* name;
+    MenuItem* submenu;
+    int numOptions;
+    MenuAction* actions; // Array of actions
+};
 class MenuRenderer
 {
 public:
-	MenuRenderer(const char *title, MenuItem *options, int numMenuOptions)
-		: title(title), menuOptions(options), numMenuOptions(numMenuOptions), currentMenuOption(0), currentSubMenu(nullptr) {}
+	MenuRenderer(const char *title, MenuItem* options, int numMenuOptions)
+	{
+		this->title = title;
+		this->menuOptions = options;
+		this->numMenuOptions = numMenuOptions;
+		this->currentMenuOption = 0;
+		this->currentSubMenu = nullptr;
+
+		l.log(Logger::INFO, "MenuRenderer initialized");
+		l.log(Logger::INFO, "Menu title: " + String(title));
+		l.log(Logger::INFO, "Menu options: " + String(numMenuOptions));
+	}
 
 	void topBar()
 	{
@@ -27,132 +42,104 @@ public:
 		M5.Lcd.fillScreen(BLACK);
 		M5.Lcd.setTextColor(WHITE);
 		topBar();
-		// M5.Lcd.setTextSize(2);
-		// M5.Lcd.setCursor(10, 20);
-		// M5.Lcd.print(title);
 
-		// M5.Lcd.setTextSize(4);
-		// M5.Lcd.setCursor(20, 60);
-		// M5.Lcd.print(menuOptions[currentMenuOption].name);
-		// M5.Lcd.setTextSize(2);
-
-		// if (menuOptions[currentMenuOption].submenu != nullptr)
-		// {
-		// 	M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);
-		// 	M5.Lcd.print("> Submenu");
-		// }
-		// else
-		// {
-		// 	M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);
-		// 	M5.Lcd.print("<" + String(currentMenuOption) + "/" + String(numMenuOptions) + "> Navigate");
-		// }
-
-		if (currentSubMenu != nullptr)
+		if (currentSubMenu == nullptr)
 		{
 			M5.Lcd.setTextSize(2);
 			M5.Lcd.setCursor(10, 20);
+			M5.Lcd.setTextColor(BLUE);
 			M5.Lcd.print(title);
+			M5.Lcd.setTextColor(WHITE);
 
 			M5.Lcd.setTextSize(4);
 			M5.Lcd.setCursor(20, 60);
 			M5.Lcd.print(menuOptions[currentMenuOption].name);
-			M5.Lcd.setTextSize(2);
 
-			if (menuOptions[currentMenuOption].submenu != nullptr)
-			{
-				M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);
-				M5.Lcd.print("> Submenu");
-			}
-			else
-			{
-				M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);
-				M5.Lcd.print("<" + String(currentMenuOption) + "/" + String(numMenuOptions) + "> Navigate");
-			}
+			M5.Lcd.setTextSize(1);
+			M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);
+			M5.Lcd.print(
+				"<" + String(currentMenuOption + 1) + "/" + String(numMenuOptions) +
+				"> Navigate" +
+				String(
+					menuOptions[currentMenuOption].submenu != nullptr
+						? " to submenu"
+						: ""));
 		}
 		else
 		{
 			// Render the submenu
-			int yOffset = SCREEN_HEIGHT - 20;
+			int yOffset = 20;
 			M5.Lcd.setCursor(10, yOffset);
-			M5.Lcd.setTextSize(1);
-			M5.Lcd.print("Submenu:");
+			M5.Lcd.setTextSize(2);
+			M5.Lcd.setTextColor(BLUE);
+			M5.Lcd.print(menuOptions[currentMenuOption].name);
+			M5.Lcd.setTextColor(WHITE);
 			yOffset += 20;
 
-			this->numSubMenuOptions = sizeof(currentSubMenu) / sizeof(currentSubMenu[0]);
+			l.log(Logger::INFO, "Rendering submenu (" + String(currentSubMenuOption) + "/" + String(numSubMenuOptions) + ")");
 
 			for (int i = 0; i < numSubMenuOptions; i++)
 			{
 				if (i == currentSubMenuOption)
-				{
 					M5.Lcd.setTextColor(ORANGE);
-					M5.Lcd.print(">");
-				}
 				else
-				{
 					M5.Lcd.setTextColor(WHITE);
-					M5.Lcd.print(" ");
-				}
-				M5.Lcd.setCursor(40, yOffset);
-				M5.Lcd.print(currentSubMenu[i].name);
+				M5.Lcd.setCursor(20, yOffset);
+				M5.Lcd.print(String(i == currentSubMenuOption ? "> " : "") + currentSubMenu[i].name);
 				yOffset += 20;
 			}
+
+			M5.Lcd.setTextColor(WHITE); // Reset text color
+
+			M5.Lcd.setTextSize(1);
+			M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);
+			M5.Lcd.print(String(currentSubMenuOption + 1) + "/" + String(numSubMenuOptions) +" Navigate");
 		}
 	}
 
 	void select()
 	{
-		this->currentSubMenu = menuOptions[currentMenuOption].submenu;
+		if (currentSubMenu) {
+			const char* name = currentSubMenu[currentSubMenuOption].name;
+			if (name == "Back")
+				exitSubMenu();
+		} else {
+			auto subMenu = menuOptions[currentMenuOption].actions;
 
-		if (currentSubMenu != nullptr)
-		{
-			// Navigate to a submenu option
-			currentSubMenuOption = (currentSubMenuOption + 1) % numSubMenuOptions;
-		}
-		else
-		{
-			// Perform the action associated with the selected option
-			// For example: menuOptions[currentMenuOption].action();
+			if (subMenu)
+				enterSubMenu(subMenu);
 		}
 	}
 
 	void nextOption()
 	{
-		if (currentSubMenu != nullptr)
-		{
-			// Navigate to the next submenu option
+		if (currentSubMenu)
 			currentSubMenuOption = (currentSubMenuOption + 1) % numSubMenuOptions;
-		}
 		else
-		{
-			// Navigate to the next main menu option
 			currentMenuOption = (currentMenuOption + 1) % numMenuOptions;
-		}
 	}
 
 	void previousOption()
 	{
-		if (currentSubMenu != nullptr)
-		{
-			// Navigate to the previous submenu option
+		if (currentSubMenu)
 			currentSubMenuOption = (currentSubMenuOption - 1 + numSubMenuOptions) % numSubMenuOptions;
-		}
 		else
-		{
-			// Navigate to the previous main menu option
 			currentMenuOption = (currentMenuOption - 1 + numMenuOptions) % numMenuOptions;
-		}
 	}
 
-	void enterSubMenu(MenuItem *submenu)
+	void enterSubMenu(MenuAction* submenu)
 	{
-		currentSubMenu = submenu;
-		currentSubMenuOption = 0;
+		this->currentSubMenu = submenu;
+		this->currentSubMenuOption = 0;
+		this->numSubMenuOptions = menuOptions[currentMenuOption].numOptions;
+		l.log(Logger::INFO, "Entered submenu: " + String(menuOptions[currentMenuOption].name) + " (" + String(menuOptions[currentMenuOption].numOptions) + " options)");
 	}
 
 	void exitSubMenu()
 	{
-		currentSubMenu = nullptr;
-		currentSubMenuOption = 0;
+		this->currentSubMenu = nullptr;
+		this->currentSubMenuOption = 0;
+		this->numSubMenuOptions = 0;
 	}
 
 private:
@@ -160,7 +147,7 @@ private:
 	MenuItem *menuOptions;
 	int numMenuOptions;
 	int currentMenuOption;
-	MenuItem *currentSubMenu;
+	MenuAction *currentSubMenu;
 	int numSubMenuOptions;
 	int currentSubMenuOption;
 };

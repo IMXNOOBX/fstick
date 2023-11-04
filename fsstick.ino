@@ -24,13 +24,12 @@
 #include <M5Display.h>
 
 #include "classes/globals.h"
-#include "menu/menu.h"
-#include "assets/logo.h"
 
 /**
  * @brief initialize classes and variables
  */
 Logger l;
+InfraredSender ir;
 int last_update = millis();
 // if (M5.Lcd.width() > 160)
 extern const unsigned char logo[];
@@ -38,25 +37,24 @@ extern const unsigned char logo[];
 /**
  * @brief Menu options
  */
-MenuItem submenu1Options[] = {
-    {"Submenu 1 - Option 1", nullptr},
-    {"Submenu 1 - Option 2", nullptr},
+MenuAction subInfraRedUtilities[] = {
+    {"Back", nullptr},
+    {"Turn Off Remote", []() { ir.sendAllCodes(); }},
 };
 
-MenuItem submenu2Options[] = {
-    {"Submenu 2 - Option 1", nullptr},
-    {"Submenu 2 - Option 2", nullptr},
+MenuAction subSettingsMenu[] = {
+    {"Back", nullptr},
+    {"Option 1", nullptr},
+    {"Option 2", nullptr},
 };
 
 MenuItem mainMenuOptions[] = {
-    {"Option 1", nullptr},
-    {"Option 2", nullptr},
-    {"Option 3", nullptr},
-    {"Submenu 1", submenu1Options},
-    {"Submenu 2", submenu2Options},
+    {"Option 1", nullptr, 0, nullptr},
+    {"IR Utilities", nullptr, 2, subInfraRedUtilities},
+    {"Settings", nullptr, 3, subSettingsMenu},
 };
 
-MenuRenderer mainMenu("Main Menu", mainMenuOptions, sizeof(mainMenuOptions) / sizeof(mainMenuOptions[0]));
+MenuRenderer mainMenu(NAME, mainMenuOptions, sizeof(mainMenuOptions) / sizeof(mainMenuOptions[0]));
 
 /**
  * @brief Display startup menu
