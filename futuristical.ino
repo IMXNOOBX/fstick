@@ -1,86 +1,126 @@
 #define PLUS
 #if defined(PLUS)
 #include <M5StickCPlus.h>
+#define DEVICE "M5StickCPlus"
+#define SCREEN_WIDTH 240
+#define SCREEN_HEIGHT 135
 #define BIG_TEXT 4
 #define MEDIUM_TEXT 3
 #define SMALL_TEXT 2
 #define TINY_TEXT 1
 #else
 #include <M5StickC.h>
+#define DEVICE "M5StickC"
+#define SCREEN_WIDTH 80
+#define SCREEN_HEIGHT 160
 #define BIG_TEXT 2
 #define MEDIUM_TEXT 2
 #define SMALL_TEXT 1
 #define TINY_TEXT 1
 #endif
+#define NAME "FS Stick"
+#define VERSION "v1.0.2"
 
 #include <M5Display.h>
-#include "utilities.h"
 
-// M5Display M5;
+#include "classes/globals.h"
+#include "menu/menu.h"
+#include "assets/logo.h"
 
-// Define menu options
-const char *menuOptions[] = {"Option 1", "Option 2", "Option 3"};
-const int numOptions = sizeof(menuOptions) / sizeof(menuOptions[0]);
-int currentOption = 0;
+/**
+ * @brief initialize classes and variables
+ */
+Logger l;
+int last_update = millis();
+// if (M5.Lcd.width() > 160)
+extern const unsigned char logo[];
 
-void setup()
-{
+/**
+ * @brief Menu options
+ */
+MenuItem submenu1Options[] = {
+    {"Submenu 1 - Option 1", nullptr},
+    {"Submenu 1 - Option 2", nullptr},
+};
+
+MenuItem submenu2Options[] = {
+    {"Submenu 2 - Option 1", nullptr},
+    {"Submenu 2 - Option 2", nullptr},
+};
+
+MenuItem mainMenuOptions[] = {
+    {"Option 1", nullptr},
+    {"Option 2", nullptr},
+    {"Option 3", nullptr},
+    {"Submenu 1", submenu1Options},
+    {"Submenu 2", submenu2Options},
+};
+
+MenuRenderer mainMenu("Main Menu", mainMenuOptions, sizeof(mainMenuOptions) / sizeof(mainMenuOptions[0]));
+
+/**
+ * @brief Display startup menu
+ */
+void setup() {
 	M5.begin();
-	M5.Lcd.setRotation(3); // Adjust screen rotation as needed
+	l.log(Logger::INFO, "Starting " + String(NAME));
+
+	M5.Lcd.setRotation(1); // Adjust screen rotation as needed
 	M5.Lcd.fillScreen(BLACK);
 	M5.Lcd.setTextColor(WHITE);
-	M5.Lcd.setTextSize(2);
-
-	// Display a banner
-	M5.Lcd.setCursor(20, 40);
-	M5.Lcd.print("Futuristical");
 
 	// Show time and battery information
-	M5.Lcd.setCursor(2, 10);
+	mainMenu.topBar();
+
+	// Logo
+	M5.Lcd.drawBitmap(10, 20, 105, 105, (uint16_t*)logo);
+
+	// Display a banner
+	M5.Lcd.setCursor(120, 40);
+	M5.Lcd.setTextSize(2);
+	M5.Lcd.print(NAME);
+	M5.Lcd.setCursor(120, 60);
 	M5.Lcd.setTextSize(1);
-  	M5.Lcd.printf("Time: %02d:%02d:%02d\n", M5.Rtc.Hour, M5.Rtc.Minute, M5.Rtc.Second);
-	M5.Lcd.setCursor(50, 10);
-	M5.Lcd.print("Batery: " + String(utilities::get_batery()) + "%");
+	M5.Lcd.println(VERSION);
+	M5.Lcd.setCursor(120, 70);
+	M5.Lcd.println(DEVICE);
 
 	delay(3000);
-	displayMenu();
+	M5.Lcd.setCursor(120, 120);
+	M5.Lcd.setTextSize(1);
+	M5.Lcd.print("Click to continue");
 }
 
 /**
- * @buttons
- * BtnA: M5 button
- * BtnB: The other button
- * Axp: Power button
+ * @brief buttons
+ * BtnA: M5 button, M5.BtnA.wasReleased()
+ * BtnB: The other button, M5.BtnB.wasReleased()
+ * Axp: Power button, M5.Axp.GetBtnPress()
  */
+void loop() {
+	M5.update(); // Its necesary to update the button states
 
-void loop()
-{
-	M5.update();
+    // Implement button handling to navigate the menu and perform actions
+    if (M5.Axp.GetBtnPress()) {
+		l.log(Logger::INFO, "Pressed Axp button to navigate to the next option");
+        mainMenu.nextOption();
+	    mainMenu.render();
+    }
 
-	if (M5.BtnB.wasReleased())
-	{
-		// Previous menu option
-		currentOption = (currentOption - 1 + numOptions) % numOptions;
-		displayMenu();
+	if (M5.BtnB.wasReleased()) {
+		l.log(Logger::INFO, "Pressed BtnB button to navigate to the previous option");
+        mainMenu.previousOption();
+		mainMenu.render();
+    }
+
+    if (M5.BtnA.wasReleased()) {
+		l.log(Logger::INFO, "Pressed BtnA button to select option");
+        mainMenu.select();
+		mainMenu.render();
+    }
+
+	if (last_update > millis()) { // refresh the screen every second
+		mainMenu.render();
+		last_update = millis() + 1000;
 	}
-
-	if (M5.Axp.GetBtnPress())
-	{
-		// Next menu option
-		currentOption = (currentOption + 1) % numOptions;
-		displayMenu();
-	}
-}
-
-void displayMenu()
-{
-  M5.Lcd.fillScreen(BLACK);
-  M5.Lcd.setCursor(20, 20);
-  M5.Lcd.print(menuOptions[currentOption]);
-
-  // Show time and battery information
-  M5.Lcd.setCursor(5, 225);
-  M5.Lcd.print("Time: 12:34:56"); // Replace with actual time
-  M5.Lcd.setCursor(180, 225);
-  M5.Lcd.print("Bat: 80%"); // Replace with actual battery level
 }
