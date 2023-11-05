@@ -1,21 +1,25 @@
-#include "../tools/utilities.h"
 #include "../classes/globals.h"
 
-struct MenuAction {
-    const char* name;
-    void (*action)(); // Function pointer for action
+extern Logger l;
+
+struct MenuAction
+{
+	const char *name;
+	void (*action)(); // Function pointer for action
 };
 
-struct MenuItem {
-    const char* name;
-    MenuItem* submenu;
-    int numOptions;
-    MenuAction* actions; // Array of actions
+struct MenuItem
+{
+	const char *name;
+	MenuItem *submenu;
+	int numOptions;
+	MenuAction *actions; // Array of actions
 };
+
 class MenuRenderer
 {
 public:
-	MenuRenderer(const char *title, MenuItem* options, int numMenuOptions)
+	MenuRenderer(const char *title, MenuItem *options, int numMenuOptions)
 	{
 		this->title = title;
 		this->menuOptions = options;
@@ -32,7 +36,7 @@ public:
 	{
 		M5.Lcd.setCursor(10, 10);
 		M5.Lcd.setTextSize(1);
-		M5.Lcd.printf("%02d:%02d:%02d\n", M5.Rtc.Hour, M5.Rtc.Minute, M5.Rtc.Second);
+		M5.Lcd.print(utilities::get_time_str());
 		M5.Lcd.setCursor(SCREEN_WIDTH - 80, 10);
 		M5.Lcd.print("Battery: " + utilities::get_battery_str());
 	}
@@ -76,34 +80,86 @@ public:
 			M5.Lcd.setTextColor(WHITE);
 			yOffset += 20;
 
-			l.log(Logger::INFO, "Rendering submenu (" + String(currentSubMenuOption) + "/" + String(numSubMenuOptions) + ")");
+			// l.log(Logger::INFO, "Rendering submenu (" + String(currentSubMenuOption) + "/" + String(numSubMenuOptions) + ")");
 
-			for (int i = 0; i < numSubMenuOptions; i++)
+			// for (int i = currentSubMenuOption; i < 3; i++)
+			// {
+			// 	if (i == currentSubMenuOption)
+			// 	{
+			// 		M5.Lcd.setTextColor(ORANGE);
+			// 		M5.Lcd.setTextSize(3);
+			// 	}
+			// 	else
+			// 	{
+			// 		M5.Lcd.setTextColor(WHITE);
+			// 		M5.Lcd.setTextSize(3);
+			// 	}
+
+			// 	M5.Lcd.print(String(i == currentSubMenuOption ? "> " : "") + currentSubMenu[i].name);
+			// 	// yOffset += 20;
+			// }
+
+			int backOpt = currentSubMenuOption - 1;
+			// Ammount of opt to array - the selected opt + 1 to get the if there is next opt
+			int nextOpt = numSubMenuOptions - 1 - currentSubMenuOption;
+
+			l.log(Logger::INFO, "Rendering submenu (" + String(currentSubMenuOption) + "/" + String(numSubMenuOptions) + ") Back: " + String(backOpt) + " Next: " + String(nextOpt));
+
+			if (backOpt >= 0) // If its less than 0 dont render
 			{
-				if (i == currentSubMenuOption)
-					M5.Lcd.setTextColor(ORANGE);
-				else
-					M5.Lcd.setTextColor(WHITE);
+				M5.Lcd.setTextColor(WHITE);
+				M5.Lcd.setTextSize(2);
 				M5.Lcd.setCursor(20, yOffset);
-				M5.Lcd.print(String(i == currentSubMenuOption ? "> " : "") + currentSubMenu[i].name);
+				M5.Lcd.print(currentSubMenu[currentSubMenuOption - 1].name);
 				yOffset += 20;
+			}
+
+			if (currentSubMenu[currentSubMenuOption].name)
+			{
+				M5.Lcd.setTextColor(ORANGE);
+				M5.Lcd.setTextSize(3);
+				M5.Lcd.setCursor(20, yOffset);
+				M5.Lcd.print("> " + String(currentSubMenu[currentSubMenuOption].name));
+				yOffset += 30;
+			}
+
+			if (nextOpt >= 0) // If its greater than the number of options dont render
+			{
+				M5.Lcd.setTextColor(WHITE);
+				M5.Lcd.setTextSize(2);
+				M5.Lcd.setCursor(20, yOffset);
+				M5.Lcd.print(currentSubMenu[currentSubMenuOption + 1].name);
+				yOffset += 20;
+			}
+
+			if (nextOpt > 1) {
+				M5.Lcd.setTextColor(WHITE);
+				M5.Lcd.setTextSize(1);
+				M5.Lcd.setCursor(20, yOffset);
+				M5.Lcd.print("...");
 			}
 
 			M5.Lcd.setTextColor(WHITE); // Reset text color
 
 			M5.Lcd.setTextSize(1);
 			M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);
-			M5.Lcd.print(String(currentSubMenuOption + 1) + "/" + String(numSubMenuOptions) +" Navigate");
+			M5.Lcd.print(String(currentSubMenuOption + 1) + "/" + String(numSubMenuOptions) + " Navigate");
 		}
 	}
 
 	void select()
 	{
-		if (currentSubMenu) {
-			const char* name = currentSubMenu[currentSubMenuOption].name;
+		if (currentSubMenu)
+		{
+			const char *name = currentSubMenu[currentSubMenuOption].name;
 			if (name == "Back")
 				exitSubMenu();
-		} else {
+
+			if (currentSubMenu[currentSubMenuOption].action)
+				currentSubMenu[currentSubMenuOption].action();
+		}
+		else
+		{
 			auto subMenu = menuOptions[currentMenuOption].actions;
 
 			if (subMenu)
@@ -127,12 +183,12 @@ public:
 			currentMenuOption = (currentMenuOption - 1 + numMenuOptions) % numMenuOptions;
 	}
 
-	void enterSubMenu(MenuAction* submenu)
+	void enterSubMenu(MenuAction *submenu)
 	{
 		this->currentSubMenu = submenu;
 		this->currentSubMenuOption = 0;
 		this->numSubMenuOptions = menuOptions[currentMenuOption].numOptions;
-		l.log(Logger::INFO, "Entered submenu: " + String(menuOptions[currentMenuOption].name) + " (" + String(menuOptions[currentMenuOption].numOptions) + " options)");
+		// l.log(Logger::INFO, "Entered submenu: " + String(menuOptions[currentMenuOption].name) + " (" + String(menuOptions[currentMenuOption].numOptions) + " options)");
 	}
 
 	void exitSubMenu()

@@ -17,7 +17,7 @@ TV-B-Gone Firmware version 1.2
 // Codes captured from Generation 3 TV-B-Gone by Limor Fried & Mitch Altman
 // table of POWER codes
 
-#include "tvbg.h"
+#include "../classes/globals.h"
 
 const uint16_t code_na000Times[] = {
 	60,

@@ -1,35 +1,13 @@
 #define PLUS
-#if defined(PLUS)
-#include <M5StickCPlus.h>
-#define DEVICE "M5StickCPlus"
-#define SCREEN_WIDTH 240
-#define SCREEN_HEIGHT 135
-#define BIG_TEXT 4
-#define MEDIUM_TEXT 3
-#define SMALL_TEXT 2
-#define TINY_TEXT 1
-#else
-#include <M5StickC.h>
-#define DEVICE "M5StickC"
-#define SCREEN_WIDTH 80
-#define SCREEN_HEIGHT 160
-#define BIG_TEXT 2
-#define MEDIUM_TEXT 2
-#define SMALL_TEXT 1
-#define TINY_TEXT 1
-#endif
-#define NAME "FS Stick"
-#define VERSION "v1.0.2"
-
-#include <M5Display.h>
-
 #include "classes/globals.h"
 
 /**
  * @brief initialize classes and variables
  */
 Logger l;
-InfraredSender ir;
+IrBlaster ir = IrBlaster(9); // const uint16_t kIrSendPin = 9;  // IR Emitter Pin - M5 IR Unit
+Led led;
+WifiManager wi;
 int last_update = millis();
 // if (M5.Lcd.width() > 160)
 extern const unsigned char logo[];
@@ -39,7 +17,12 @@ extern const unsigned char logo[];
  */
 MenuAction subInfraRedUtilities[] = {
     {"Back", nullptr},
-    {"Turn Off Remote", []() { ir.sendAllCodes(); }},
+    {"Turn Off Remote", []() { ir.turnOnOff(); }},
+};
+MenuAction subWifiManager[] = {
+    {"Back", nullptr},
+    {"Scan AP", []() { wi.scanNetworks(); }},
+	{"Create AP", []() { wi.spamAP(); }},
 };
 
 MenuAction subSettingsMenu[] = {
@@ -50,7 +33,8 @@ MenuAction subSettingsMenu[] = {
 
 MenuItem mainMenuOptions[] = {
     {"Option 1", nullptr, 0, nullptr},
-    {"IR Utilities", nullptr, 2, subInfraRedUtilities},
+    {"IR Utils", nullptr, 2, subInfraRedUtilities},
+    {"WiFi Mng", nullptr, 3, subWifiManager},
     {"Settings", nullptr, 3, subSettingsMenu},
 };
 
@@ -84,9 +68,11 @@ void setup() {
 	M5.Lcd.println(DEVICE);
 
 	delay(3000);
+	led.flash();
 	M5.Lcd.setCursor(120, 120);
 	M5.Lcd.setTextSize(1);
 	M5.Lcd.print("Click to continue");
+	l.log(Logger::INFO, "Menu is ready to use!");
 }
 
 /**
@@ -119,6 +105,7 @@ void loop() {
 
 	if (last_update > millis()) { // refresh the screen every second
 		mainMenu.render();
+		M5.Rtc.GetBm8563Time();
 		last_update = millis() + 1000;
 	}
 }

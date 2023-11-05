@@ -3,7 +3,7 @@
     "configurations": [
         {
             "name": "Win32",
-            "compilerPath": "cl.exe",
+            "compilerPath": "",
             "compilerArgs": [],
             "intelliSenseMode": "windows-msvc-x64",
             "includePath": [
@@ -240,6 +240,7 @@
                 "C:\\Users\\parae\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.11\\libraries\\SPI\\src",
                 "C:\\Users\\parae\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.11\\libraries\\FS\\src",
                 "C:\\Users\\parae\\OneDrive\\Documentos\\Arduino\\libraries\\IRremoteESP8266\\src",
+                "C:\\Users\\parae\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.11\\libraries\\WiFi\\src",
                 "c:\\users\\parae\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\esp-2021r2-patch5-8.4.0\\xtensa-esp32-elf\\include\\c++\\8.4.0",
                 "c:\\users\\parae\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\esp-2021r2-patch5-8.4.0\\xtensa-esp32-elf\\include\\c++\\8.4.0\\xtensa-esp32-elf",
                 "c:\\users\\parae\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\esp-2021r2-patch5-8.4.0\\xtensa-esp32-elf\\include\\c++\\8.4.0\\backward",
