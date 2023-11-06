@@ -17,7 +17,8 @@ extern const unsigned char logo[];
  */
 MenuAction subInfraRedUtilities[] = {
     {"Back", nullptr},
-    {"Turn Off Remote", []() { ir.turnOnOff(); }},
+    {"Off Signal", []() { ir.turnOnOff(); }},
+    {"Spam Sig", []() { ir.turnOnOffLoop(); }},
 };
 MenuAction subWifiManager[] = {
     {"Back", nullptr},
@@ -29,14 +30,13 @@ MenuAction subWifiManager[] = {
 MenuAction subSettingsMenu[] = {
     {"Back", nullptr},
     {"Option 1", nullptr},
-    {"Option 2", nullptr},
 };
 
 MenuItem mainMenuOptions[] = {
     {"Option 1", nullptr, 0, nullptr},
-    {"IR Utils", nullptr, 2, subInfraRedUtilities},
+    {"IR Utils", nullptr, 3, subInfraRedUtilities},
     {"WiFi Mng", nullptr, 4, subWifiManager},
-    {"Settings", nullptr, 3, subSettingsMenu},
+    {"Settings", nullptr, 2, subSettingsMenu},
 };
 
 MenuRenderer mainMenu(NAME, mainMenuOptions, sizeof(mainMenuOptions) / sizeof(mainMenuOptions[0]));

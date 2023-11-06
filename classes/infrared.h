@@ -16,6 +16,16 @@ public:
 		l.log(Logger::INFO, "turnOnOff() called, sending code: " + String(TV_ON_OFF_POWER_CODE));
     }
 
+    void turnOnOffLoop() {
+		// for tv codes
+		for (int i = 0; i < tvCodesSize; i++) {
+			sendIRCode(tvCodes[i]); // Define your TV's power-on IR code
+			led.flash(); // TODO: Fix this
+		}
+
+		l.log(Logger::INFO, "turnOnOffLoop() called, sending code: " + String(TV_ON_OFF_POWER_CODE));
+    }
+
 private:
     IRsend* irsend;
     const uint16_t TV_ON_OFF_POWER_CODE = 0x1234; // Replace with your TV's power IR code
@@ -24,4 +34,21 @@ private:
     void sendIRCode(uint16_t code) {
         irsend->sendNEC(code, 32);
     }
+
+	uint64_t tvCodes[12] = {
+		0x20DF10EF,  // TV Model 1
+		0x20DF609F,  // TV Model 2
+		0x20DF40BF,  // Samsung UN55NU7100
+		0x20DF30CF,  // LG 55UH8509
+		0x20DF50AF,  // Sony XBR65X850C
+		0x20DF708F,  // Vizio E55-C2
+		0x20DF00FF,  // TCL 55P715
+		0x20DF906F,  // Hisense 55H8C
+		0x20DF807F,  // Panasonic TX65FXW784
+		0x20DFD02F,  // Toshiba 55LF621U19
+		0x20DFC03F,  // Sharp LC-55N8000U
+		0x20DFB04F,  // Insignia NS-55DF710NA19
+	};
+
+	int tvCodesSize = sizeof(tvCodes) / sizeof(tvCodes[0]);
 };
