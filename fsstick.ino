@@ -8,7 +8,7 @@ Logger l;
 IrBlaster ir = IrBlaster(9); // const uint16_t kIrSendPin = 9;  // IR Emitter Pin - M5 IR Unit
 Led led;
 WifiManager wi;
-int last_update = millis() + 5000;
+int last_update = millis() + 10000;
 // if (M5.Lcd.width() > 160)
 extern const unsigned char logo[];
 
@@ -23,6 +23,7 @@ MenuAction subWifiManager[] = {
     {"Back", nullptr},
     {"Scan AP", []() { wi.scanNetworks(); }},
 	{"Create AP", []() { wi.spamAP(); }},
+	{"Deauth", []() { wi.scanNetworksAndDeauth(3); }},
 };
 
 MenuAction subSettingsMenu[] = {
@@ -34,7 +35,7 @@ MenuAction subSettingsMenu[] = {
 MenuItem mainMenuOptions[] = {
     {"Option 1", nullptr, 0, nullptr},
     {"IR Utils", nullptr, 2, subInfraRedUtilities},
-    {"WiFi Mng", nullptr, 3, subWifiManager},
+    {"WiFi Mng", nullptr, 4, subWifiManager},
     {"Settings", nullptr, 3, subSettingsMenu},
 };
 

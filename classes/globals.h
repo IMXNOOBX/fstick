@@ -28,6 +28,7 @@
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
 #include <WiFi.h>
+#include <esp_wifi.h>
 
 #include "../tools/utilities.h"
 #include "../tools/logger.h"
@@ -42,11 +43,11 @@
 #include "infrared.h"
 #include "wifi.h"
 
-extern "C" {
-	#include "esp_wifi.h"
-	esp_err_t esp_wifi_set_channel(uint8_t primary, wifi_second_chan_t second);
-	esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
-}
+// extern "C" {
+// 	#include "esp_wifi.h"
+// 	esp_err_t esp_wifi_set_channel(uint8_t primary, wifi_second_chan_t second);
+// 	esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
+// }
 
 extern Logger l; // Declare an external reference to Logger
 extern IrBlaster ir; // Declare an external reference to IrBlaster

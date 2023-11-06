@@ -100,21 +100,20 @@ public:
 			// }
 
 			int backOpt = currentSubMenuOption - 1;
-			// Ammount of opt to array - the selected opt + 1 to get the if there is next opt
-			int nextOpt = currentSubMenuOption+1 - numSubMenuOptions;
+			int nextOpt = currentSubMenuOption + 1;
 
-			l.log(Logger::INFO, "Rendering submenu (" + String(currentSubMenuOption+1) + "/" + String(numSubMenuOptions) + ") Back: " + String(backOpt) + " Next: " + String(nextOpt));
+			l.log(Logger::INFO, "Rendering submenu (" + String(currentSubMenuOption + 1) + "/" + String(numSubMenuOptions) + ") Back: " + String(backOpt) + " Next: " + String(nextOpt));
 
-			if (backOpt >= 0) // If its less than 0 dont render
+			if (backOpt >= 0)
 			{
 				M5.Lcd.setTextColor(WHITE);
 				M5.Lcd.setTextSize(2);
 				M5.Lcd.setCursor(20, yOffset);
-				M5.Lcd.print(currentSubMenu[currentSubMenuOption - 1].name);
+				M5.Lcd.print(currentSubMenu[backOpt].name);
 				yOffset += 20;
 			}
 
-			if (currentSubMenu[currentSubMenuOption].name)
+			if (currentSubMenuOption >= 0)
 			{
 				M5.Lcd.setTextColor(ORANGE);
 				M5.Lcd.setTextSize(3);
@@ -123,16 +122,17 @@ public:
 				yOffset += 30;
 			}
 
-			if (nextOpt >= 0) // If its greater than the number of options dont render
+			if (nextOpt < numSubMenuOptions)
 			{
 				M5.Lcd.setTextColor(WHITE);
 				M5.Lcd.setTextSize(2);
 				M5.Lcd.setCursor(20, yOffset);
-				M5.Lcd.print(currentSubMenu[currentSubMenuOption + 1].name);
+				M5.Lcd.print(currentSubMenu[nextOpt].name);
 				yOffset += 20;
 			}
 
-			if (nextOpt > 1) {
+			if (nextOpt < numSubMenuOptions - 1)
+			{
 				M5.Lcd.setTextColor(WHITE);
 				M5.Lcd.setTextSize(1);
 				M5.Lcd.setCursor(20, yOffset);

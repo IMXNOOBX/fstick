@@ -1,3 +1,18 @@
 {
-	"C_Cpp.errorSquiggles": "disabled",
+	"configurations": [
+		{
+			"name": "Win32",
+			"includePath": [
+				"${workspaceFolder}/**",
+				"C:/Program Files (x86)/Arduino/libraries/**"
+			],
+			"defines": [],
+			"compilerPath": "C:/MinGW/bin/gcc.exe",
+			"cStandard": "c11",
+			"cppStandard": "c++17",
+			"intelliSenseMode": "gcc-x64"
+		}
+	],
+	"version": 4,
+	"C_Cpp.errorSquiggles": "disabled"
 }
