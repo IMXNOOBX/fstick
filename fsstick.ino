@@ -8,7 +8,7 @@ Logger l;
 IrBlaster ir = IrBlaster(9); // const uint16_t kIrSendPin = 9;  // IR Emitter Pin - M5 IR Unit
 Led led;
 WifiManager wi;
-int last_update = millis();
+int last_update = millis() + 5000;
 // if (M5.Lcd.width() > 160)
 extern const unsigned char logo[];
 
@@ -103,9 +103,8 @@ void loop() {
 		mainMenu.render();
     }
 
-	if (last_update > millis()) { // refresh the screen every second
+	if (last_update < millis()) { // refresh the screen every second
 		mainMenu.render();
-		M5.Rtc.GetBm8563Time();
-		last_update = millis() + 1000;
+		last_update = millis() + 10000; // Refresh every 10s
 	}
 }

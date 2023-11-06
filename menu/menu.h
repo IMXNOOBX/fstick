@@ -37,7 +37,7 @@ public:
 		M5.Lcd.setCursor(10, 10);
 		M5.Lcd.setTextSize(1);
 		M5.Lcd.print(utilities::get_time_str());
-		M5.Lcd.setCursor(SCREEN_WIDTH - 80, 10);
+		M5.Lcd.setCursor(SCREEN_WIDTH - 75, 10);
 		M5.Lcd.print("Battery: " + utilities::get_battery_str());
 	}
 
@@ -101,9 +101,9 @@ public:
 
 			int backOpt = currentSubMenuOption - 1;
 			// Ammount of opt to array - the selected opt + 1 to get the if there is next opt
-			int nextOpt = numSubMenuOptions - 1 - currentSubMenuOption;
+			int nextOpt = currentSubMenuOption+1 - numSubMenuOptions;
 
-			l.log(Logger::INFO, "Rendering submenu (" + String(currentSubMenuOption) + "/" + String(numSubMenuOptions) + ") Back: " + String(backOpt) + " Next: " + String(nextOpt));
+			l.log(Logger::INFO, "Rendering submenu (" + String(currentSubMenuOption+1) + "/" + String(numSubMenuOptions) + ") Back: " + String(backOpt) + " Next: " + String(nextOpt));
 
 			if (backOpt >= 0) // If its less than 0 dont render
 			{
@@ -149,19 +149,21 @@ public:
 
 	void select()
 	{
+		l.log(Logger::INFO, "Menu::select() called, user is in a " + String(currentSubMenu ? "submenu" : "menu"));
 		if (currentSubMenu)
 		{
 			const char *name = currentSubMenu[currentSubMenuOption].name;
+			l.log(Logger::INFO, "Menu::select() subaction name: " + String(name));
 			if (name == "Back")
-				exitSubMenu();
+				return exitSubMenu();
 
-			if (currentSubMenu[currentSubMenuOption].action)
+			if (currentSubMenu[currentSubMenuOption].action != nullptr)
 				currentSubMenu[currentSubMenuOption].action();
 		}
 		else
 		{
 			auto subMenu = menuOptions[currentMenuOption].actions;
-
+			l.log(Logger::INFO, "Menu::select() submenu name: " + String(menuOptions[currentMenuOption].name));
 			if (subMenu)
 				enterSubMenu(subMenu);
 		}
@@ -185,17 +187,20 @@ public:
 
 	void enterSubMenu(MenuAction *submenu)
 	{
+		l.log(Logger::INFO, "Menu::enterSubMenu() called");
 		this->currentSubMenu = submenu;
 		this->currentSubMenuOption = 0;
 		this->numSubMenuOptions = menuOptions[currentMenuOption].numOptions;
-		// l.log(Logger::INFO, "Entered submenu: " + String(menuOptions[currentMenuOption].name) + " (" + String(menuOptions[currentMenuOption].numOptions) + " options)");
+		l.log(Logger::INFO, "Entered submenu: " + String(menuOptions[currentMenuOption].name) + " (" + String(menuOptions[currentMenuOption].numOptions) + " options)");
 	}
 
 	void exitSubMenu()
 	{
+		l.log(Logger::INFO, "Menu::exitSubMenu() called");
 		this->currentSubMenu = nullptr;
 		this->currentSubMenuOption = 0;
 		this->numSubMenuOptions = 0;
+		l.log(Logger::INFO, "Menu::exitSubMenu() finished");
 	}
 
 private:

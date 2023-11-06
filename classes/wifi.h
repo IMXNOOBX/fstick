@@ -34,10 +34,10 @@ public:
 	{
 		for (int i = 0; i < 10; i++)
 		{
-			createAccessPoint("FS | " + generateRandomString(10), "fsstick")
+			String name = String("FS | ") + generateRandomString(10);
+			createAccessPoint(name.c_str(), "fsstick");
 		}
 	}
-
 
 	// void deauthenticate(const char* targetMAC, int numPackets) {
 	//     WiFi.disconnect();
@@ -55,7 +55,7 @@ public:
 			String ssid = WiFi.SSID(i);
 			if (ssid.length() > 0)
 			{
-					(ssid.c_str(), numPackets);
+				(ssid.c_str(), numPackets);
 			}
 		}
 	}
@@ -67,7 +67,7 @@ private:
 		WiFi.softAP(apName, apPassword);
 	}
 
-	const char* generateRandomString(int length) {
+	String generateRandomString(int length) {
 		const char characters[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 		const int charactersLength = sizeof(characters) - 1;
 		String randomString = "";
