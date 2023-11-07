@@ -4,10 +4,11 @@
 /**
  * @brief initialize classes and variables
  */
-Logger l;
-IrBlaster ir = IrBlaster(9); // const uint16_t kIrSendPin = 9;  // IR Emitter Pin - M5 IR Unit
 Led led;
+Logger l;
+IrBlaster ir; // const uint16_t kIrSendPin = 9;  // IR Emitter Pin - M5 IR Unit
 WifiManager wi;
+BLE b;
 int last_update = millis() + 10000;
 // if (M5.Lcd.width() > 160)
 extern const unsigned char logo[];
@@ -26,6 +27,12 @@ MenuAction subWifiManager[] = {
 	{"Create AP", []() { wi.spamAP(); }},
 	{"Deauth", []() { wi.scanNetworksAndDeauth(3); }},
 };
+MenuAction subBleUtils[] = {
+    {"Back", nullptr},
+    {"Apple Spm", []() { b.advertiseApple(); }},
+	{"Windows Spm", []() { b.advertiseWindows(); }},
+	{"@everyone", []() { b.advertiseApple(); b.advertiseWindows(); }},
+};
 
 MenuAction subSettingsMenu[] = {
     {"Back", nullptr},
@@ -35,7 +42,8 @@ MenuAction subSettingsMenu[] = {
 MenuItem mainMenuOptions[] = {
     {"Option 1", nullptr, 0, nullptr},
     {"IR Utils", nullptr, 3, subInfraRedUtilities},
-    {"WiFi Mng", nullptr, 4, subWifiManager},
+    {"WiFi Mng", nullptr, 4, subWifiManager},.
+    {"BLE Utils", nullptr, 4, subBleUtils},
     {"Settings", nullptr, 2, subSettingsMenu},
 };
 
@@ -46,7 +54,8 @@ MenuRenderer mainMenu(NAME, mainMenuOptions, sizeof(mainMenuOptions) / sizeof(ma
  */
 void setup() {
 	M5.begin();
-	l.log(Logger::INFO, "Starting " + String(NAME));
+	delay(1000); // Delay 1s ti allow serial monitor to connect
+	l.log(Logger::INFO, "Starting " + String(NAME) + "...");
 
 	M5.Lcd.setRotation(1); // Adjust screen rotation as needed
 	M5.Lcd.fillScreen(BLACK);
@@ -68,7 +77,25 @@ void setup() {
 	M5.Lcd.setCursor(120, 70);
 	M5.Lcd.println(DEVICE);
 
-	delay(3000);
+	/**
+	 * @brief initialize classes
+	 */
+	if(ir.init())
+		l.log(Logger::INFO, "IrBlaster has been initialized successfully!");
+	else
+		l.log(Logger::ERROR, "Failed to initialize IrBlaster");
+
+	if(wi.init())
+		l.log(Logger::INFO, "WifiManager has been initialized successfully!");
+	else
+		l.log(Logger::ERROR, "Failed to initialize WifiManager");
+
+	if(b.init())
+		l.log(Logger::INFO, "BLE has been initialized successfully!");
+	else
+		l.log(Logger::ERROR, "Failed to initialize BLE");
+
+	delay(1000);
 	led.flash();
 	M5.Lcd.setCursor(120, 120);
 	M5.Lcd.setTextSize(1);
@@ -104,8 +131,8 @@ void loop() {
 		mainMenu.render();
     }
 
-	if (last_update < millis()) { // refresh the screen every second
-		mainMenu.render();
-		last_update = millis() + 10000; // Refresh every 10s
-	}
+	// if (last_update < millis()) { // refresh the screen every second
+	// 	mainMenu.render();
+	// 	last_update = millis() + 10000; // Refresh every 10s
+	// }
 }

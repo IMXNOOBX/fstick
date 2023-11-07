@@ -5,10 +5,16 @@ extern Led led;
 
 class IrBlaster {
 public:
-    IrBlaster(int irLedPin) : irLed(irLedPin) {
-        // Initialize the IR sender with the specified IR LED pin
-        irsend = new IRsend(irLedPin);
-    }
+    IrBlaster() {}
+
+	bool init() { 
+		try {
+			irsend = new IRsend(kIrSendPin);
+			return true;
+		} catch(...) {
+			return false; 
+		}
+	}
 
     void turnOnOff() {
         sendIRCode(TV_ON_OFF_POWER_CODE); // Define your TV's power-on IR code
@@ -27,9 +33,10 @@ public:
     }
 
 private:
-    IRsend* irsend;
-    const uint16_t TV_ON_OFF_POWER_CODE = 0x1234; // Replace with your TV's power IR code
     int irLed;
+    IRsend* irsend;
+	uint16_t kIrSendPin = 9; // IR Emitter Pin - M5 IR Unit
+    const uint16_t TV_ON_OFF_POWER_CODE = 0x1234; // Replace with your TV's power IR code
 
     void sendIRCode(uint16_t code) {
         irsend->sendNEC(code, 32);

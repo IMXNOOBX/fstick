@@ -22,16 +22,16 @@ public:
 
 	void flash() {
 		digitalWrite(M5_LED, LOW);
-		delay(100);
+		delay(10);
 		digitalWrite(M5_LED, HIGH);
     }
 
 	void flash(int times) {
 		for (int i = 0; i < times; i++) {
 			digitalWrite(M5_LED, LOW);
-			delay(100);
+			delay(10);
 			digitalWrite(M5_LED, HIGH);
-			delay(100);
+			delay(10);
 		}
     }
 };
