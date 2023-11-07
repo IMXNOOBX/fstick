@@ -105,6 +105,10 @@ public:
 		WiFi.softAP(apName, apPassword);
 	}
 
+	void loop() {
+
+	}
+
 private:
 	int current_channel = 1;
 	wifi_init_config_t cfg;
@@ -223,8 +227,6 @@ private:
 			delay(1);
 		}
 	}
-
-
 
 	void sendDeauthPacket(const char *targetMAC)
 	{

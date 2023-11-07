@@ -9,40 +9,39 @@ Logger l;
 IrBlaster ir; // const uint16_t kIrSendPin = 9;  // IR Emitter Pin - M5 IR Unit
 WifiManager wi;
 BLE b;
-int last_update = millis() + 10000;
 // if (M5.Lcd.width() > 160)
 extern const unsigned char logo[];
+int last_update = millis() + 10000;
 
 /**
  * @brief Menu options
  */
 MenuAction subInfraRedUtilities[] = {
-    {"Back", nullptr},
-    {"Off Signal", []() { ir.turnOnOff(); }},
-    {"Spam Sig", []() { ir.turnOnOffLoop(); }},
+    {"Back", nullptr, false},
+    {"Off Signal", []() { ir.turnOnOff(); }, false},
+    {"Spam Sig", []() { ir.sendAllPowerCodes(); }, false},
 };
 MenuAction subWifiManager[] = {
-    {"Back", nullptr},
-    {"Scan AP", []() { wi.scanNetworks(); }},
-	{"Create AP", []() { wi.spamAP(); }},
-	{"Deauth", []() { wi.scanNetworksAndDeauth(3); }},
+    {"Back", nullptr, false},
+    {"Scan AP", []() { wi.scanNetworks(); }, false},
+	{"Create AP", []() { wi.spamAP(); }, false},
+	{"Deauth", []() { wi.scanNetworksAndDeauth(3); }, false},
 };
 MenuAction subBleUtils[] = {
-    {"Back", nullptr},
-    {"Apple Spm", []() { b.advertiseApple(); }},
-	{"Windows Spm", []() { b.advertiseWindows(); }},
-	{"@everyone", []() { b.advertiseApple(); b.advertiseWindows(); }},
+    {"Back", nullptr, false},
+    {"Apple Spm", []() { b.advertiseApple(); }, false},
+	{"Windows S", []() { b.advertiseWindows(); }, false},
+	{"@everyone", []() { b.toggleAdvertiseEveryone(); }, false},
 };
-
 MenuAction subSettingsMenu[] = {
-    {"Back", nullptr},
-    {"Option 1", nullptr},
+    {"Back", nullptr, false},
+    {"Option 1", nullptr, false},
 };
 
 MenuItem mainMenuOptions[] = {
     {"Option 1", nullptr, 0, nullptr},
     {"IR Utils", nullptr, 3, subInfraRedUtilities},
-    {"WiFi Mng", nullptr, 4, subWifiManager},.
+    {"WiFi Mng", nullptr, 4, subWifiManager},
     {"BLE Utils", nullptr, 4, subBleUtils},
     {"Settings", nullptr, 2, subSettingsMenu},
 };
@@ -54,7 +53,8 @@ MenuRenderer mainMenu(NAME, mainMenuOptions, sizeof(mainMenuOptions) / sizeof(ma
  */
 void setup() {
 	M5.begin();
-	delay(1000); // Delay 1s ti allow serial monitor to connect
+	while (!Serial) // Wait for the serial connection to be establised.
+    	delay(50); 
 	l.log(Logger::INFO, "Starting " + String(NAME) + "...");
 
 	M5.Lcd.setRotation(1); // Adjust screen rotation as needed
@@ -131,8 +131,16 @@ void loop() {
 		mainMenu.render();
     }
 
-	// if (last_update < millis()) { // refresh the screen every second
+	// if (last_update < millis()) { // refresh the screen every x seconds
 	// 	mainMenu.render();
 	// 	last_update = millis() + 10000; // Refresh every 10s
 	// }
+
+	/**
+	 * @brief Loops
+	 * Run the loop() function of each class every tick
+	 */
+	ir.loop();
+	wi.loop();
+	b.loop();
 }

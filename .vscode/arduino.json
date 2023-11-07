@@ -1,6 +1,6 @@
 {
-    "configuration": "PartitionScheme=huge_app,CPUFreq=240,FlashMode=qio,FlashFreq=80,FlashSize=4M,UploadSpeed=1500000,LoopCore=1,EventsCore=1,DebugLevel=none,EraseFlash=none",
-    "board": "m5stack:esp32:stickc_plus",
+    "configuration": "PartitionScheme=default,UploadSpeed=1500000,DebugLevel=none,EraseFlash=none",
+    "board": "esp32:esp32:m5stick-c",
     "port": "COM3",
     "programmer": "esptool",
     "output": "./build",

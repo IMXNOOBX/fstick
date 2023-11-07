@@ -6,6 +6,7 @@ struct MenuAction
 {
 	const char *name;
 	void (*action)(); // Function pointer for action
+	bool isLooped;
 };
 
 struct MenuItem

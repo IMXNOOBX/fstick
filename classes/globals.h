@@ -34,7 +34,6 @@
 // #include <BLEServer.h>
 #include <NimBLEDevice.h>
 
-
 #include "../tools/utilities.h"
 #include "../tools/logger.h"
 #include "../tools/led.h"
@@ -43,7 +42,7 @@
 #include "../menu/menu.h"
 
 #include "../assets/logo.h"
-// #include "../assets/ircodes.h"
+#include "../assets/ircodes.h"
 
 #include "infrared.h"
 #include "wifi.h"
@@ -51,13 +50,13 @@
 
 // extern "C" {
 // 	// #include "esp_wifi.h"
-esp_err_t esp_wifi_set_channel(uint8_t primary, wifi_second_chan_t second);
-esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
+// esp_err_t esp_wifi_set_channel(uint8_t primary, wifi_second_chan_t second);
+// esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
 // }
 
 extern Logger l; // Declare an external reference to Logger
-extern IrBlaster ir; // Declare an external reference to IrBlaster
 extern Led led; // Declare an external reference to Led
+extern IrBlaster ir; // Declare an external reference to IrBlaster
 extern WifiManager wi; // Declare an external reference to WifiManager
 extern BLE b; // Declare an external reference to BLE
 

@@ -18,7 +18,6 @@ public:
 
     void turnOnOff() {
         sendIRCode(TV_ON_OFF_POWER_CODE); // Define your TV's power-on IR code
-		led.flash(); // TODO: Fix this
 		l.log(Logger::INFO, "turnOnOff() called, sending code: " + String(TV_ON_OFF_POWER_CODE));
     }
 
@@ -26,11 +25,21 @@ public:
 		// for tv codes
 		for (int i = 0; i < tvCodesSize; i++) {
 			sendIRCode(tvCodes[i]); // Define your TV's power-on IR code
-			led.flash(); // TODO: Fix this
 		}
 
 		l.log(Logger::INFO, "turnOnOffLoop() called, sending code: " + String(TV_ON_OFF_POWER_CODE));
     }
+
+	void sendAllPowerCodes() {
+        for (int i = 0; i < powerCodesCount; i++) {
+            sendCustomIRCode(powerCodes[i]->times, powerCodes[i]->codes, powerCodes[i]->numpairs);
+            delay(500); // Adjust delay as needed
+        }
+    }
+
+	void loop() {
+
+	}
 
 private:
     int irLed;
@@ -40,6 +49,12 @@ private:
 
     void sendIRCode(uint16_t code) {
         irsend->sendNEC(code, 32);
+		led.flash();
+    }
+
+	void sendCustomIRCode(const uint16_t customCode[], const uint8_t customCodes[], int codeLength) {
+        // irsend->sendRaw(customCode, customCodes, codeLength, 38); // Adjust the modulation frequency as needed (38 kHz in this case)
+        led.flash(); // You can remove this line if not needed
     }
 
 	uint64_t tvCodes[12] = {
