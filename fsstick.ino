@@ -54,7 +54,7 @@ MenuRenderer mainMenu(NAME, mainMenuOptions, sizeof(mainMenuOptions) / sizeof(ma
 void setup() {
 	M5.begin();
 	while (!Serial) // Wait for the serial connection to be establised.
-    	delay(50); 
+    	delay(100); 
 	l.log(Logger::INFO, "Starting " + String(NAME) + "...");
 
 	M5.Lcd.setRotation(1); // Adjust screen rotation as needed
@@ -131,10 +131,11 @@ void loop() {
 		mainMenu.render();
     }
 
-	// if (last_update < millis()) { // refresh the screen every x seconds
-	// 	mainMenu.render();
-	// 	last_update = millis() + 10000; // Refresh every 10s
-	// }
+	if (last_update < millis()) { // refresh the screen every x seconds
+		// mainMenu.render();
+		mainMenu.topBar();
+		last_update = millis() + 1000; // Refresh every 1s
+	}
 
 	/**
 	 * @brief Loops

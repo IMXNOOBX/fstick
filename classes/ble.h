@@ -73,7 +73,7 @@ public:
 	void loop() {
 		if (advertiseEveryone) {
 			advertiseApple();
-			advertiseWindows();
+			// advertiseWindows();
 		}
 	}
 

