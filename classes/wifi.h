@@ -224,11 +224,12 @@ private:
 
 		int packetCounter = 0;
 		// Send the beacon frame multiple times for better broadcasting.
-		packetCounter += esp_wifi_80211_tx(WIFI_IF_AP, beaconPacket, sizeof(beaconPacket), 0) == 0;
-		// for (int i = 0; i < 3; i++) {
-		// 	delay(1);
-		// }
-		l.log(Logger::INFO, String("Creating access point: ") + name);
+		for (int i = 0; i < 3; i++) {
+			packetCounter += esp_wifi_80211_tx(WIFI_IF_AP, beaconPacket, sizeof(beaconPacket), 0) == 0;
+			delay(1);
+		}
+		
+		l.log(Logger::INFO, String("Creating access point: ") + ssid);
 	}
 
 	void sendDeauthPacket(const char* mac)
