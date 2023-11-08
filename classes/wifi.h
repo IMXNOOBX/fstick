@@ -18,8 +18,9 @@ public:
 					
 			esp_wifi_init(&cfg);
 			esp_wifi_set_storage(WIFI_STORAGE_RAM);
-			esp_wifi_set_mode(WIFI_MODE_AP);
+			esp_wifi_set_mode(WIFI_MODE_APSTA);
 			esp_wifi_set_config(WIFI_IF_AP, &ap_config);
+			esp_wifi_get_mac(WIFI_IF_AP, original_mac_ap);
 			esp_wifi_start();
 			// esp_wifi_set_ps(WIFI_PS_NONE);
 			esp_wifi_set_channel(current_channel, WIFI_SECOND_CHAN_NONE);
@@ -112,6 +113,7 @@ private:
 	int current_channel = 1;
 	wifi_init_config_t cfg;
     wifi_config_t ap_config;
+	uint8_t original_mac_ap[6];
 
 	void switchChannel() {
 		if (current_channel > 14)
