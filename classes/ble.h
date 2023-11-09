@@ -60,6 +60,11 @@ public:
 		NimBLEAdvertisementData advData = getSwiftAdvertisementData();
 
 		adv->setAdvertisementData(advData);
+		adv->setMinInterval(0x20);
+		adv->setMaxInterval(0x20);
+		adv->setMinPreferred(0x20);
+		adv->setMaxPreferred(0x20);
+
 		adv->start();
 		led.flash();
 		delay(100);
@@ -73,7 +78,7 @@ public:
 	void loop() {
 		if (advertiseEveryone) {
 			advertiseApple();
-			// advertiseWindows();
+			advertiseWindows();
 		}
 	}
 
@@ -83,21 +88,6 @@ private:
 	NimBLEAdvertising *adv;
 	NimBLEServer *server;
 	bool advertiseEveryone = false;
-
-	String generateRandomString(int length)
-	{
-		const char characters[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-		const int charactersLength = sizeof(characters) - 1;
-		String randomString = "";
-
-		for (int i = 0; i < length; i++)
-		{
-			int randomIndex = random(charactersLength);
-			randomString += characters[randomIndex];
-		}
-
-		return randomString;
-	}
 
 	/**
 	 * Credits https://github.com/RapierXbox/ESP32-Sour-Apple
@@ -129,10 +119,11 @@ private:
 
 	NimBLEAdvertisementData getSwiftAdvertisementData() {
 		NimBLEAdvertisementData oAdvertisementData = NimBLEAdvertisementData();
-		const char* prefix = "FS | ";
-		String randomString = generateRandomString(10);
-		const char* display_name = (String(prefix) + randomString).c_str();
+		String b_name = String("fs - ") + utilities::gen_random_str(5);
+		const char* display_name = b_name.c_str();
 		uint8_t display_name_len = strlen(display_name);
+
+		l.log(Logger::INFO, "Adv device: " + String(display_name));
 
 		uint8_t size = 7 + display_name_len;
 		uint8_t *packet = (uint8_t *)malloc(size);
@@ -153,9 +144,9 @@ private:
 
 		oAdvertisementData.addData(std::string((char *)packet, size));
 
-		free(packet);
+		// free(packet);
 
-		free((void *)display_name);
+		// free((void *)display_name);
 
 		return oAdvertisementData;
 	}

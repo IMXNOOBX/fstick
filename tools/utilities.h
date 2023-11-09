@@ -20,4 +20,27 @@ namespace utilities
 		int battery = ((b - 3.0) / 1.2) * 100;
 		return String(battery) + "%";
 	}
+	
+	String gen_random_str(int length) {
+		const char characters[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		const int charactersLength = sizeof(characters) - 1;
+		String randomString = "";
+
+		for (int i = 0; i < length; i++) {
+			int randomIndex = random(charactersLength);
+			randomString += characters[randomIndex];
+		}
+
+		return randomString;
+	}
+
+	uint8_t* rand_mac() {
+		static uint8_t macAddr[6];
+		randomSeed(micros());
+		for (int i = 0; i < 6; i++) {
+			macAddr[i] = random(0, 256);
+		}
+
+		return macAddr;
+	}
 }

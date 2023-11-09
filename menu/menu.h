@@ -35,18 +35,25 @@ public:
 
 	void topBar()
 	{
+		M5.Lcd.setTextColor(WHITE, BLACK);
 		M5.Lcd.setCursor(10, 10);
 		M5.Lcd.setTextSize(1);
 		M5.Lcd.print(utilities::get_time_str());
-		M5.Lcd.setCursor(SCREEN_WIDTH - 75, 10);
-		M5.Lcd.print("Battery: " + utilities::get_battery_str());
+		M5.Lcd.setCursor(SCREEN_WIDTH / 2 - 5, 10);
+		M5.Lcd.setTextColor(BLUE);
+		M5.Lcd.print("FS");
+		M5.Lcd.setTextColor(WHITE, BLACK);
+		M5.Lcd.setCursor(SCREEN_WIDTH - 55, 10);
+		M5.Lcd.print("Bt: " + utilities::get_battery_str());
 	}
 
-	void render()
+	void render(bool reset = false)
 	{
-		M5.Lcd.fillScreen(BLACK);
-		M5.Lcd.setTextColor(WHITE);
+		if (reset)
+			M5.Lcd.fillScreen(BLACK);
+
 		topBar();
+		M5.Lcd.setTextColor(WHITE);
 
 		if (currentSubMenu == nullptr)
 		{

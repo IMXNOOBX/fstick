@@ -11,7 +11,7 @@ WifiManager wi;
 BLE b;
 // if (M5.Lcd.width() > 160)
 extern const unsigned char logo[];
-int last_update = millis() + 10000;
+int last_update = millis() + 1000;
 
 /**
  * @brief Menu options
@@ -53,8 +53,8 @@ MenuRenderer mainMenu(NAME, mainMenuOptions, sizeof(mainMenuOptions) / sizeof(ma
  */
 void setup() {
 	M5.begin();
-	while (!Serial) // Wait for the serial connection to be establised.
-    	delay(100); 
+	// while (!Serial) // Wait for the serial connection to be establised.
+	delay(1000); 
 	l.log(Logger::INFO, "Starting " + String(NAME) + "...");
 
 	M5.Lcd.setRotation(1); // Adjust screen rotation as needed
@@ -97,7 +97,7 @@ void setup() {
 
 	delay(1000);
 	led.flash();
-	M5.Lcd.setCursor(120, 120);
+	M5.Lcd.setCursor(120, SCREEN_HEIGHT - 20);
 	M5.Lcd.setTextSize(1);
 	M5.Lcd.print("Click to continue");
 	l.log(Logger::INFO, "Menu is ready to use!");
@@ -116,19 +116,19 @@ void loop() {
     if (M5.Axp.GetBtnPress()) {
 		l.log(Logger::INFO, "Pressed Axp button to navigate to the next option");
         mainMenu.nextOption();
-	    mainMenu.render();
+	    mainMenu.render(true);
     }
 
 	if (M5.BtnB.wasReleased()) {
 		l.log(Logger::INFO, "Pressed BtnB button to navigate to the previous option");
         mainMenu.previousOption();
-		mainMenu.render();
+		mainMenu.render(true);
     }
 
     if (M5.BtnA.wasReleased()) {
 		l.log(Logger::INFO, "Pressed BtnA button to select option");
         mainMenu.select();
-		mainMenu.render();
+		mainMenu.render(true);
     }
 
 	if (last_update < millis()) { // refresh the screen every x seconds

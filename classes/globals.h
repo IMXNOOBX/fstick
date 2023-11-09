@@ -44,21 +44,6 @@
 #include "../assets/logo.h"
 #include "../assets/ircodes.h"
 
-// extern "C" {
-// 	// #include "esp_wifi.h"
-/**
- * @brief Decomplied function that overrides original one at compilation time.
- * 
- * @attention This function is not meant to be called!
- * @see Project with original idea/implementation https://github.com/GANESH-ICMC/esp32-deauther
- */
-int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3){
-    return 0;
-}
-esp_err_t esp_wifi_set_channel(uint8_t primary, wifi_second_chan_t second);
-esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
-// }
-
 #include "infrared.h"
 #include "wifi.h"
 #include "ble.h"
