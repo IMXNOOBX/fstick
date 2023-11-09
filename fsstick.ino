@@ -25,6 +25,7 @@ MenuAction subWifiManager[] = {
     {"Back", nullptr, false},
     {"Scan AP", []() { wi.scanNetworks(); }, false},
 	{"Create AP", []() { wi.spamAP(); }, false},
+	{"Loop AP", []() { wi.apLoop(); }, false},
 	{"Deauth", []() { wi.scanNetworksAndDeauth(3); }, false},
 };
 MenuAction subBleUtils[] = {
@@ -41,7 +42,7 @@ MenuAction subSettingsMenu[] = {
 MenuItem mainMenuOptions[] = {
     {"Option 1", nullptr, 0, nullptr},
     {"IR Utils", nullptr, 3, subInfraRedUtilities},
-    {"WiFi Mng", nullptr, 4, subWifiManager},
+    {"WiFi Mng", nullptr, 5, subWifiManager},
     {"BLE Utils", nullptr, 4, subBleUtils},
     {"Settings", nullptr, 2, subSettingsMenu},
 };

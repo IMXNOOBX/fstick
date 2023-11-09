@@ -42,9 +42,21 @@ public:
 		M5.Lcd.setCursor(SCREEN_WIDTH / 2 - 5, 10);
 		M5.Lcd.setTextColor(BLUE);
 		M5.Lcd.print("FS");
+
+		/**
+		 * @todo Clean this part :D
+		 */
+
+		int battery = utilities::get_battery();
+		if (battery > 50)
+			M5.Lcd.setTextColor(GREEN, BLACK);
+		else if (battery > 25)
+			M5.Lcd.setTextColor(YELLOW, BLACK);
+		else
+			M5.Lcd.setTextColor(RED, BLACK);
+		M5.Lcd.setCursor(SCREEN_WIDTH - 30, 10);
+		M5.Lcd.print(utilities::get_battery_str());
 		M5.Lcd.setTextColor(WHITE, BLACK);
-		M5.Lcd.setCursor(SCREEN_WIDTH - 55, 10);
-		M5.Lcd.print("Bt: " + utilities::get_battery_str());
 	}
 
 	void render(bool reset = false)

@@ -28,13 +28,13 @@ public:
 			esp_wifi_init(&cfg);
 			esp_wifi_set_storage(WIFI_STORAGE_RAM);
 			esp_wifi_set_mode(WIFI_MODE_APSTA);
+			// esp_wifi_set_mode(WIFI_MODE_AP);
 			esp_wifi_set_config(WIFI_IF_AP, &ap_config);
 			esp_wifi_get_mac(WIFI_IF_AP, original_mac_ap);
 			esp_wifi_start();
 			esp_wifi_set_channel(current_channel, WIFI_SECOND_CHAN_NONE);
-			// esp_wifi_set_promiscuous(true);
-			// esp_wifi_set_ps(WIFI_PS_NONE);
-			// switchChannel();
+			esp_wifi_set_promiscuous(true);
+			esp_wifi_set_max_tx_power(82);
 			return true;
 		} catch(...) {
 			return false; 
@@ -85,10 +85,18 @@ public:
 
 	void spamAP()
 	{
-		WiFi.mode(WIFI_MODE_STA);
-		for (int i = 1; i < 5; i++)
+		// WiFi.mode(WIFI_MODE_STA);
+		// for (int i = 1; i < 5; i++)
+		// {
+		// 	String name = utilities::gen_random_str(5);
+		// 	beacon(name);
+		// 	delay(100);
+		// }
+		// delay(1000);
+		// WiFi.mode(WIFI_IF_AP);
+		for (int i = 1; i < 20; i++)
 		{
-			String name = utilities::gen_random_str(10);
+			String name = utilities::gen_random_str(5);
 			beacon(name);
 			delay(100);
 		}
@@ -113,8 +121,15 @@ public:
 		WiFi.softAP(apName, apPassword);
 	}
 
-	void loop() {
+	void apLoop() {
+		loop_spam_ap = !loop_spam_ap;
+	}
 
+	void loop() {
+		if (loop_spam_ap) {
+			beacon();
+			led.flash();
+		}
 	}
 
 private:
@@ -122,6 +137,7 @@ private:
 	wifi_init_config_t cfg;
     wifi_config_t ap_config;
 	uint8_t original_mac_ap[6];
+	bool loop_spam_ap = false;
 
 	void switchChannel() {
 		current_channel++;
@@ -129,7 +145,7 @@ private:
 		if (current_channel > 14)
 			current_channel = 1;
 
-		l.log(Logger::INFO, "Switching to interface channel " + String(current_channel) + "...");
+		// l.log(Logger::INFO, "Switching to channel " + String(current_channel) + "...");
 	    esp_wifi_set_channel(current_channel, WIFI_SECOND_CHAN_NONE);
 		// configure_wifi(current_channel);
 		delay(1);
@@ -138,12 +154,12 @@ private:
 	bool configure_wifi(uint8_t channel) {
 		wifi_config_t ap_config = {
 			.ap = {
-				// .ssid = "https://owo.sh/8AkjqRL",
+				// .ssid = "SSID Name",
 				// .ssid_len = 22,
-				// .password = "https://owo.sh/4Ai3g47",
+				// .password = "Super Secure Password",
 				.channel = channel,
 				// .authmode = WIFI_AUTH_WPA2_PSK,
-				.ssid_hidden = 0,
+				.ssid_hidden = 1,
 				.max_connection = 4,
 				.beacon_interval = 60000
 			}
@@ -194,7 +210,7 @@ private:
 		// memcpy(&buffer[38 + ssidLen], &beacon_packet[70], 39);
 
 		for (int i = 0; i < 3; i++) {
-			esp_wifi_80211_tx(WIFI_IF_AP, beacon_packet, sizeof(beacon_packet), 0);
+			esp_wifi_80211_tx(WIFI_IF_STA, beacon_packet, sizeof(beacon_packet), 0);
 			delay(1);
 		}
 		
