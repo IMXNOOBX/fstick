@@ -4,6 +4,8 @@ namespace utilities
 	{
 		M5.Rtc.GetBm8563Time();
 		String time = String(M5.Rtc.Hour) + ":" + String(M5.Rtc.Minute) + ":" + String(M5.Rtc.Second);
+		if (time.length() < 8)
+			time += "  ";
 		return time;
 	}
 
