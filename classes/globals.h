@@ -38,7 +38,6 @@
 #include "../tools/logger.h"
 #include "../tools/led.h"
 
-
 #include "../menu/menu.h"
 
 #include "../assets/logo.h"
@@ -47,7 +46,6 @@
 #include "infrared.h"
 #include "wifi.h"
 #include "ble.h"
-
 
 extern Logger l; // Declare an external reference to Logger
 extern Led led; // Declare an external reference to Led

