@@ -20,7 +20,7 @@ public:
 	bool init() {
 		try {
 			this->cfg = WIFI_INIT_CONFIG_DEFAULT();
-			this->ap_config.ap.ssid_hidden = 1;
+			this->ap_config.ap.ssid_hidden = 0;
 			this->ap_config.ap.channel = current_channel;
 			this->ap_config.ap.beacon_interval = 10000;
 			this->ap_config.ap.ssid_len = 0;
@@ -83,25 +83,6 @@ public:
 		}
 	}
 
-	void spamAP()
-	{
-		// WiFi.mode(WIFI_MODE_STA);
-		// for (int i = 1; i < 5; i++)
-		// {
-		// 	String name = utilities::gen_random_str(5);
-		// 	beacon(name);
-		// 	delay(100);
-		// }
-		// delay(1000);
-		// WiFi.mode(WIFI_IF_AP);
-		for (int i = 1; i < 20; i++)
-		{
-			String name = utilities::gen_random_str(5);
-			beacon(name);
-			delay(100);
-		}
-	}
-
 	void scanNetworksAndDeauth(int numPackets)
 	{
 		int numNetworks = WiFi.scanNetworks();
@@ -121,14 +102,16 @@ public:
 		WiFi.softAP(apName, apPassword);
 	}
 
-	void apLoop() {
+	void accessPointLoop() {
 		loop_spam_ap = !loop_spam_ap;
+		l.log(Logger::INFO, loop_spam_ap ? "Starting access point spam loop" : "Stopping access point spam loop");
+		led.flash();
 	}
 
 	void loop() {
 		if (loop_spam_ap) {
-			beacon();
-			led.flash();
+			String name = "FS | " + utilities::gen_random_str(5);
+			beacon(name);
 		}
 	}
 
@@ -159,7 +142,7 @@ private:
 				// .password = "Super Secure Password",
 				.channel = channel,
 				// .authmode = WIFI_AUTH_WPA2_PSK,
-				.ssid_hidden = 1,
+				.ssid_hidden = 0,
 				.max_connection = 4,
 				.beacon_interval = 60000
 			}
@@ -195,17 +178,13 @@ private:
 		memcpy(&beacon_packet[10], mac, 6);
 		memcpy(&beacon_packet[16], mac, 6);
 
-		char emptySSID[32];
-		for (int i = 0; i < 32; i++)
-			emptySSID[i] = ' ';
-
-		memcpy(&beacon_packet[38], emptySSID, 32);
 		const char* ssid_c = ssid.c_str();
-		memcpy(&beacon_packet[38], &ssid_c, ssidLen);
+
+		memcpy(&beacon_packet[38], ssid_c, ssidLen);
 
 		// memcpy(&buffer[38], ssid.c_str(), ssidLen);
 		beacon_packet[82] = current_channel;
-		// buffer[34] = 0x31; // wpa2
+		beacon_packet[34] = 0x31; // wpa2
     	// buffer[37] = ssidLen;
 		// memcpy(&buffer[38 + ssidLen], &beacon_packet[70], 39);
 
@@ -213,20 +192,22 @@ private:
 			esp_wifi_80211_tx(WIFI_IF_STA, beacon_packet, sizeof(beacon_packet), 0);
 			delay(1);
 		}
-		
-		l.log(Logger::INFO, String("Creating access point: ") + ssid);
-		delay(100);
+		// delay(100);
 	}
 
 	void beacon() {
 		switchChannel();
 
-		packet[10] = packet[16] = random(256);
-		packet[11] = packet[17] = random(256);
-		packet[12] = packet[18] = random(256);
-		packet[13] = packet[19] = random(256);
-		packet[14] = packet[20] = random(256);
-		packet[15] = packet[21] = random(256);
+		// packet[10] = packet[16] = random(256);
+		// packet[11] = packet[17] = random(256);
+		// packet[12] = packet[18] = random(256);
+		// packet[13] = packet[19] = random(256);
+		// packet[14] = packet[20] = random(256);
+		// packet[15] = packet[21] = random(256);
+		uint8_t* mac = utilities::rand_mac();
+
+		memcpy(&packet[10], mac, 6);
+		memcpy(&packet[16], mac, 6);
 
 		packet[37] = 6;
 
@@ -254,7 +235,7 @@ private:
 		}
 		
 		l.log(Logger::INFO, String("Creating access point: mode rand"));
-		delay(100);
+		// delay(100);
 	}
 
 	void deauth(const char* t_mac) // void deauth(const char* ap_mac, const char* t_mac)
@@ -271,7 +252,7 @@ private:
 		// buffer[0] = 0xa0;
 		// esp_wifi_80211_tx(WIFI_IF_AP, buffer, sizeof(deauth_packet), false);
 
-		delay(100);
+		// delay(100);
 	}
 
 	uint8_t probe_packet[68] = {
