@@ -68,6 +68,7 @@ private:
         M5.Lcd.setTextColor(textColor);
         M5.Lcd.setCursor(10, M5.Lcd.getCursorY() + 10);
         M5.Lcd.println(logMessage);
+        M5.Lcd.setTextColor(WHITE);
     }
 };
 

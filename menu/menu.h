@@ -4,14 +4,14 @@ extern Logger l;
 
 struct MenuAction
 {
-	const char *name;
+	String name;
 	void (*action)(); // Function pointer for action
 	bool isLooped;
 };
 
 struct MenuItem
 {
-	const char *name;
+	String name;
 	MenuItem *submenu;
 	int numOptions;
 	MenuAction *actions; // Array of actions
@@ -135,10 +135,12 @@ public:
 
 			if (currentSubMenuOption >= 0)
 			{
+				String opt_name = currentSubMenu[currentSubMenuOption].name;
 				M5.Lcd.setTextColor(ORANGE);
-				M5.Lcd.setTextSize(3);
+
+				M5.Lcd.setTextSize(opt_name.length() > 8 ? 2 : 3); // To better fit each feature
 				M5.Lcd.setCursor(20, yOffset);
-				M5.Lcd.print("> " + String(currentSubMenu[currentSubMenuOption].name));
+				M5.Lcd.print("> " + opt_name);
 				yOffset += 30;
 			}
 
@@ -172,8 +174,8 @@ public:
 		l.log(Logger::INFO, "Menu::select() called, user is in a " + String(currentSubMenu ? "submenu" : "menu"));
 		if (currentSubMenu)
 		{
-			const char *name = currentSubMenu[currentSubMenuOption].name;
-			l.log(Logger::INFO, "Menu::select() subaction name: " + String(name));
+			String name = currentSubMenu[currentSubMenuOption].name;
+			l.log(Logger::INFO, "Menu::select() subaction name: " + name);
 			if (name == "Back")
 				return exitSubMenu();
 
@@ -183,7 +185,7 @@ public:
 		else
 		{
 			auto subMenu = menuOptions[currentMenuOption].actions;
-			l.log(Logger::INFO, "Menu::select() submenu name: " + String(menuOptions[currentMenuOption].name));
+			l.log(Logger::INFO, "Menu::select() submenu name: " + menuOptions[currentMenuOption].name);
 			if (subMenu)
 				enterSubMenu(subMenu);
 		}
@@ -211,7 +213,7 @@ public:
 		this->currentSubMenu = submenu;
 		this->currentSubMenuOption = 0;
 		this->numSubMenuOptions = menuOptions[currentMenuOption].numOptions;
-		l.log(Logger::INFO, "Entered submenu: " + String(menuOptions[currentMenuOption].name) + " (" + String(menuOptions[currentMenuOption].numOptions) + " options)");
+		l.log(Logger::INFO, "Entered submenu: " + menuOptions[currentMenuOption].name + " (" + String(menuOptions[currentMenuOption].numOptions) + " options)");
 	}
 
 	void exitSubMenu()

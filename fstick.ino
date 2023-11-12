@@ -6,9 +6,13 @@
  */
 Led led;
 Logger l;
+Battery battery;
+
+BLE b;
+Settings cfg;
 IrBlaster ir; // const uint16_t kIrSendPin = 9;  // IR Emitter Pin - M5 IR Unit
 WifiManager wi;
-BLE b;
+
 // if (M5.Lcd.width() > 160)
 extern const unsigned char logo[];
 int last_update = millis() + 1000;
@@ -25,7 +29,9 @@ MenuAction subWifiManager[] = {
     {"Back", nullptr, false},
     {"Scan AP", []() { wi.scanNetworks(); }, false},
 	{"Spam AP", []() { wi.accessPointLoop(); }, false},
-	{"Deauth", []() { wi.scanNetworksAndDeauth(3); }, false},
+	{"Clone AP", []() { wi.cloneAPLoop(); }, false},
+	{"Rogue AP", []() { wi.rogueAPloop(); }, false},
+	{"Deauth", []() { wi.deauthLoop(); }, false},
 };
 MenuAction subBleUtils[] = {
     {"Back", nullptr, false},
@@ -35,15 +41,17 @@ MenuAction subBleUtils[] = {
 };
 MenuAction subSettingsMenu[] = {
     {"Back", nullptr, false},
-    {"Option 1", nullptr, false},
+    {"Bat Saver", []() { b.toggleAdvertiseEveryone(); }, false},
+    {"Restart", []() { M5.Axp.DeepSleep(0); }, false},
+    {"Shutdown", []() { M5.Axp.PowerOff(); }, false},
 };
 
 MenuItem mainMenuOptions[] = {
     {"Option 1", nullptr, 0, nullptr},
     {"IR Utils", nullptr, 3, subInfraRedUtilities},
-    {"WiFi Mng", nullptr, 4, subWifiManager},
+    {"WiFi Mng", nullptr, 6, subWifiManager},
     {"BLE Utils", nullptr, 4, subBleUtils},
-    {"Settings", nullptr, 2, subSettingsMenu},
+    {"Settings", nullptr, 4, subSettingsMenu},
 };
 
 MenuRenderer mainMenu(NAME, mainMenuOptions, sizeof(mainMenuOptions) / sizeof(mainMenuOptions[0]));
@@ -59,7 +67,7 @@ void setup() {
 
 	M5.Lcd.setRotation(1); // Adjust screen rotation as needed
 	M5.Lcd.fillScreen(BLACK);
-	M5.Lcd.setTextColor(WHITE);
+	M5.Lcd.setTextColor(WHITE, BLACK);
 
 	// Show time and battery information
 	mainMenu.topBar();
@@ -77,19 +85,34 @@ void setup() {
 	M5.Lcd.setCursor(120, 70);
 	M5.Lcd.println(DEVICE);
 
+	M5.Lcd.setCursor(120, SCREEN_HEIGHT - 40);
+	M5.Lcd.setTextSize(1);
+
 	/**
 	 * @brief initialize classes
 	 */
+	M5.Lcd.print("Initializing Settings module...");
+	if(cfg.init())
+		l.log(Logger::INFO, "Settings has been initialized successfully!");
+	else
+		l.log(Logger::ERROR, "Failed to initialize BLE");
+
+	M5.Lcd.setCursor(120, SCREEN_HEIGHT - 40); // Temp solution
+	M5.Lcd.print("Initializing IrBlaster module...");
 	if(ir.init())
 		l.log(Logger::INFO, "IrBlaster has been initialized successfully!");
 	else
 		l.log(Logger::ERROR, "Failed to initialize IrBlaster");
 
+	M5.Lcd.setCursor(120, SCREEN_HEIGHT - 40); // Temp solution
+	M5.Lcd.print("Initializing WiFi module...");
 	if(wi.init())
 		l.log(Logger::INFO, "WifiManager has been initialized successfully!");
 	else
 		l.log(Logger::ERROR, "Failed to initialize WifiManager");
 
+	M5.Lcd.setCursor(120, SCREEN_HEIGHT - 40); // Temp solution
+	M5.Lcd.print("Initializing BLE module...");
 	if(b.init())
 		l.log(Logger::INFO, "BLE has been initialized successfully!");
 	else
@@ -97,8 +120,7 @@ void setup() {
 
 	delay(1000);
 	led.flash();
-	M5.Lcd.setCursor(120, SCREEN_HEIGHT - 20);
-	M5.Lcd.setTextSize(1);
+	M5.Lcd.setCursor(120, SCREEN_HEIGHT - 20); // Temp solution
 	M5.Lcd.print("Click to continue");
 	l.log(Logger::INFO, "Menu is ready to use!");
 }
@@ -117,18 +139,21 @@ void loop() {
 		l.log(Logger::INFO, "Pressed Axp button to navigate to the next option");
         mainMenu.nextOption();
 	    mainMenu.render(true);
+		battery.setLI(millis());
     }
 
 	if (M5.BtnB.wasReleased()) {
 		l.log(Logger::INFO, "Pressed BtnB button to navigate to the previous option");
         mainMenu.previousOption();
 		mainMenu.render(true);
+		battery.setLI(millis());
     }
 
     if (M5.BtnA.wasReleased()) {
 		l.log(Logger::INFO, "Pressed BtnA button to select option");
         mainMenu.select();
 		mainMenu.render(true);
+		battery.setLI(millis());
     }
 
 	if (last_update < millis()) { // refresh the screen every x seconds
@@ -144,4 +169,6 @@ void loop() {
 	ir.loop();
 	wi.loop();
 	b.loop();
+
+	battery.loop();
 }

@@ -4,5 +4,5 @@
     "port": "COM3",
     "programmer": "esptool",
     "output": "./build",
-    "sketch": "fsstick.ino"
+    "sketch": "fstick.ino"
 }

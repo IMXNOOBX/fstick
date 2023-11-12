@@ -239,6 +239,7 @@
                 "C:\\Users\\parae\\AppData\\Local\\Arduino15\\packages\\m5stack\\hardware\\esp32\\2.0.8\\libraries\\Wire\\src",
                 "C:\\Users\\parae\\AppData\\Local\\Arduino15\\packages\\m5stack\\hardware\\esp32\\2.0.8\\libraries\\SPI\\src",
                 "C:\\Users\\parae\\AppData\\Local\\Arduino15\\packages\\m5stack\\hardware\\esp32\\2.0.8\\libraries\\FS\\src",
+                "C:\\Users\\parae\\AppData\\Local\\Arduino15\\packages\\m5stack\\hardware\\esp32\\2.0.8\\libraries\\EEPROM\\src",
                 "C:\\Users\\parae\\OneDrive\\Documentos\\Arduino\\libraries\\IRremoteESP8266\\src",
                 "C:\\Users\\parae\\AppData\\Local\\Arduino15\\packages\\m5stack\\hardware\\esp32\\2.0.8\\libraries\\WiFi\\src",
                 "C:\\Users\\parae\\OneDrive\\Documentos\\Arduino\\libraries\\NimBLE-Arduino\\src",

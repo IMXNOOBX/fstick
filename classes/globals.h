@@ -21,10 +21,11 @@
 	#define TINY_TEXT 1
 #endif
 
-#define NAME "FS Stick"
+#define NAME "FStick"
 #define VERSION "v1.0.2"
 
 #include <M5Display.h>
+#include <EEPROM.h>
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
 #include <WiFi.h>
@@ -35,6 +36,7 @@
 #include <NimBLEDevice.h>
 
 #include "../tools/utilities.h"
+#include "../tools/battery.h"
 #include "../tools/logger.h"
 #include "../tools/led.h"
 
@@ -44,13 +46,16 @@
 #include "../assets/ircodes.h"
 
 #include "infrared.h"
+#include "settings.h"
 #include "wifi.h"
 #include "ble.h"
 
-extern Logger l; // Declare an external reference to Logger
 extern Led led; // Declare an external reference to Led
+extern Logger l; // Declare an external reference to Logger
+extern Battery battery; // Declare an external reference to Settings
+extern BLE b; // Declare an external reference to BLE
 extern IrBlaster ir; // Declare an external reference to IrBlaster
 extern WifiManager wi; // Declare an external reference to WifiManager
-extern BLE b; // Declare an external reference to BLE
+extern Settings cfg; // Declare an external reference to Settings
 
 #endif

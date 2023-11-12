@@ -14,7 +14,7 @@ This is a simple project to play around with the [M5StickC Plus](https://m5stack
 * [] Settings
 
 ## 📦 How To Build
-1. Clone the repo using `git clone https://github.com/IMXNOOBX/fsstick.git`
+1. Clone the repo using `git clone https://github.com/IMXNOOBX/fstick.git`
 2. Run the python script `python3 setup.py` to be able to
 
 ## 📚 Credits
