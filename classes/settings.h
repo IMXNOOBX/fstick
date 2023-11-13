@@ -2,6 +2,7 @@
 
 extern Logger l;
 extern Led led;
+extern Battery battery;
 
 class Settings
 {
@@ -73,6 +74,7 @@ public:
 
     void setBattSaver(bool enable) {
         battery_saver = enable;
+        battery.setBT(enable);
         this->save();
     }
 
@@ -103,7 +105,7 @@ private:
             return;
         }
 
-
+        battery.setBT(battery_saver);
 		setLed(led_enable);
 		setRotation(rotation);
     }

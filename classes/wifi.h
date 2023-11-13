@@ -146,7 +146,7 @@ public:
 			Serial.print(scanned_ap[i].ssid);
 			Serial.print("(");
 			Serial.print(scanned_ap[i].bssid);
-			Serial.println(")");
+			Serial.print(")");
 			Serial.print("[");
 			Serial.print(scanned_ap[i].rssi);
 			Serial.println("]");

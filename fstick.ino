@@ -1,4 +1,5 @@
 #define PLUS
+#define DEV // Mostly to disable battery saver
 #include "classes/globals.h"
 
 /**
@@ -22,7 +23,6 @@ int last_update = millis() + 1000;
  */
 MenuAction subInfraRedUtilities[] = {
     {"Back", nullptr, false},
-    {"Off Signal", []() { ir.turnOnOff(); }, false},
     {"Spam Sig", []() { ir.sendAllPowerCodes(); }, false},
 };
 MenuAction subWifiManager[] = {
@@ -41,14 +41,13 @@ MenuAction subBleUtils[] = {
 };
 MenuAction subSettingsMenu[] = {
     {"Back", nullptr, false},
-    {"Bat Saver", []() { b.toggleAdvertiseEveryone(); }, false},
-    {"Restart", []() { M5.Axp.DeepSleep(0); }, false},
+    {"Bat Saver", []() { cfg.setBattSaver(!cfg.getBattSaver()); }, false},
+    {"Restart", []() { M5.Axp.DeepSleep(5); }, false},
     {"Shutdown", []() { M5.Axp.PowerOff(); }, false},
 };
 
 MenuItem mainMenuOptions[] = {
-    {"Option 1", nullptr, 0, nullptr},
-    {"IR Utils", nullptr, 3, subInfraRedUtilities},
+    {"IR Utils", nullptr, 2, subInfraRedUtilities},
     {"WiFi Mng", nullptr, 6, subWifiManager},
     {"BLE Utils", nullptr, 4, subBleUtils},
     {"Settings", nullptr, 4, subSettingsMenu},
@@ -84,43 +83,44 @@ void setup() {
 	M5.Lcd.println(VERSION);
 	M5.Lcd.setCursor(120, 70);
 	M5.Lcd.println(DEVICE);
-
-	M5.Lcd.setCursor(120, SCREEN_HEIGHT - 40);
-	M5.Lcd.setTextSize(1);
-
 	/**
 	 * @brief initialize classes
 	 */
-	M5.Lcd.print("Initializing Settings module...");
+	l.setShouldDisplayLog(true); // Set log output to screen
+
 	if(cfg.init())
 		l.log(Logger::INFO, "Settings has been initialized successfully!");
 	else
 		l.log(Logger::ERROR, "Failed to initialize BLE");
 
-	M5.Lcd.setCursor(120, SCREEN_HEIGHT - 40); // Temp solution
-	M5.Lcd.print("Initializing IrBlaster module...");
+	delay(500); // I know its not clean, but looks good for the end user
+
 	if(ir.init())
 		l.log(Logger::INFO, "IrBlaster has been initialized successfully!");
 	else
 		l.log(Logger::ERROR, "Failed to initialize IrBlaster");
 
-	M5.Lcd.setCursor(120, SCREEN_HEIGHT - 40); // Temp solution
-	M5.Lcd.print("Initializing WiFi module...");
+	delay(500);
+
 	if(wi.init())
 		l.log(Logger::INFO, "WifiManager has been initialized successfully!");
 	else
 		l.log(Logger::ERROR, "Failed to initialize WifiManager");
 
-	M5.Lcd.setCursor(120, SCREEN_HEIGHT - 40); // Temp solution
-	M5.Lcd.print("Initializing BLE module...");
+	delay(500);
+
 	if(b.init())
 		l.log(Logger::INFO, "BLE has been initialized successfully!");
 	else
 		l.log(Logger::ERROR, "Failed to initialize BLE");
 
-	delay(1000);
+	delay(500);
+
+	l.setShouldDisplayLog(false); // Remove log output from screen
+		
 	led.flash();
-	M5.Lcd.setCursor(120, SCREEN_HEIGHT - 20); // Temp solution
+	M5.Lcd.setTextSize(1);
+	M5.Lcd.setCursor(120, SCREEN_HEIGHT - 20);
 	M5.Lcd.print("Click to continue");
 	l.log(Logger::INFO, "Menu is ready to use!");
 }

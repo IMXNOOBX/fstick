@@ -21,6 +21,8 @@ TV-B-Gone Firmware version 1.2
 
 #define freq_to_timerval(x) (x / 1000)
 
+#define NUM_ELEM(x) (sizeof (x) / sizeof (*(x)));
+
 struct IrCode {
   uint8_t timer_val;
   uint8_t numpairs;
@@ -9368,4 +9370,5 @@ const IrCode *const powerCodes[] = {
 	&code_na135Code,
 	&code_na136Code,
 };
-uint8_t powerCodesCount = sizeof(powerCodes) / sizeof(powerCodes[0]);
+
+uint8_t powerCodesCount = NUM_ELEM(powerCodes);

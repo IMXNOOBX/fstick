@@ -1,16 +1,17 @@
 #ifndef BATTERY_H
 #define BATTERY_H
 
-class Battery {
+class Battery
+{
 public:
-    Battery() {}
+	Battery() {}
 
-    void brightness(int ammount) {
+	void brightness(int ammount) {
 		current_brightness = ammount;
 		M5.Axp.ScreenBreath(ammount);
 	}
 
-    int getBrightness() {
+	int getBrightness() {
 		return current_brightness;
 	}
 
@@ -35,41 +36,50 @@ public:
 	}
 
 	void loop() {
-        if (last_battery_loop < millis()) {
-			if (battery_saver) { // hehe (100 * -1) iq xd
-				brightness(this->get());
-			}
+		/**
+		 * @brief Automatic Brightness
+		 * This is not clean at all, but works 
+		 */
+		if (last_interaction + last_interation_timeout < millis()) {  // If last interaction was more than 20 seconds ago, adjust screen brightness
+			int amount = getBrightness();
 
-			if (last_interaction + 10000 > millis())
-				return; // If last interaction was less than 10 seconds ago, don't do anything
-
-			switch (getBrightness()) {
-			case 100:
+			if (amount > 75) {
 				brightness(75);
-				break;
-			case 75:
-				brightness(50);
-				break;
-			case 50:
+			} else if (amount > 50) {
+				brightness(45);
+			} else if (amount > 25) {
 				brightness(25);
-				break;
-			case 25:	
-				brightness(10);
-				break;
+			} else if (amount > 15) {
+				brightness(15);
+			} else if (battery_saver) {
+				#ifndef DEV
+					M5.Axp.PowerOff(); // if there hasnt been any action by the user in 90s power off
+				#endif
 			}
-        }
 
-        if (last_battery_loop < millis())
-			last_battery_loop = millis() + 10000; // 10s default, i will make a setting later
+			last_interation_timeout += 20000;
+
+			Serial.println("Adjusted brightness to: " + String(getBrightness()) + "%");
+		} else if (last_interaction == millis()) { // If the user has interacted this tick
+			if (battery_saver)
+				brightness(this->get());
+			else
+				brightness(100);
+
+			Serial.println("Restored brightness to: " + String(getBrightness()) + "%");
+
+			last_interation_timeout = 20000;
+		}
 	}
+
 private:
 	bool battery_saver = true;
 
 	int current_brightness = 100;
-	
-	int last_interaction = 0;
-	int last_battery_loop = 0;
 
+	int last_interaction = millis();
+	int last_interation_timeout = 20000;
+	int last_battery_loop = millis() + 10000; // Because if not it will run 
 };
 
 #endif

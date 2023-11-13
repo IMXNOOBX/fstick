@@ -3,74 +3,92 @@
 extern Logger l;
 extern Led led;
 
-class IrBlaster {
+class IrBlaster
+{
 public:
-    IrBlaster() {}
+	IrBlaster() {}
 
-	bool init() { 
-		try {
+	bool init()
+	{
+		try
+		{
 			irsend = new IRsend(kIrSendPin);
 			return true;
-		} catch(...) {
-			return false; 
+		}
+		catch (...)
+		{
+			return false;
 		}
 	}
 
-    void turnOnOff() {
-        sendIRCode(TV_ON_OFF_POWER_CODE); // Define your TV's power-on IR code
-		l.log(Logger::INFO, "turnOnOff() called, sending code: " + String(TV_ON_OFF_POWER_CODE));
-    }
+	void sendAllPowerCodes()
+	{
+		l.setShouldDisplayLog(true); // Set log output to screen
 
-    void turnOnOffLoop() {
-		// for tv codes
-		for (int i = 0; i < tvCodesSize; i++) {
-			sendIRCode(tvCodes[i]); // Define your TV's power-on IR code
+		for (int i = 0; i < powerCodesCount; i++)
+		{
+			const IrCode *powerCode = powerCodes[i];
+			uint8_t freq = powerCode->timer_val;
+			uint8_t numpairs = powerCode->numpairs;
+			uint8_t bitcompression = powerCode->bitcompression;
+			uint16_t rawData[300];
+
+			for (uint8_t k = 0; k < numpairs; k++)
+			{
+				uint16_t ti = (read_bits(bitcompression, powerCode)) * 2;
+				#if defined(PLUS)
+					offtime = powerCode->times[ti];	   // read word 1 - ontime
+					ontime = powerCode->times[ti + 1]; // read word 2 - offtime
+				#else
+					ontime = powerCode->times[ti];		// read word 1 - ontime
+					offtime = powerCode->times[ti + 1]; // read word 2 - offtime
+				#endif
+				rawData[k * 2] = offtime * 10;
+				rawData[(k * 2) + 1] = ontime * 10;
+				yield();
+			}
+
+			irsend->sendRaw(rawData, (numpairs * 2), freq);
+			digitalWrite(kIrSendPin, HIGH); // Seems to be needed to turn off the light
+
+			l.log(Logger::INFO, "Sending code: (" + String(i) + ") freq: " + String(freq) + ", pair: " + String(ontime) + ", " + String(offtime));
+
+			delay(20);
+			led.flash(); // Here just in case it conflicts with the ir message
 		}
 
-		l.log(Logger::INFO, "turnOnOffLoop() called, sending code: " + String(TV_ON_OFF_POWER_CODE));
-    }
+		l.log(Logger::INFO, "Finished sending " + String(powerCodesCount) + " codes.");
 
-	void sendAllPowerCodes() {
-        for (int i = 0; i < powerCodesCount; i++) {
-            sendCustomIRCode(powerCodes[i]->times, powerCodes[i]->codes, powerCodes[i]->numpairs);
-            delay(500); // Adjust delay as needed
-        }
-    }
+		l.setShouldDisplayLog(false);
+	}
 
-	void loop() {
-
+	void loop()
+	{
 	}
 
 private:
-    int irLed;
-    IRsend* irsend;
+	int irLed;
+	IRsend* irsend;
 	uint16_t kIrSendPin = 9; // IR Emitter Pin - M5 IR Unit
-    const uint16_t TV_ON_OFF_POWER_CODE = 0x1234; // Replace with your TV's power IR code
+	uint16_t ontime, offtime;
 
-    void sendIRCode(uint16_t code) {
-        irsend->sendNEC(code, 32);
-		led.flash();
-    }
+	uint8_t bitsleft_r = 0;
+	uint8_t bits_r = 0;
+	uint8_t code_ptr;
+	uint8_t read_bits(uint8_t count, const IrCode *powerCode) {
+		uint8_t i;
+		uint8_t tmp = 0;
 
-	void sendCustomIRCode(const uint16_t customCode[], const uint8_t customCodes[], int codeLength) {
-        // irsend->sendRaw(customCode, customCodes, codeLength, 38); // Adjust the modulation frequency as needed (38 kHz in this case)
-        led.flash(); // You can remove this line if not needed
-    }
-
-	uint64_t tvCodes[12] = {
-		0x20DF10EF,  // TV Model 1
-		0x20DF609F,  // TV Model 2
-		0x20DF40BF,  // Samsung UN55NU7100
-		0x20DF30CF,  // LG 55UH8509
-		0x20DF50AF,  // Sony XBR65X850C
-		0x20DF708F,  // Vizio E55-C2
-		0x20DF00FF,  // TCL 55P715
-		0x20DF906F,  // Hisense 55H8C
-		0x20DF807F,  // Panasonic TX65FXW784
-		0x20DFD02F,  // Toshiba 55LF621U19
-		0x20DFC03F,  // Sharp LC-55N8000U
-		0x20DFB04F,  // Insignia NS-55DF710NA19
-	};
-
-	int tvCodesSize = sizeof(tvCodes) / sizeof(tvCodes[0]);
+		for (i = 0; i < count; i++)
+		{
+			if (bitsleft_r == 0)
+			{
+				bits_r = powerCode->codes[code_ptr++];
+				bitsleft_r = 8;
+			}
+			bitsleft_r--;
+			tmp |= (((bits_r >> (bitsleft_r)) & 1) << (count - 1 - i));
+		}
+		return tmp;
+	}
 };
