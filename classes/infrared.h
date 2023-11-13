@@ -25,9 +25,10 @@ public:
 	{
 		l.setShouldDisplayLog(true); // Set log output to screen
 
-		for (int i = 0; i < powerCodesCount; i++)
-		{
-			const IrCode *powerCode = powerCodes[i];
+		int i = 0;
+		const IrCode *powerCode;
+		while ((powerCode = powerCodes[i]) != nullptr) {
+			i++;
 			uint8_t freq = powerCode->timer_val;
 			uint8_t numpairs = powerCode->numpairs;
 			uint8_t bitcompression = powerCode->bitcompression;

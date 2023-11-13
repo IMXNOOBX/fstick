@@ -9230,9 +9230,7 @@ const IrCode *const powerCodes[] = {
 	&code_eu137Code,
 	&code_eu138Code,
 	&code_eu139Code,
-
-	// North America
-	&code_na000Code,
+	&code_na000Code, // North America
 	&code_na001Code,
 	&code_na002Code,
 	&code_na003Code,
