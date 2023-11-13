@@ -13,6 +13,8 @@ public:
 		try
 		{
 			irsend = new IRsend(kIrSendPin);
+			irsend->begin();
+			digitalWrite(kIrSendPin, HIGH); // Turn off the light as its turned on by default
 			return true;
 		}
 		catch (...)
@@ -28,7 +30,6 @@ public:
 		int i = 0;
 		const IrCode *powerCode;
 		while ((powerCode = powerCodes[i]) != nullptr) {
-			i++;
 			uint8_t freq = powerCode->timer_val;
 			uint8_t numpairs = powerCode->numpairs;
 			uint8_t bitcompression = powerCode->bitcompression;
@@ -52,10 +53,10 @@ public:
 			irsend->sendRaw(rawData, (numpairs * 2), freq);
 			digitalWrite(kIrSendPin, HIGH); // Seems to be needed to turn off the light
 
-			l.log(Logger::INFO, "Sending code: (" + String(i) + ") freq: " + String(freq) + ", pair: " + String(ontime) + ", " + String(offtime));
+			l.log(Logger::INFO, "Sending code: (" + String(i) + "/" + String(powerCodesCount) + ") freq: " + String(freq) + ", pair: " + String(ontime) + ", " + String(offtime));
 
 			delay(20);
-			led.flash(); // Here just in case it conflicts with the ir message
+			i++;
 		}
 
 		l.log(Logger::INFO, "Finished sending " + String(powerCodesCount) + " codes.");

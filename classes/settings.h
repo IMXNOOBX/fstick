@@ -93,7 +93,7 @@ private:
     bool led_enable = true;
     bool sound_enable = false;
     bool battery_saver = true;
-    int rotation = 0;
+    int rotation = 1;
 
 	// Keep track of cumulative size
     size_t sizeOffset = 0;
@@ -101,7 +101,7 @@ private:
     void load() {
 		if(!this->read()) {
             this->save();
-            l.log(Logger::INFO, "Settings has resetted to default values");
+            l.log(Logger::INFO, "Settings have been resetted to default values");
             return;
         }
 
@@ -125,7 +125,7 @@ private:
 		sizeOffset += sizeof(int);
         EEPROM.get(sizeOffset, rotation);
 
-        if (rotation > 3 || rotation < 0)
+        if (rotation <= 3 || rotation >= 0)
             return false;
 
 		sizeOffset = 0;

@@ -27,7 +27,7 @@ public:
 	bool init() {
 		try {
 			this->cfg = WIFI_INIT_CONFIG_DEFAULT();
-			// this->ap_config.ap.ssid_hidden = 1;
+			this->ap_config.ap.ssid_hidden = 1;
 			this->ap_config.ap.channel = current_channel;
 			this->ap_config.ap.beacon_interval = 10000;
 			this->ap_config.ap.ssid_len = 0;
@@ -56,7 +56,7 @@ public:
 			esp_wifi_set_mac(WIFI_IF_AP, original_mac_ap);
 			esp_wifi_set_mode(WIFI_MODE_NULL);
 			esp_wifi_set_promiscuous(false);
-			// esp_wifi_set_max_tx_power(0);
+			esp_wifi_set_max_tx_power(0);
 			esp_wifi_restore();
 			esp_wifi_stop();
 			esp_wifi_deinit();
@@ -69,7 +69,7 @@ public:
 	void deauthLoop() {
 		loop_deauth_ap = !loop_deauth_ap;
 		l.log(Logger::INFO, loop_deauth_ap ? "Starting deauth loop" : "Stopping deauth loop");
-
+	
 		if (!loop_spam_ap)
 			return led.flash(2);
 
@@ -125,7 +125,7 @@ public:
 			return;
 		}
 
-		// esp_wifi_set_mode(WIFI_MODE_APSTA);
+		esp_wifi_set_mode(WIFI_MODE_AP);
 		led.flash();
 	}
 
@@ -355,6 +355,8 @@ private:
 
 		sscanf(bssid, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
 				&buffer[26], &buffer[27], &buffer[28], &buffer[29], &buffer[30], &buffer[31]);
+
+		delete[] mac;
 
 		esp_wifi_80211_tx(WIFI_IF_AP, buffer, probe_packet_size, false);
 	}
