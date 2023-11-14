@@ -51,15 +51,18 @@ public:
 				brightness(25);
 			} else if (amount > 15) {
 				brightness(15);
+				last_interation_timeout += 20000; // Add some more delay before shutting it down
 			} else if (battery_saver) {
 				#ifndef DEV
-					M5.Axp.PowerOff(); // if there hasnt been any action by the user in 90s power off
+					Serial.println("Shutting down due to inactivity...");
+					M5.Axp.PowerOff(); // if there hasnt been any action by the user in 2m power off
 				#endif
 			}
 
-			last_interation_timeout += 20000;
+			if (amount > 15)
+				Serial.println("Adjusted brightness to: " + String(getBrightness()) + "%");
 
-			Serial.println("Adjusted brightness to: " + String(getBrightness()) + "%");
+			last_interation_timeout += 20000;
 		} else if (last_interaction == millis()) { // If the user has interacted this tick
 			if (battery_saver)
 				brightness(this->get());

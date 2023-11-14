@@ -9085,7 +9085,7 @@ const struct IrCode code_eu140Code = {
 //-otherwise stated: "declare NApowerCodes as array of const pointers to const IrCode structs"
 //-to confirm this, go to http://cdecl.org/ and paste "const int* const NApowerCodes[]", and you'll
 //  see it means "declare NApowerCodes as array of const pointer to const int"
-const IrCode *const powerCodes[] = {
+const IrCode * powerCodes[] = {
 	// Europe
 	&code_eu000Code,
 	&code_eu001Code,
@@ -9367,4 +9367,4 @@ const IrCode *const powerCodes[] = {
 	&code_na136Code,
 };
 
-uint8_t powerCodesCount = (sizeof(powerCodes) / sizeof(powerCodes[0]));
+uint8_t powerCodesCount = 276; //(sizeof(powerCodes) / sizeof(powerCodes[0])); // hardcoded cause it counts 20 idk why

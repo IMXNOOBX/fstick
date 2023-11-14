@@ -23,21 +23,17 @@ public:
 		}
 	}
 
-	void sendAllPowerCodes()
-	{
-		l.setShouldDisplayLog(true); // Set log output to screen
-
+	void sendAllPowerCodes() {
 		send_codes = !send_codes;
 
 		l.log(Logger::INFO, send_codes ? "Starting send ir code loop" : "Stopping sending ir code loop");
 
 		// l.log(Logger::INFO, "Finished sending " + String(powerCodesCount) + " codes.");
 
-		l.setShouldDisplayLog(false);
+		l.setShouldDisplayLog(send_codes);
 	}
 
-	void loop()
-	{
+	void loop() {
 		if (send_codes && (last_update < millis()))
 		{
 			powerCode = powerCodes[i];
@@ -47,6 +43,7 @@ public:
 				l.log(Logger::INFO, "Finished sending (" + String(i) + "/" + String(powerCodesCount) + ") codes.");
 				int i = 0;
 				send_codes = false;
+				l.setShouldDisplayLog(false);
 				return;
 			}
 
@@ -58,13 +55,13 @@ public:
 			for (uint8_t k = 0; k < numpairs; k++)
 			{
 				uint16_t ti = (read_bits(bitcompression)) * 2;
-#if defined(PLUS)
+				#if defined(PLUS)
 				offtime = powerCode->times[ti];	   // read word 1 - ontime
 				ontime = powerCode->times[ti + 1]; // read word 2 - offtime
-#else
+				#else
 				ontime = powerCode->times[ti];		// read word 1 - ontime
 				offtime = powerCode->times[ti + 1]; // read word 2 - offtime
-#endif
+				#endif
 				rawData[k * 2] = offtime * 10;
 				rawData[(k * 2) + 1] = ontime * 10;
 				yield();
