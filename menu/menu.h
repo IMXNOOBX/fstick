@@ -138,7 +138,7 @@ public:
 				String opt_name = currentSubMenu[currentSubMenuOption].name;
 				M5.Lcd.setTextColor(ORANGE);
 
-				M5.Lcd.setTextSize(opt_name.length() > 8 ? 2 : 3); // To better fit each feature
+				M5.Lcd.setTextSize(opt_name.length() >= 9 ? 2 : 3); // To better fit each feature
 				M5.Lcd.setCursor(20, yOffset);
 				M5.Lcd.print("> " + opt_name);
 				yOffset += 30;
@@ -169,11 +169,9 @@ public:
 		}
 	}
 
-	void select()
-	{
+	void select() {
 		l.log(Logger::INFO, "Menu::select() called, user is in a " + String(currentSubMenu ? "submenu" : "menu"));
-		if (currentSubMenu)
-		{
+		if (currentSubMenu) {
 			String name = currentSubMenu[currentSubMenuOption].name;
 			l.log(Logger::INFO, "Menu::select() subaction name: " + name);
 			if (name == "Back")
@@ -181,9 +179,7 @@ public:
 
 			if (currentSubMenu[currentSubMenuOption].action != nullptr)
 				currentSubMenu[currentSubMenuOption].action();
-		}
-		else
-		{
+		} else {
 			auto subMenu = menuOptions[currentMenuOption].actions;
 			l.log(Logger::INFO, "Menu::select() submenu name: " + menuOptions[currentMenuOption].name);
 			if (subMenu)
@@ -191,38 +187,31 @@ public:
 		}
 	}
 
-	void nextOption()
-	{
+	void nextOption() {
 		if (currentSubMenu)
 			currentSubMenuOption = (currentSubMenuOption + 1) % numSubMenuOptions;
 		else
 			currentMenuOption = (currentMenuOption + 1) % numMenuOptions;
 	}
 
-	void previousOption()
-	{
+	void previousOption() {
 		if (currentSubMenu)
 			currentSubMenuOption = (currentSubMenuOption - 1 + numSubMenuOptions) % numSubMenuOptions;
 		else
 			currentMenuOption = (currentMenuOption - 1 + numMenuOptions) % numMenuOptions;
 	}
 
-	void enterSubMenu(MenuAction *submenu)
-	{
-		l.log(Logger::INFO, "Menu::enterSubMenu() called");
+	void enterSubMenu(MenuAction *submenu) {
 		this->currentSubMenu = submenu;
 		this->currentSubMenuOption = 0;
 		this->numSubMenuOptions = menuOptions[currentMenuOption].numOptions;
 		l.log(Logger::INFO, "Entered submenu: " + menuOptions[currentMenuOption].name + " (" + String(menuOptions[currentMenuOption].numOptions) + " options)");
 	}
 
-	void exitSubMenu()
-	{
-		l.log(Logger::INFO, "Menu::exitSubMenu() called");
+	void exitSubMenu() {
 		this->currentSubMenu = nullptr;
 		this->currentSubMenuOption = 0;
 		this->numSubMenuOptions = 0;
-		l.log(Logger::INFO, "Menu::exitSubMenu() finished");
 	}
 
 private:

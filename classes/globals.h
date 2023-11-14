@@ -44,6 +44,7 @@
 
 #include "../assets/logo.h"
 #include "../assets/ircodes.h"
+#include "../assets/android_models.h"
 
 #include "infrared.h"
 #include "settings.h"

