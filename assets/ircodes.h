@@ -9367,4 +9367,4 @@ const IrCode * powerCodes[] = {
 	&code_na136Code,
 };
 
-uint8_t powerCodesCount = (sizeof(powerCodes) / sizeof(powerCodes[0])); // hardcoded cause it counts 20 idk why
+uint16_t powerCodesCount = (sizeof(powerCodes) / sizeof(powerCodes[0])); // hardcoded cause it counts 20 idk why

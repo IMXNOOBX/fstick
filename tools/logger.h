@@ -14,8 +14,8 @@ public:
     };
 
     void log(LogLevel logLevel, String message) {
-        String logMessage = getLogTypeString(logLevel) + " | " + getLogCount() + " | " + message;
-        Serial.println(logMessage);
+        String logMessage = getLogTypeString(logLevel) + " | " + message;
+        Serial.println(getLogCount() + " | " + logMessage);
         
         if (shouldDisplayLog) {
             int textColor = getLogTextColor(logLevel);

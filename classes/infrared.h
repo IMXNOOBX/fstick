@@ -51,11 +51,10 @@ public:
 	}
 
 	void loop() {
-		if (send_codes && (last_update < millis()))
-		{
+		if (send_codes && (last_update < millis())) {
 			powerCode = powerCodes[code_index];
 
-			if (code_index >=  250) { //powerCodesCount) {
+			if (code_index >= powerCodesCount) {
 				l.log(Logger::INFO, "Finished sending (" + String(code_index) + "/" + String(powerCodesCount) + ") codes.");
 				code_index = 0;
 				send_codes = false;

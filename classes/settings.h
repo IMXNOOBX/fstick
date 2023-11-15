@@ -87,12 +87,12 @@ public:
         rotation = pos;
         this->save();
     }
-
+public:
+    bool led_enable = true;
+    bool battery_saver = true;
+    bool sound_enable = false;
 private:
     String version = VERSION;
-    bool led_enable = true;
-    bool sound_enable = false;
-    bool battery_saver = true;
     int rotation = 1;
 
 	// Keep track of cumulative size

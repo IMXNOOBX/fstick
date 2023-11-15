@@ -22,26 +22,22 @@ public:
     // Constructor for actions with an action function and render function
     MenuAction(String name, void (*action)() = nullptr, bool isLoop = false, bool hasMenu = false, bool* isActive = nullptr, void (*render)() = nullptr)
         : name(name), action(action), isLoop(isLoop), hasMenu(hasMenu), render(render) {
-            if (isActive == nullptr) { // If no isActive pointer is provided, create a new bool variable
-                static bool defaultIsActive = false;
-                this->isActive = &defaultIsActive;
-            } else {
+            if (isActive == nullptr) // If no isActive pointer is provided, create a new bool variable
+                this->isActive = new bool(false);
+        	else 
                 this->isActive = isActive;
-            }
         }
 
     // Constructor for actions with no action function but with a render function
     MenuAction(String name, bool hasMenu, void (*render)(), bool* isActive = nullptr)
         : name(name), action(nullptr), isLoop(false), hasMenu(hasMenu), render(render) {
-            if (isActive == nullptr) {
-                static bool defaultIsActive = false;
-                this->isActive = &defaultIsActive;
-            } else {
+            if (isActive == nullptr) 
+                this->isActive = new bool(false);
+        	else 
                 this->isActive = isActive;
-            }
         }
 
-    // Constructor for actions with no action or render function
+	// Constructor for actions with no action or render function
     MenuAction(String name, bool hasMenu)
         : name(name), action(nullptr), isLoop(false), hasMenu(hasMenu), render(nullptr) {}
 };
@@ -156,13 +152,13 @@ public:
 				bool is_active = currentSubMenu[currentSubMenuOption].isActive != nullptr ? *(currentSubMenu[currentSubMenuOption].isActive) : false;
 				bool has_sub = currentSubMenu[currentSubMenuOption].hasMenu;
 				
-				if (is_active) {
+				if (is_active)
 					M5.Lcd.setTextColor(GREEN);
-				} else if (is_loop) {
-					M5.Lcd.setTextColor(0xF3950E); // setTextColor(uint16_t color, [uint16_t backgroundcolor])
-				} else {
+				else if (is_loop) 
+					M5.Lcd.setTextColor(PURPLE); // setTextColor(uint16_t color, [uint16_t backgroundcolor])
+				else 
 					M5.Lcd.setTextColor(ORANGE);
-				}
+				
 
 				M5.Lcd.setCursor(20, yOffset);
 				M5.Lcd.setTextSize(3);

@@ -42,7 +42,9 @@ MenuAction subBleUtils[] = {
 };
 MenuAction subSettingsMenu[] = {
     {"Back", nullptr },
-    {"Bat Saver", []() { cfg.setBattSaver(!cfg.getBattSaver()); } },
+    {"Bat Saver", []() { cfg.setBattSaver(!cfg.getBattSaver()); }, &cfg.battery_saver },
+    {"Sounds", []() { cfg.setSound(!cfg.getSound()); }, &cfg.sound_enable },
+    {"Led", []() { cfg.setLed(!cfg.getLed()); }, &cfg.led_enable },
     {"Restart", []() { M5.Axp.DeepSleep(5); } },
     {"Shutdown", []() { M5.Axp.PowerOff(); } },
 };
