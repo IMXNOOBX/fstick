@@ -70,6 +70,7 @@ private:
     void displayLog(const String& logMessage, int textColor) {
         clearLog();
         M5.Lcd.setCursor(0, SCREEN_HEIGHT - 20);
+        M5.Lcd.setTextSize(1);
         // M5.Lcd.setCursor(10, M5.Lcd.getCursorY() + 10);
         M5.Lcd.setTextColor(textColor, BLACK);
         M5.Lcd.println(logMessage);

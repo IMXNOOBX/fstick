@@ -23,7 +23,7 @@ public:
 		}
 	}
 
-	void sendAllPowerCodes() {
+	bool sendAllPowerCodes() {
 		send_codes = !send_codes;
 
 		l.log(Logger::INFO, send_codes ? "Starting send ir code loop" : "Stopping sending ir code loop");
@@ -31,17 +31,33 @@ public:
 		// l.log(Logger::INFO, "Finished sending " + String(powerCodesCount) + " codes.");
 
 		l.setShouldDisplayLog(send_codes);
+		return send_codes;
+	}
+
+	void sendAllPowerCodesRender() {
+		// M5.Lcd.fillScreen(BLACK);
+		M5.Lcd.setTextColor(WHITE, BLACK);
+
+		int barWidth = 200;
+		int progress = map(code_index, 0, powerCodesCount, 0, barWidth);
+
+		M5.Lcd.drawRect(20, 80, barWidth, 20, WHITE);
+
+		M5.Lcd.fillRect(20, 80, progress, 20, WHITE);
+
+		M5.Lcd.setTextSize(2);
+		M5.Lcd.setCursor(20, 50);
+		M5.Lcd.print("Sending: (" + String(code_index) + "/" + String(powerCodesCount) + ")");
 	}
 
 	void loop() {
 		if (send_codes && (last_update < millis()))
 		{
-			powerCode = powerCodes[i];
+			powerCode = powerCodes[code_index];
 
-			if (i >= powerCodesCount)
-			{
-				l.log(Logger::INFO, "Finished sending (" + String(i) + "/" + String(powerCodesCount) + ") codes.");
-				int i = 0;
+			if (code_index >=  250) { //powerCodesCount) {
+				l.log(Logger::INFO, "Finished sending (" + String(code_index) + "/" + String(powerCodesCount) + ") codes.");
+				code_index = 0;
 				send_codes = false;
 				l.setShouldDisplayLog(false);
 				return;
@@ -71,21 +87,21 @@ public:
 			digitalWrite(kIrSendPin, HIGH); // Seems to be needed to turn off the light
 
 			bitsleft_r = 0;
-			l.log(Logger::INFO, "Sending code: (" + String(i) + "/" + String(powerCodesCount) + ") freq: " + String(freq) + ", pair: " + String(ontime) + ", " + String(offtime));
-			i++;
+			l.log(Logger::INFO, "Sending code: (" + String(code_index) + "/" + String(powerCodesCount) + ") freq: " + String(freq) + ", pair: " + String(ontime) + ", " + String(offtime));
+			code_index++;
 		}
 
 		if (last_update < millis())
 			last_update = millis() + 20;
 	}
-
+public:
+	bool send_codes = false;
 private:
 	int irLed;
 	IRsend *irsend;
 	uint16_t kIrSendPin = 9; // IR Emitter Pin - M5 IR Unit
 	uint16_t ontime, offtime;
-	bool send_codes = false;
-	int i = 0;
+	int code_index = 0;
 	int last_update = 0;
 	uint16_t rawData[300];
 

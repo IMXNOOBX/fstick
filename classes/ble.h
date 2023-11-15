@@ -89,11 +89,11 @@ public:
 			delay(100);
 			adv->stop();
 		}
-		
 	}
 
-	void toggleAdvertiseEveryone() {
+	bool toggleAdvertiseEveryone() {
 		advertiseEveryone = !advertiseEveryone;
+		return advertiseEveryone;
 	}
 
 	void loop() {

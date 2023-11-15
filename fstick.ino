@@ -22,36 +22,36 @@ int last_update = millis() + 1000;
  * @brief Menu options
  */
 MenuAction subInfraRedUtilities[] = {
-    {"Back", nullptr, false},
-    {"Spam Sig", []() { ir.sendAllPowerCodes(); }, false},
+    {"Back", nullptr },
+    {"Spam Sig", []() { ir.sendAllPowerCodes(); }, false, true, &ir.send_codes, []() { ir.sendAllPowerCodesRender(); } },
 };
 MenuAction subWifiManager[] = {
-    {"Back", nullptr, false},
-    {"Scan AP", []() { wi.scanNetworks(); }, false},
-	{"Spam AP", []() { wi.accessPointLoop(); }, false},
-	{"Clone AP", []() { wi.cloneAPLoop(); }, false},
-	{"Rogue AP", []() { wi.rogueAPloop(); }, false},
-	{"Deauth", []() { wi.deauthLoop(); }, false},
+    {"Back", nullptr },
+    {"Scan AP", []() { wi.scanNetworks(); } },
+	{"Spam AP", []() { wi.accessPointLoop(); }, true },
+	{"Clone AP", []() { wi.cloneAPLoop(); }, true },
+	{"Rogue AP", []() { wi.rogueAPloop(); }, true },
+	{"Deauth", []() { wi.deauthLoop(); }, true },
 };
 MenuAction subBleUtils[] = {
-    {"Back", nullptr, false},
-    {"Apple Spm", []() { b.advertiseApple(); }, false},
-    {"Android Sp", []() { b.advertiseAndroid(); }, false},
-	{"Windows S", []() { b.advertiseWindows(); }, false},
-	{"@everyone", []() { b.toggleAdvertiseEveryone(); }, false},
+    {"Back", nullptr },
+    {"Apple Spm", []() { b.advertiseApple(); } },
+    {"Android Sp", []() { b.advertiseAndroid(); } },
+	{"Windows S", []() { b.advertiseWindows(); } },
+	{"@everyone", []() { b.toggleAdvertiseEveryone(); }, true},
 };
 MenuAction subSettingsMenu[] = {
-    {"Back", nullptr, false},
-    {"Bat Saver", []() { cfg.setBattSaver(!cfg.getBattSaver()); }, false},
-    {"Restart", []() { M5.Axp.DeepSleep(5); }, false},
-    {"Shutdown", []() { M5.Axp.PowerOff(); }, false},
+    {"Back", nullptr },
+    {"Bat Saver", []() { cfg.setBattSaver(!cfg.getBattSaver()); } },
+    {"Restart", []() { M5.Axp.DeepSleep(5); } },
+    {"Shutdown", []() { M5.Axp.PowerOff(); } },
 };
 
 MenuItem mainMenuOptions[] = {
-    {"IR Utils", nullptr, 2, subInfraRedUtilities},
-    {"WiFi Mng", nullptr, 6, subWifiManager},
-    {"BLE Utils", nullptr, 5, subBleUtils},
-    {"Settings", nullptr, 4, subSettingsMenu},
+    {"IR Utils", nullptr, 2, subInfraRedUtilities },
+    {"WiFi Mng", nullptr, 6, subWifiManager },
+    {"BLE Utils", nullptr, 5, subBleUtils },
+    {"Settings", nullptr, 4, subSettingsMenu },
 };
 
 MenuRenderer mainMenu(NAME, mainMenuOptions, sizeof(mainMenuOptions) / sizeof(mainMenuOptions[0]));
@@ -138,28 +138,30 @@ void loop() {
     // Implement button handling to navigate the menu and perform actions
     if (M5.Axp.GetBtnPress()) {
 		l.log(Logger::INFO, "Pressed Axp button to navigate to the next option");
+		battery.setLI(millis());
         mainMenu.nextOption();
 	    mainMenu.render(true);
-		battery.setLI(millis());
     }
 
 	if (M5.BtnB.wasReleased()) {
 		l.log(Logger::INFO, "Pressed BtnB button to navigate to the previous option");
+		battery.setLI(millis());
         mainMenu.previousOption();
 		mainMenu.render(true);
-		battery.setLI(millis());
     }
 
     if (M5.BtnA.wasReleased()) {
 		l.log(Logger::INFO, "Pressed BtnA button to select option");
+		battery.setLI(millis());
         mainMenu.select();
 		mainMenu.render(true);
-		battery.setLI(millis());
+		mainMenu.render_feature(); // Not clean but should do its job
     }
 
 	if (last_update < millis()) { // refresh the screen every x seconds
 		// mainMenu.render();
-		mainMenu.topBar();
+		mainMenu.render_feature();
+		mainMenu.topBar(); // Should be the last to be on top of everything
 		last_update = millis() + 1000; // Refresh every 1s
 	}
 
