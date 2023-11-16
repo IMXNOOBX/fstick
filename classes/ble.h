@@ -92,12 +92,21 @@ public:
 	}
 
 	bool toggleAdvertiseEveryone() {
-		advertiseEveryone = !advertiseEveryone;
-		return advertiseEveryone;
+		advertise_everyone = !advertise_everyone;
+		return advertise_everyone;
+	}
+
+	void advertiseEveryoneRender() {
+		circle_size = constrain(circle_size + sin(millis() / 5 * 0.001) * 10, 0, 30);
+
+		int x = M5.Lcd.width() / 2;
+		int y = M5.Lcd.height() / 2;
+
+		M5.Lcd.fillCircle(x, y, circle_size, WHITE);
 	}
 
 	void loop() {
-		if (advertiseEveryone && (last_update < millis())) {
+		if (advertise_everyone && (last_update < millis())) {
 			advertiseApple();
 			advertiseAndroid();
 			advertiseWindows();
@@ -106,14 +115,16 @@ public:
 		if (last_update < millis())
 			last_update = millis() + 1000;
 	}
+public:
+	bool advertise_everyone = false;
 
 private:
 	// BLEServer* server;
 	// BLEAdvertising* Adv;
 	NimBLEAdvertising *adv;
 	NimBLEServer *server;
-	bool advertiseEveryone = false;
 	int last_update = 0;
+	int circle_size = 0;
 
 	/**
 	 * Credits https://github.com/RapierXbox/ESP32-Sour-Apple

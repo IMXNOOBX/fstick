@@ -1,5 +1,5 @@
 #define PLUS
-#define DEV // Mostly to disable battery saver
+#define DEV // Mostly to disable battery saver and some debug messages
 #include "classes/globals.h"
 
 /**
@@ -23,14 +23,15 @@ int last_update = millis() + 1000;
  */
 MenuAction subInfraRedUtilities[] = {
     {"Back", nullptr },
-    {"Spam Sig", []() { ir.sendAllPowerCodes(); }, false, true, &ir.send_codes, []() { ir.sendAllPowerCodesRender(); } },
+    {"Spam Sig", []() { ir.sendAllPowerCodes(); }, false, true, []() { ir.sendAllPowerCodesRender(); }, &ir.send_codes },
 };
 MenuAction subWifiManager[] = {
     {"Back", nullptr },
-    {"Scan AP", []() { wi.scanNetworks(); } },
+    {"Scan AP", []() { wi.scanNetworks(); }, false, true, []() { wi.scanNetworksRender(); } },
 	{"Spam AP", []() { wi.accessPointLoop(); }, true },
 	{"Clone AP", []() { wi.cloneAPLoop(); }, true },
 	{"Rogue AP", []() { wi.rogueAPloop(); }, true },
+	{"Probe AP", []() { wi.probeAPloop(); }, true },
 	{"Deauth", []() { wi.deauthLoop(); }, true },
 };
 MenuAction subBleUtils[] = {
@@ -38,22 +39,22 @@ MenuAction subBleUtils[] = {
     {"Apple Spm", []() { b.advertiseApple(); } },
     {"Android Sp", []() { b.advertiseAndroid(); } },
 	{"Windows S", []() { b.advertiseWindows(); } },
-	{"@everyone", []() { b.toggleAdvertiseEveryone(); }, true},
+	{"@everyone", []() { b.toggleAdvertiseEveryone(); }, true, true, []() { b.advertiseEveryoneRender(); }, &b.advertise_everyone },
 };
 MenuAction subSettingsMenu[] = {
     {"Back", nullptr },
-    {"Bat Saver", []() { cfg.setBattSaver(!cfg.getBattSaver()); }, &cfg.battery_saver },
-    {"Sounds", []() { cfg.setSound(!cfg.getSound()); }, &cfg.sound_enable },
-    {"Led", []() { cfg.setLed(!cfg.getLed()); }, &cfg.led_enable },
+    {"Bat Saver", []() { cfg.setBattSaver(!cfg.getBattSaver()); }, false, false, []() { }, &cfg.battery_saver },
+    {"Sounds", []() { cfg.setSound(!cfg.getSound()); }, false, false, []() { }, &cfg.sound_enable },
+    {"Led", []() { cfg.setLed(!cfg.getLed()); }, false, false, []() { }, &cfg.led_enable },
     {"Restart", []() { M5.Axp.DeepSleep(5); } },
     {"Shutdown", []() { M5.Axp.PowerOff(); } },
 };
 
 MenuItem mainMenuOptions[] = {
     {"IR Utils", nullptr, 2, subInfraRedUtilities },
-    {"WiFi Mng", nullptr, 6, subWifiManager },
+    {"WiFi Mng", nullptr, 7, subWifiManager },
     {"BLE Utils", nullptr, 5, subBleUtils },
-    {"Settings", nullptr, 4, subSettingsMenu },
+    {"Settings", nullptr, 6, subSettingsMenu },
 };
 
 MenuRenderer mainMenu(NAME, mainMenuOptions, sizeof(mainMenuOptions) / sizeof(mainMenuOptions[0]));
@@ -139,21 +140,21 @@ void loop() {
 
     // Implement button handling to navigate the menu and perform actions
     if (M5.Axp.GetBtnPress()) {
-		l.log(Logger::INFO, "Pressed Axp button to navigate to the next option");
+		// l.log(Logger::INFO, "Pressed Axp button to navigate to the next option");
 		battery.setLI(millis());
         mainMenu.nextOption();
 	    mainMenu.render(true);
     }
 
 	if (M5.BtnB.wasReleased()) {
-		l.log(Logger::INFO, "Pressed BtnB button to navigate to the previous option");
+		// l.log(Logger::INFO, "Pressed BtnB button to navigate to the previous option");
 		battery.setLI(millis());
         mainMenu.previousOption();
 		mainMenu.render(true);
     }
 
     if (M5.BtnA.wasReleased()) {
-		l.log(Logger::INFO, "Pressed BtnA button to select option");
+		// l.log(Logger::INFO, "Pressed BtnA button to select option");
 		battery.setLI(millis());
         mainMenu.select();
 		mainMenu.render(true);

@@ -16,16 +16,19 @@ public:
     void (*action)();  // Function pointer for action
     bool isLoop = false;
     bool* isActive = nullptr;
+    bool isAutomatic = false;
     bool hasMenu = false;
     void (*render)();
 
     // Constructor for actions with an action function and render function
-    MenuAction(String name, void (*action)() = nullptr, bool isLoop = false, bool hasMenu = false, bool* isActive = nullptr, void (*render)() = nullptr)
+    MenuAction(String name, void (*action)() = nullptr, bool isLoop = false, bool hasMenu = false, void (*render)() = nullptr, bool* isActive = nullptr)
         : name(name), action(action), isLoop(isLoop), hasMenu(hasMenu), render(render) {
             if (isActive == nullptr) // If no isActive pointer is provided, create a new bool variable
                 this->isActive = new bool(false);
-        	else 
+        	else {
                 this->isActive = isActive;
+				this->isAutomatic = true;
+			}
         }
 
     // Constructor for actions with no action function but with a render function
@@ -33,8 +36,10 @@ public:
         : name(name), action(nullptr), isLoop(false), hasMenu(hasMenu), render(render) {
             if (isActive == nullptr) 
                 this->isActive = new bool(false);
-        	else 
+        	else {
                 this->isActive = isActive;
+				this->isAutomatic = true;
+			}
         }
 
 	// Constructor for actions with no action or render function
@@ -66,8 +71,7 @@ public:
 		l.log(Logger::INFO, "Menu options: " + String(numMenuOptions));
 	}
 
-	void topBar()
-	{
+	void topBar() {
 		M5.Lcd.setTextColor(WHITE, BLACK);
 		M5.Lcd.setCursor(10, 10);
 		M5.Lcd.setTextSize(1);
@@ -155,11 +159,10 @@ public:
 				if (is_active)
 					M5.Lcd.setTextColor(GREEN);
 				else if (is_loop) 
-					M5.Lcd.setTextColor(PURPLE); // setTextColor(uint16_t color, [uint16_t backgroundcolor])
+					M5.Lcd.setTextColor(DARKCYAN); // setTextColor(uint16_t color, [uint16_t backgroundcolor])
 				else 
 					M5.Lcd.setTextColor(ORANGE);
 				
-
 				M5.Lcd.setCursor(20, yOffset);
 				M5.Lcd.setTextSize(3);
 				M5.Lcd.print("> ");
@@ -214,14 +217,14 @@ public:
 	}
 
 	void select() {
-		l.log(Logger::INFO, "Menu::select() called, user is in a " + String(currentSubMenu ? "submenu" : "menu"));
+		// l.log(Logger::INFO, "Menu::select() called, user is in a " + String(currentSubMenu ? "submenu" : "menu"));
 		if (currentSubMenu) {
 			String name = currentSubMenu[currentSubMenuOption].name;
 			l.log(Logger::INFO, "Menu::select() subaction name: " + name);
 			if (name == "Back")
 				return exitSubMenu();
 
-			if (currentSubMenu[currentSubMenuOption].isLoop) // I know its not clean, but i cant think about anything 
+			if (!currentSubMenu[currentSubMenuOption].isAutomatic) // I know its not clean, but i cant think about anything 
 				if (currentSubMenu[currentSubMenuOption].isActive != nullptr)
 					*(currentSubMenu[currentSubMenuOption].isActive) = !*(currentSubMenu[currentSubMenuOption].isActive);
 

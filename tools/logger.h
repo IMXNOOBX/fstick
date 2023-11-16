@@ -15,7 +15,7 @@ public:
 
     void log(LogLevel logLevel, String message) {
         String logMessage = getLogTypeString(logLevel) + " | " + message;
-        Serial.println(getLogCount() + " | " + logMessage);
+        Serial.println(String(getLogCount()) + " | " + logMessage);
         
         if (shouldDisplayLog) {
             int textColor = getLogTextColor(logLevel);
@@ -57,13 +57,13 @@ private:
     int getLogTextColor(LogLevel logLevel) {
         switch (logLevel) {
             case INFO:
-                return WHITE; // Set the text color for INFO
+                return 0x07FF; // Set the text color for INFO
             case WARNING:
-                return YELLOW; // Set the text color for WARNING
+                return 0xFFE0; // Set the text color for WARNING
             case ERROR:
-                return RED; // Set the text color for ERROR
+                return 0xF800; // Set the text color for ERROR
             default:
-                return WHITE; // Default text color
+                return 0xFFFF; // Default text color
         }
     }
 

