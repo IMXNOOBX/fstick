@@ -49,6 +49,23 @@ public:
         this->save(); 
     }
 
+    bool toggleScretMode() {
+        secret_mode = true;
+        return secret_mode;
+    }
+
+    bool getSecretMode() {
+        return secret_mode;
+    }
+
+    int getSecretCount() {
+        return ++secret_count;
+    }
+
+    void resetSecretCount() {
+        secret_count = 0;
+    }
+
     bool getLed() const {
         return led_enable;
     }
@@ -91,6 +108,9 @@ public:
     bool led_enable = true;
     bool battery_saver = true;
     bool sound_enable = false;
+
+    bool secret_mode = false;
+    int secret_count = 0;
 private:
     String version = VERSION;
     int rotation = 1;

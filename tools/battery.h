@@ -34,6 +34,9 @@ public:
 	void setLI(int time) { // Last Interaction
 		last_interaction = time;
 	}
+	int getLI() { // Last Interaction
+		return last_interaction;
+	}
 
 	void loop() {
 		/**
@@ -63,7 +66,7 @@ public:
 				Serial.println("Adjusted brightness to: " + String(getBrightness()) + "%");
 
 			last_interation_timeout += 20000;
-		} else if (last_interaction == millis()) { // If the user has interacted this tick
+		} else if (last_interaction + 10 >= millis()) { // If the user has interacted this tick
 			if (battery_saver)
 				brightness(this->get());
 			else

@@ -127,6 +127,11 @@ void setup() {
 	M5.Lcd.setCursor(120, SCREEN_HEIGHT - 20);
 	M5.Lcd.print("Click to continue");
 	l.log(Logger::INFO, "Menu is ready to use!");
+
+	while (!M5.BtnA.wasReleased()) 
+		M5.update();
+
+	mainMenu.render(true);
 }
 
 /**
@@ -138,9 +143,12 @@ void setup() {
 void loop() {
 	M5.update(); // Its necesary to update the button states
 
-    // Implement button handling to navigate the menu and perform actions
+	if (cfg.getSecretMode()) 
+		return;
+
     if (M5.Axp.GetBtnPress()) {
 		// l.log(Logger::INFO, "Pressed Axp button to navigate to the next option");
+
 		battery.setLI(millis());
         mainMenu.nextOption();
 	    mainMenu.render(true);
@@ -148,6 +156,16 @@ void loop() {
 
 	if (M5.BtnB.wasReleased()) {
 		// l.log(Logger::INFO, "Pressed BtnB button to navigate to the previous option");
+		
+		if (millis() - battery.getLI() < 300) {
+			if(cfg.getSecretCount() >= 1) {
+				cfg.toggleScretMode();
+				l.log(Logger::WARNING, "Secret mode has been activated, restart the device to exit it.");
+			}
+		} else {
+			cfg.resetSecretCount();
+		}
+		
 		battery.setLI(millis());
         mainMenu.previousOption();
 		mainMenu.render(true);
@@ -161,8 +179,10 @@ void loop() {
 		mainMenu.render_feature(); // Not clean but should do its job
     }
 
+	if (cfg.getSecretMode()) 
+		mainMenu.render_hww();
+	
 	if (last_update < millis()) { // refresh the screen every x seconds
-		// mainMenu.render();
 		mainMenu.render_feature();
 		mainMenu.topBar(); // Should be the last to be on top of everything
 		last_update = millis() + 1000; // Refresh every 1s

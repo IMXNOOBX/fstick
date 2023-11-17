@@ -196,6 +196,38 @@ public:
 		}
 	}
 
+	/**
+	 * @brief Secret screen to fake the device as a crypto wallet
+	 * To exit this screen the user will have to restart the device.
+	 */
+	void render_hww() {
+		this->topBar();
+		M5.Lcd.fillScreen(BLACK);
+
+		M5.Lcd.setTextSize(2);
+		M5.Lcd.setTextColor(BLUE);
+		M5.Lcd.setCursor(SCREEN_WIDTH / 4, 30);
+		M5.Lcd.print("M5 | Wallet");
+		
+		M5.Lcd.setTextColor(WHITE);
+		M5.Lcd.setCursor(10, 60);
+		M5.Lcd.print("Type:");
+		M5.Lcd.setCursor(80, 60);
+		M5.Lcd.setTextColor(ORANGE);
+		M5.Lcd.print("BTC");
+		M5.Lcd.setTextColor(WHITE);
+
+		M5.Lcd.setCursor(10, 80);
+		M5.Lcd.setTextSize(2);
+		M5.Lcd.print("Amt: 0.027");
+
+		M5.Lcd.qrcode("bitcoin:1LbcFS7sAHTD9CglQo3STiCkV8LK4ZnXl0s", SCREEN_WIDTH - 85, SCREEN_HEIGHT - 85, 80, 2);
+
+		M5.Lcd.setTextSize(1);
+		M5.Lcd.setCursor(10, SCREEN_HEIGHT - 15);
+		M5.Lcd.print("Version: " + String(VERSION));
+	}
+
 	void render_feature() {
 		if (!currentSubMenu)
 			return;
@@ -228,8 +260,9 @@ public:
 				if (currentSubMenu[currentSubMenuOption].isActive != nullptr)
 					*(currentSubMenu[currentSubMenuOption].isActive) = !*(currentSubMenu[currentSubMenuOption].isActive);
 
-			if (currentSubMenu[currentSubMenuOption].action != nullptr) 
-				currentSubMenu[currentSubMenuOption].action();
+			// if (*(currentSubMenu[currentSubMenuOption].isActive))
+				if (currentSubMenu[currentSubMenuOption].action != nullptr) 
+					currentSubMenu[currentSubMenuOption].action();
 		} else {
 			auto subMenu = menuOptions[currentMenuOption].actions;
 			l.log(Logger::INFO, "Menu::select() submenu name: " + menuOptions[currentMenuOption].name);
