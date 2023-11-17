@@ -97,19 +97,19 @@ public:
 	}
 
 	void advertiseEveryoneRender() {
-		if (circle_size == 30) 
+		if (circle_size == 100) 
 			circle_size = 0;
 			
 		int x = M5.Lcd.width() / 2;
 		int y = M5.Lcd.height() / 2;
 
-		M5.Lcd.fillCircle(x, y, 30, BLACK);
+		M5.Lcd.fillCircle(x, y, 100, BLACK);
 		for (int i = 1; i <= 3; i++) {
 			if (circle_size != 0)
 				M5.Lcd.drawCircle(x, y, circle_size / i, BLUE);
 		}
 
-		circle_size += 5;
+		circle_size += 25;
 	}
 
 	void loop() {

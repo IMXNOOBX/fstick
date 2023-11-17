@@ -201,8 +201,8 @@ public:
 	 * To exit this screen the user will have to restart the device.
 	 */
 	void render_hww() {
-		this->topBar();
 		M5.Lcd.fillScreen(BLACK);
+		this->topBar();
 
 		M5.Lcd.setTextSize(2);
 		M5.Lcd.setTextColor(BLUE);

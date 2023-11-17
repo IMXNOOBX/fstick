@@ -10,6 +10,7 @@ Logger l;
 Battery battery;
 
 BLE b;
+Info inf;
 Settings cfg;
 IrBlaster ir; // const uint16_t kIrSendPin = 9;  // IR Emitter Pin - M5 IR Unit
 WifiManager wi;
@@ -49,12 +50,19 @@ MenuAction subSettingsMenu[] = {
     {"Restart", []() { M5.Axp.DeepSleep(5); } },
     {"Shutdown", []() { M5.Axp.PowerOff(); } },
 };
+MenuAction subInfoMenu[] = {
+    {"Back", nullptr },
+    {"Donate", true, []() { inf.renderDonate(); } },
+    {"Repository", true, []() { inf.renderRepository(); } },
+    {"Credits", true, []() { inf.renderCredits(); } },
+};
 
 MenuItem mainMenuOptions[] = {
     {"IR Utils", nullptr, 2, subInfraRedUtilities },
     {"WiFi Mng", nullptr, 7, subWifiManager },
     {"BLE Utils", nullptr, 5, subBleUtils },
     {"Settings", nullptr, 6, subSettingsMenu },
+    {"Info", nullptr, 4, subInfoMenu },
 };
 
 MenuRenderer mainMenu(NAME, mainMenuOptions, sizeof(mainMenuOptions) / sizeof(mainMenuOptions[0]));
@@ -158,7 +166,7 @@ void loop() {
 		// l.log(Logger::INFO, "Pressed BtnB button to navigate to the previous option");
 		
 		if (millis() - battery.getLI() < 300) {
-			if(cfg.getSecretCount() >= 1) {
+			if(cfg.getSecretCount() >= 2) {
 				cfg.toggleScretMode();
 				l.log(Logger::WARNING, "Secret mode has been activated, restart the device to exit it.");
 			}
@@ -179,6 +187,8 @@ void loop() {
 		mainMenu.render_feature(); // Not clean but should do its job
     }
 
+	battery.loop();
+
 	if (cfg.getSecretMode()) 
 		mainMenu.render_hww();
 	
@@ -195,6 +205,4 @@ void loop() {
 	ir.loop();
 	wi.loop();
 	b.loop();
-
-	battery.loop();
 }

@@ -66,7 +66,7 @@ public:
 				Serial.println("Adjusted brightness to: " + String(getBrightness()) + "%");
 
 			last_interation_timeout += 20000;
-		} else if (last_interaction + 10 >= millis()) { // If the user has interacted this tick
+		} else if (last_interaction == millis()) { // If the user has interacted this tick
 			if (battery_saver)
 				brightness(this->get());
 			else
@@ -85,7 +85,6 @@ private:
 
 	int last_interaction = millis();
 	int last_interation_timeout = 20000;
-	int last_battery_loop = millis() + 10000; // Because if not it will run 
 };
 
 #endif

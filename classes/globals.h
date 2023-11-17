@@ -48,16 +48,22 @@
 
 #include "infrared.h"
 #include "settings.h"
+#include "info.h"
 #include "wifi.h"
 #include "ble.h"
 
-extern Led led; // Declare an external reference to Led
-extern Logger l; // Declare an external reference to Logger
-extern Battery battery; // Declare an external reference to Settings
-extern BLE b; // Declare an external reference to BLE
-extern IrBlaster ir; // Declare an external reference to IrBlaster
-extern WifiManager wi; // Declare an external reference to WifiManager
-extern Settings cfg; // Declare an external reference to Settings
+/**
+ * @brief Declare external references to classes
+ * 
+ */
+extern Led led;
+extern Logger l; 
+extern Battery battery;
+extern BLE b;
+extern Info inf;
+extern IrBlaster ir;
+extern WifiManager wi;
+extern Settings cfg;
 
 #endif
 
