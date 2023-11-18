@@ -15,6 +15,15 @@ public:
 		return current_brightness;
 	}
 
+	void restoreBrightness() {
+		if (battery_saver)
+			brightness(this->get());
+		else
+			brightness(100);
+
+		Serial.println("Restored brightness to: " + String(getBrightness()) + "%");
+	}
+
 	int get() {
 		float b = M5.Axp.GetVbatData() * 1.1 / 1000;
 		int battery = ((b - 3.0) / 1.2) * 100;
@@ -34,6 +43,7 @@ public:
 	void setLI(int time) { // Last Interaction
 		last_interaction = time;
 	}
+	
 	int getLI() { // Last Interaction
 		return last_interaction;
 	}
@@ -66,15 +76,6 @@ public:
 				Serial.println("Adjusted brightness to: " + String(getBrightness()) + "%");
 
 			last_interation_timeout += 20000;
-		} else if (last_interaction == millis()) { // If the user has interacted this tick
-			if (battery_saver)
-				brightness(this->get());
-			else
-				brightness(100);
-
-			Serial.println("Restored brightness to: " + String(getBrightness()) + "%");
-
-			last_interation_timeout = 20000;
 		}
 	}
 

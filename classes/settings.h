@@ -41,21 +41,21 @@ public:
 	}
 
 	String getVersion() const {
-        return version;
+        return this->version;
     }
 
     void setVersion(const String& newVersion) {
-        version = newVersion;
+        this->version = newVersion;
         this->save(); 
     }
 
     bool toggleScretMode() {
-        secret_mode = true;
-        return secret_mode;
+        this->secret_mode = true;
+        return this->secret_mode;
     }
 
     bool getSecretMode() {
-        return secret_mode;
+        return this->secret_mode;
     }
 
     int getSecretCount() {
@@ -63,36 +63,42 @@ public:
     }
 
     void resetSecretCount() {
-        secret_count = 0;
+        this->secret_count = 0;
     }
 
     bool getLed() const {
-        return led_enable;
+        return this->led_enable;
     }
 
-    void setLed(bool enable) {
-		led.off();
-        led_enable = enable;
+    void toggleLed() {
+        led.flash();
+        led.is_enabled = !led_enable;
+        led_enable = !led_enable;
         this->save();
+        l.log(Logger::INFO, "Setting changed, led is now " + String(led_enable ? "enabled" : "disabled"));
     }
 
     bool getSound() const {
-        return sound_enable;
+        return this->sound_enable;
     }
 
-    void setSound(bool enable) {
-        sound_enable = enable;
+    void toggleSound() {
+        led.flash();
+        this->sound_enable = !this->sound_enable;
         this->save();
+        l.log(Logger::INFO, "Setting changed, sound is now " + String(this->sound_enable ? "enabled" : "disabled"));
     }
 
     bool getBattSaver() const {
-        return battery_saver;
+        return this->battery_saver;
     }
 
-    void setBattSaver(bool enable) {
-        battery_saver = enable;
-        battery.setBT(enable);
+    void toggleBattSaver() {
+        led.flash();
+        battery.setBT(this->battery_saver);
+        this->battery_saver = !this->battery_saver;
         this->save();
+        l.log(Logger::INFO, "Setting changed, battery saver is now " + String(this->battery_saver ? "enabled" : "disabled"));
     }
 
     bool getRotation() const {
@@ -100,12 +106,15 @@ public:
     }
 
     void setRotation(int pos) {
+        led.flash();
 	    M5.Lcd.setRotation(pos);
-        rotation = pos;
+        this->rotation = pos;
         this->save();
+        l.log(Logger::INFO, "Setting changed, rotation is now " + String(this->rotation));
     }
-public:
+
     bool led_enable = true;
+public:
     bool battery_saver = true;
     bool sound_enable = false;
 
@@ -126,7 +135,7 @@ private:
         }
 
         battery.setBT(battery_saver);
-		setLed(led_enable);
+        led.is_enabled = !this->led_enable;
 		setRotation(rotation);
     }
 

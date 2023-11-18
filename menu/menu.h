@@ -153,10 +153,11 @@ public:
 			{
 				String opt_name = currentSubMenu[currentSubMenuOption].name;
 				bool is_loop = currentSubMenu[currentSubMenuOption].isLoop;
+				bool is_auto = currentSubMenu[currentSubMenuOption].isAutomatic;
 				bool is_active = currentSubMenu[currentSubMenuOption].isActive != nullptr ? *(currentSubMenu[currentSubMenuOption].isActive) : false;
 				bool has_sub = currentSubMenu[currentSubMenuOption].hasMenu;
 				
-				if (is_active)
+				if (!is_auto && is_active)
 					M5.Lcd.setTextColor(GREEN);
 				else if (is_loop) 
 					M5.Lcd.setTextColor(DARKCYAN); // setTextColor(uint16_t color, [uint16_t backgroundcolor])
@@ -221,7 +222,7 @@ public:
 		M5.Lcd.setTextSize(2);
 		M5.Lcd.print("Amt: 0.027");
 
-		M5.Lcd.qrcode("bitcoin:1LbcFS7sAHTD9CglQo3STiCkV8LK4ZnXl0s", SCREEN_WIDTH - 85, SCREEN_HEIGHT - 85, 80, 2);
+		M5.Lcd.qrcode("https://youtu.be/dQw4w9WgXcQ", SCREEN_WIDTH - 85, SCREEN_HEIGHT - 85, 80, 5);
 
 		M5.Lcd.setTextSize(1);
 		M5.Lcd.setCursor(10, SCREEN_HEIGHT - 15);

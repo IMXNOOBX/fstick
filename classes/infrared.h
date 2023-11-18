@@ -27,8 +27,8 @@ public:
 		send_codes = !send_codes;
 
 		l.log(Logger::INFO, send_codes ? "Starting send ir code loop" : "Stopping sending ir code loop");
-
 		// l.log(Logger::INFO, "Finished sending " + String(powerCodesCount) + " codes.");
+		code_index = 0;
 
 		l.setShouldDisplayLog(send_codes);
 		return send_codes;

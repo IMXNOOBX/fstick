@@ -5,6 +5,7 @@
  * When LOW the LED is on, when HIGH the LED is off.
  */
 
+
 class Led {
 public:
     Led() {
@@ -21,12 +22,14 @@ public:
     }
 
 	void flash() {
+		if (!is_enabled) return;
 		digitalWrite(M5_LED, LOW);
 		delay(10);
 		digitalWrite(M5_LED, HIGH);
     }
 
 	void flash(int times) {
+		if (!is_enabled) return;
 		for (int i = 0; i < times; i++) {
 			digitalWrite(M5_LED, LOW);
 			delay(10);
@@ -34,6 +37,9 @@ public:
 			delay(100);
 		}
     }
+
+public:
+	bool is_enabled = true;
 };
 
 #endif

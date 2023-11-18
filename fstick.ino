@@ -18,6 +18,7 @@ WifiManager wi;
 // if (M5.Lcd.width() > 160)
 extern const unsigned char logo[];
 int last_update = millis() + 1000;
+int is_ready = false;
 
 /**
  * @brief Menu options
@@ -44,9 +45,9 @@ MenuAction subBleUtils[] = {
 };
 MenuAction subSettingsMenu[] = {
     {"Back", nullptr },
-    {"Bat Saver", []() { cfg.setBattSaver(!cfg.getBattSaver()); }, false, false, []() { }, &cfg.battery_saver },
-    {"Sounds", []() { cfg.setSound(!cfg.getSound()); }, false, false, []() { }, &cfg.sound_enable },
-    {"Led", []() { cfg.setLed(!cfg.getLed()); }, false, false, []() { }, &cfg.led_enable },
+    {"Bat Saver", []() { cfg.toggleBattSaver(); }, false, false, []() { }, &cfg.battery_saver },
+    {"Sounds", []() { cfg.toggleSound(); }, false, false, []() { }, &cfg.sound_enable },
+    {"Led", []() { cfg.toggleLed(); }, false, false, []() { }, &cfg.led_enable },
     {"Restart", []() { M5.Axp.DeepSleep(5); } },
     {"Shutdown", []() { M5.Axp.PowerOff(); } },
 };
@@ -136,8 +137,10 @@ void setup() {
 	M5.Lcd.print("Click to continue");
 	l.log(Logger::INFO, "Menu is ready to use!");
 
-	while (!M5.BtnA.wasReleased()) 
+	while (!M5.BtnA.wasReleased()) {
 		M5.update();
+		battery.loop();
+	}
 
 	mainMenu.render(true);
 }
@@ -160,12 +163,13 @@ void loop() {
 		battery.setLI(millis());
         mainMenu.nextOption();
 	    mainMenu.render(true);
+		battery.restoreBrightness();
     }
 
 	if (M5.BtnB.wasReleased()) {
 		// l.log(Logger::INFO, "Pressed BtnB button to navigate to the previous option");
 		
-		if (millis() - battery.getLI() < 300) {
+		if (millis() - battery.getLI() < 250) {
 			if(cfg.getSecretCount() >= 2) {
 				cfg.toggleScretMode();
 				l.log(Logger::WARNING, "Secret mode has been activated, restart the device to exit it.");
@@ -177,6 +181,7 @@ void loop() {
 		battery.setLI(millis());
         mainMenu.previousOption();
 		mainMenu.render(true);
+		battery.restoreBrightness();
     }
 
     if (M5.BtnA.wasReleased()) {
@@ -185,9 +190,8 @@ void loop() {
         mainMenu.select();
 		mainMenu.render(true);
 		mainMenu.render_feature(); // Not clean but should do its job
+		battery.restoreBrightness();
     }
-
-	battery.loop();
 
 	if (cfg.getSecretMode()) 
 		mainMenu.render_hww();
@@ -205,4 +209,6 @@ void loop() {
 	ir.loop();
 	wi.loop();
 	b.loop();
+
+	battery.loop();
 }
