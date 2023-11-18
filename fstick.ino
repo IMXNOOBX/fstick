@@ -1,5 +1,5 @@
 #define PLUS
-#define DEV // Mostly to disable battery saver and some debug messages
+// #define DEV // Mostly to disable battery saver and some debug messages
 #include "classes/globals.h"
 
 /**
