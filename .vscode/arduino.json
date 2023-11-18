@@ -1,8 +1,0 @@
-{
-    "configuration": "PartitionScheme=huge_app,CPUFreq=240,FlashMode=qio,FlashFreq=80,FlashSize=4M,UploadSpeed=1500000,LoopCore=1,EventsCore=1,DebugLevel=none,EraseFlash=none",
-    "board": "m5stack:esp32:stickc",
-    "port": "COM3",
-    "programmer": "esptool",
-    "output": "./build",
-    "sketch": "fstick.ino"
-}
