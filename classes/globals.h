@@ -30,9 +30,6 @@
 #include <IRsend.h>
 #include <WiFi.h>
 #include <esp_wifi.h>
-// #include <BLEUtils.h>
-// #include <BLEDevice.h>
-// #include <BLEServer.h>
 #include <NimBLEDevice.h>
 
 #include "../tools/utilities.h"
@@ -54,7 +51,6 @@
 
 /**
  * @brief Declare external references to classes
- * 
  */
 extern Led led;
 extern Logger l; 
@@ -67,6 +63,9 @@ extern Settings cfg;
 
 #endif
 
+/**
+ * @brief To keep track of the colors easily
+ */
 // #define BLACK       0x0000 /*   0,   0,   0 */
 // #define NAVY        0x000F /*   0,   0, 128 */
 // #define DARKGREEN   0x03E0 /*   0, 128,   0 */

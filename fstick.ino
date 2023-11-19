@@ -1,3 +1,22 @@
+/*
+ * Copyright 2023 IMXNOOBX
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * If you use or modify this code, please include an attribution to the original author and repository.
+ * This notice applies to all files within this repository
+ */
+
 #define PLUS
 // #define DEV // Mostly to disable battery saver and some debug messages
 #include "classes/globals.h"
@@ -73,21 +92,23 @@ MenuRenderer mainMenu(NAME, mainMenuOptions, sizeof(mainMenuOptions) / sizeof(ma
  */
 void setup() {
 	M5.begin();
-	// while (!Serial) // Wait for the serial connection to be establised.
-	delay(1000); 
+	#ifdef DEV
+	{
+		// while (!Serial) // Wait for the serial connection to be establised.
+		delay(1000);
+	}
+	#endif 
 	l.log(Logger::INFO, "Starting " + String(NAME) + "...");
 
-	M5.Lcd.setRotation(1); // Adjust screen rotation as needed
+	M5.Lcd.setRotation(1);
 	M5.Lcd.fillScreen(BLACK);
 	M5.Lcd.setTextColor(WHITE, BLACK);
 
-	// Show time and battery information
 	mainMenu.topBar();
 
 	// Logo
 	M5.Lcd.drawBitmap(10, 20, 105, 105, (uint16_t*)logo);
 
-	// Display a banner
 	M5.Lcd.setCursor(120, 40);
 	M5.Lcd.setTextSize(2);
 	M5.Lcd.print(NAME);
@@ -137,6 +158,10 @@ void setup() {
 	M5.Lcd.print("Click to continue");
 	l.log(Logger::INFO, "Menu is ready to use!");
 
+	/**
+	 * @brief Wait until user interacts with the device
+	 * @details This is to prevent the user from missing the startup screen but i have to find a better way to do this
+	 */
 	while (!M5.BtnA.wasReleased()) {
 		M5.update();
 		battery.loop();
@@ -158,7 +183,11 @@ void loop() {
 		return;
 
     if (M5.Axp.GetBtnPress()) {
-		// l.log(Logger::INFO, "Pressed Axp button to navigate to the next option");
+		#ifdef DEV
+		{
+			l.log(Logger::INFO, "Pressed Axp button to navigate to the next option");
+		}
+		#endif
 
 		battery.setLI(millis());
         mainMenu.nextOption();
@@ -167,7 +196,11 @@ void loop() {
     }
 
 	if (M5.BtnB.wasReleased()) {
-		// l.log(Logger::INFO, "Pressed BtnB button to navigate to the previous option");
+		#ifdef DEV
+		{
+			l.log(Logger::INFO, "Pressed BtnB button to navigate to the previous option");
+		}
+		#endif
 		
 		if (millis() - battery.getLI() < 250) {
 			if(cfg.getSecretCount() >= 2) {
@@ -185,7 +218,12 @@ void loop() {
     }
 
     if (M5.BtnA.wasReleased()) {
-		// l.log(Logger::INFO, "Pressed BtnA button to select option");
+		#ifdef DEV
+		{
+			l.log(Logger::INFO, "Pressed BtnA button to select option");
+		}
+		#endif
+
 		battery.setLI(millis());
         mainMenu.select();
 		mainMenu.render(true);

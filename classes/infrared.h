@@ -27,7 +27,6 @@ public:
 		send_codes = !send_codes;
 
 		l.log(Logger::INFO, send_codes ? "Starting send ir code loop" : "Stopping sending ir code loop");
-		// l.log(Logger::INFO, "Finished sending " + String(powerCodesCount) + " codes.");
 		code_index = 0;
 
 		l.setShouldDisplayLog(send_codes);
@@ -35,7 +34,6 @@ public:
 	}
 
 	void sendAllPowerCodesRender() {
-		// M5.Lcd.fillScreen(BLACK);
 		M5.Lcd.setTextColor(WHITE, BLACK);
 
 		int barWidth = 200;
@@ -83,7 +81,7 @@ public:
 			}
 
 			irsend->sendRaw(rawData, (numpairs * 2), freq);
-			digitalWrite(kIrSendPin, HIGH); // Seems to be needed to turn off the light
+			digitalWrite(kIrSendPin, HIGH); // Needed to turn off the light, after each code is sent
 
 			bitsleft_r = 0;
 			l.log(Logger::INFO, "Sending code: (" + String(code_index) + "/" + String(powerCodesCount) + ") freq: " + String(freq) + ", pair: " + String(ontime) + ", " + String(offtime));
@@ -104,7 +102,9 @@ private:
 	int last_update = 0;
 	uint16_t rawData[300];
 
-	// needed for the function below
+	/**
+	 * @brief Variables used for reading the IR code
+	 */
 	const IrCode *powerCode;
 	uint8_t bitsleft_r = 0;
 	uint8_t bits_r = 0;

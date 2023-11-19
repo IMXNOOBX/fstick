@@ -350,8 +350,6 @@ private:
 		// Write the RSN information to the packet
 		buffer[34] = 0x31; // wpa2
 
-		// printBuffer(buffer, beacon_packet_size);
-
 		for (int i = 0; i < 3; i++) {
 			esp_wifi_80211_tx(WIFI_IF_STA, buffer, beacon_packet_size, 0);
 			delay(1);

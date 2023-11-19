@@ -2,14 +2,6 @@
 
 extern Logger l;
 
-// struct MenuAction
-// {
-// 	String name;
-// 	void (*action)(); // Function pointer for action
-// 	bool isLoop = false;
-// 	bool isActive = false;
-// };
-
 class MenuAction {
 public:
     String name;
@@ -66,9 +58,13 @@ public:
 		this->currentMenuOption = 0;
 		this->currentSubMenu = nullptr;
 
-		l.log(Logger::INFO, "MenuRenderer initialized");
-		l.log(Logger::INFO, "Menu title: " + String(title));
-		l.log(Logger::INFO, "Menu options: " + String(numMenuOptions));
+		#ifdef DEV
+		{
+			l.log(Logger::INFO, "MenuRenderer initialized");
+			l.log(Logger::INFO, "Menu title: " + String(title));
+			l.log(Logger::INFO, "Menu options: " + String(numMenuOptions));
+		}
+		#endif
 	}
 
 	void topBar() {
@@ -83,7 +79,6 @@ public:
 		/**
 		 * @todo Clean this part :D
 		 */
-
 		int battery = utilities::get_battery();
 		if (battery > 50)
 			M5.Lcd.setTextColor(GREEN, BLACK);
@@ -125,8 +120,7 @@ public:
 					menuOptions[currentMenuOption].submenu != nullptr
 						? " to submenu"
 						: ""));
-		} else if (currentSubMenu) {
-			// Render the submenu
+		} else if (currentSubMenu) { // Render the submenu
 			int yOffset = 20;
 			M5.Lcd.setCursor(10, yOffset);
 			M5.Lcd.setTextSize(2);
@@ -160,7 +154,7 @@ public:
 				if (!is_auto && is_active)
 					M5.Lcd.setTextColor(GREEN);
 				else if (is_loop) 
-					M5.Lcd.setTextColor(DARKCYAN); // setTextColor(uint16_t color, [uint16_t backgroundcolor])
+					M5.Lcd.setTextColor(DARKCYAN);
 				else 
 					M5.Lcd.setTextColor(ORANGE);
 				
@@ -222,7 +216,7 @@ public:
 		M5.Lcd.setTextSize(2);
 		M5.Lcd.print("Amt: 0.027");
 
-		M5.Lcd.qrcode("https://youtu.be/dQw4w9WgXcQ", SCREEN_WIDTH - 85, SCREEN_HEIGHT - 85, 80, 5);
+		M5.Lcd.qrcode("https://youtu.be/dQw4w9WgXcQ", SCREEN_WIDTH - 85, SCREEN_HEIGHT - 85, 80, 5); // Ctrl + Click the URL
 
 		M5.Lcd.setTextSize(1);
 		M5.Lcd.setCursor(10, SCREEN_HEIGHT - 15);
@@ -240,6 +234,7 @@ public:
 			if (!prevFeatureState)
 				M5.Lcd.fillScreen(BLACK); // Reset the screen, so we dont have to do it inside the sub render
 
+			this->topBar();
 			currentSubMenu[currentSubMenuOption].render();
 		}
 
@@ -250,7 +245,6 @@ public:
 	}
 
 	void select() {
-		// l.log(Logger::INFO, "Menu::select() called, user is in a " + String(currentSubMenu ? "submenu" : "menu"));
 		if (currentSubMenu) {
 			String name = currentSubMenu[currentSubMenuOption].name;
 			l.log(Logger::INFO, "Menu::select() subaction name: " + name);

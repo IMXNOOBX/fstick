@@ -10,17 +10,12 @@ public:
 
 	bool init()
 	{
-		try
-		{
-			// BLEDevice::init("");
-			// server = BLEDevice::createServer();
+		try {
 			NimBLEDevice::init("");
 			server = NimBLEDevice::createServer();
 			adv = server->getAdvertising();
 			return true;
-		}
-		catch (...)
-		{
+		} catch (...) {
 			return false;
 		}
 	}
@@ -29,7 +24,6 @@ public:
 	{
 		try
 		{
-			// BLEDevice::deinit();
 			NimBLEDevice::deinit();
 			return true;
 		}
@@ -126,8 +120,6 @@ public:
 	bool advertise_everyone = false;
 
 private:
-	// BLEServer* server;
-	// BLEAdvertising* Adv;
 	NimBLEAdvertising *adv;
 	NimBLEServer *server;
 	int last_update = 0;
@@ -167,8 +159,6 @@ private:
 		const char* display_name = b_name.c_str();
 		uint8_t display_name_len = strlen(display_name);
 
-		// l.log(Logger::INFO, "Adv device: " + String(display_name));
-
 		uint8_t size = 7 + display_name_len;
 		uint8_t *packet = (uint8_t *)malloc(size);
 		uint8_t i = 0;
@@ -187,10 +177,6 @@ private:
 		i += display_name_len;
 
 		oAdvertisementData.addData(std::string((char *)packet, size));
-
-		// free(packet);
-
-		// free((void *)display_name);
 
 		return oAdvertisementData;
 	}

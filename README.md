@@ -1,8 +1,14 @@
-# 💫 fs stick
+# 💫 FStick
 
 ![img](.github/showcase.jpeg)
 
 This is a simple project to play around with the [M5StickC Plus](https://m5stack.com/products/m5stickc-plus-esp32-pico-mini-iot-development-kit) trying to mimic a flipper zero functionality. I bought it cause i couldn't afford the flipper zero myself :c. This project is based on many different projects credited below. Even though the project is published, it is still a work in progress, and I will continue working on it for a while. Feel free to contribute and share your incredible ideas.
+
+## 🪀 Usage
+* The device has three different buttons, we will call them TOP (the one on the top), M5 (the one in the front) and BOTTOM (the one on the bottom).
+* To Select an option, press the M5 button.
+* To go to the last page/option, press the TOP button.
+* To go to the next page/option, press the BOTTOM button.
 
 ## ➰ Features (WIP)
 1. [x] IR Controller (TV, AC, etc)
@@ -31,12 +37,17 @@ This is a simple project to play around with the [M5StickC Plus](https://m5stack
 
 ## 📦 How To Build
 1. Clone the repo using `git clone https://github.com/IMXNOOBX/fstick.git`
-2. Download the [Arduino IDE](https://www.arduino.cc/en/software) and install it or use visual studio code with the [Arduino extension](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino)
+2. Download the [**Arduino IDE**](https://www.arduino.cc/en/software) and install it or use visual studio code with the [**Arduino extension**](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino)
 3. Run the python script `python3 setup.py` to be able to to build the project
-4. Go to the main file `fstick.ino` and click on the build button
+4. In your Arduino IDE or VSCode extension go to the main file `fstick.ino` and click on the build button in the top Left/Right in Arduino/VSCode respectively.
+
+## 🧶 Contribute/Issues
+Feel free to contribute or open any issue for the project, just make sure to read the [**CONTRIBUTE.md**](./CONTRIBUTE.md) file first and you follow the steps acordingly.
+
+## 🧾 License And CopyRight
+This project is licensed under the [**Apache 2.0**](./LICENSE) license. Copiright (c) 2023 IMXNOOBX
 
 ## 📚 Credits
-
 * [nemo](https://github.com/n0xa/m5stick-nemo) project for the idea and some code
 * [SourApple](https://github.com/RapierXbox/ESP32-Sour-Apple) for the ble spammer
 * [wifi-penetration-tool](https://github.com/risinek/esp32-wifi-penetration-tool) for incredible well documented code and such great tools
