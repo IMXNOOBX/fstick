@@ -8,7 +8,7 @@ public:
     void (*action)();  // Function pointer for action
     bool isLoop = false;
     bool* isActive = nullptr;
-    bool isAutomatic = false;
+    bool isAutomatic = true;
     bool hasMenu = false;
     void (*render)();
 
@@ -19,7 +19,7 @@ public:
                 this->isActive = new bool(false);
         	else {
                 this->isActive = isActive;
-				this->isAutomatic = true;
+				this->isAutomatic = false;
 			}
         }
 
@@ -30,7 +30,7 @@ public:
                 this->isActive = new bool(false);
         	else {
                 this->isActive = isActive;
-				this->isAutomatic = true;
+				this->isAutomatic = false;
 			}
         }
 
@@ -150,7 +150,13 @@ public:
 				bool is_auto = currentSubMenu[currentSubMenuOption].isAutomatic;
 				bool is_active = currentSubMenu[currentSubMenuOption].isActive != nullptr ? *(currentSubMenu[currentSubMenuOption].isActive) : false;
 				bool has_sub = currentSubMenu[currentSubMenuOption].hasMenu;
-				
+
+				l.log(Logger::INFO, "Option Name: " + opt_name);
+				l.log(Logger::INFO, "Is Loop: " + String(is_loop));
+				l.log(Logger::INFO, "Is Automatic: " + String(is_auto));
+				l.log(Logger::INFO, "Is Active: " + String(is_active));
+				l.log(Logger::INFO, "Has Submenu: " + String(has_sub));	
+
 				if (!is_auto && is_active)
 					M5.Lcd.setTextColor(GREEN);
 				else if (is_loop) 
@@ -251,7 +257,10 @@ public:
 			if (name == "Back")
 				return exitSubMenu();
 
-			if (!currentSubMenu[currentSubMenuOption].isAutomatic) // I know its not clean, but i cant think about anything 
+			/**
+			 * @brief This should invert the state of the boolean pointer just if it has been created by the menu and hasnt been provided
+			 */
+			if (currentSubMenu[currentSubMenuOption].isAutomatic) // I know its not clean, but i cant think about anything 
 				if (currentSubMenu[currentSubMenuOption].isActive != nullptr)
 					*(currentSubMenu[currentSubMenuOption].isActive) = !*(currentSubMenu[currentSubMenuOption].isActive);
 

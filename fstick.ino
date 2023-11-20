@@ -18,7 +18,7 @@
  */
 
 #define PLUS
-// #define DEV // Mostly to disable battery saver and some debug messages
+#define DEV // Mostly to disable battery saver and some debug messages
 #include "classes/globals.h"
 
 /**
@@ -44,7 +44,7 @@ int is_ready = false;
  */
 MenuAction subInfraRedUtilities[] = {
     {"Back", nullptr },
-    {"Spam Sig", []() { ir.sendAllPowerCodes(); }, false, true, []() { ir.sendAllPowerCodesRender(); }, &ir.send_codes },
+    {"Spam Sig", []() { ir.sendAllPowerCodes(); }, true, true, []() { ir.sendAllPowerCodesRender(); }, &ir.send_codes },
 };
 MenuAction subWifiManager[] = {
     {"Back", nullptr },
@@ -64,9 +64,9 @@ MenuAction subBleUtils[] = {
 };
 MenuAction subSettingsMenu[] = {
     {"Back", nullptr },
-    {"Bat Saver", []() { cfg.toggleBattSaver(); }, false, false, []() { }, &cfg.battery_saver },
-    {"Sounds", []() { cfg.toggleSound(); }, false, false, []() { }, &cfg.sound_enable },
-    {"Led", []() { cfg.toggleLed(); }, false, false, []() { }, &cfg.led_enable },
+    {"Bat Saver", []() { cfg.toggleBattSaver(); }, false, false, nullptr, new bool(cfg.battery_saver) },
+    {"Sounds", []() { cfg.toggleSound(); }, false, false, nullptr, new bool(cfg.sound_enable) },
+    {"Led", []() { cfg.toggleLed(); }, false, false, nullptr, new bool(cfg.led_enable) },
     {"Restart", []() { M5.Axp.DeepSleep(5); } },
     {"Shutdown", []() { M5.Axp.PowerOff(); } },
 };
@@ -92,6 +92,7 @@ MenuRenderer mainMenu(NAME, mainMenuOptions, sizeof(mainMenuOptions) / sizeof(ma
  */
 void setup() {
 	M5.begin();
+	
 	#ifdef DEV
 	{
 		// while (!Serial) // Wait for the serial connection to be establised.
@@ -165,6 +166,7 @@ void setup() {
 	while (!M5.BtnA.wasReleased()) {
 		M5.update();
 		battery.loop();
+		delay(10);
 	}
 
 	mainMenu.render(true);

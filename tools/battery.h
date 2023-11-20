@@ -16,8 +16,9 @@ public:
 	}
 
 	void restoreBrightness() {
+		int battery = this->get();
 		if (battery_saver)
-			brightness(this->get());
+			brightness(battery < 75 ? 50 : 75);
 		else
 			brightness(100);
 
