@@ -48,6 +48,6 @@ Feel free to contribute or open any issue for the project, just make sure to rea
 This project is licensed under the [**Apache 2.0**](./LICENSE) license. Copiright (c) 2023 IMXNOOBX
 
 ## 📚 Credits
-* [nemo](https://github.com/n0xa/m5stick-nemo) project for the idea and some code
+* [nemo](https://github.com/n0xa/m5stick-nemo) project for the idea, assistance with the m5burner and useful code!
 * [SourApple](https://github.com/RapierXbox/ESP32-Sour-Apple) for the ble spammer
 * [wifi-penetration-tool](https://github.com/risinek/esp32-wifi-penetration-tool) for incredible well documented code and such great tools
