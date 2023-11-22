@@ -1,6 +1,6 @@
 # Contributing to FStick
 
-Welcome to FStick! We appreciate your interest in contributing. Before you get started, please take a moment to read the following guidelines.
+Welcome to FStick Project! Before you get started, please take a moment to read the following guidelines.
 
 ## How to Contribute
 
@@ -46,6 +46,6 @@ If you are reporting a bug, please provide the following information:
 
 ## Code of Conduct
 
-The project is single threaded to create a challenge for myself, if you have any good reason to make it multi threaded, please let me know. If not please keep it single threaded to keep the challenge.
+The project is single threaded to create a challenge for myself, if you have any good reason to make it multi-threaded, please let me know. If not please keep it single threaded to keep the challenge.
 
 Thank you for contributing to FStick! 🚀
