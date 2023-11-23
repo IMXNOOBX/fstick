@@ -2,41 +2,48 @@
 
 extern Logger l;
 
+enum ActionType {
+	LOOP,
+	TOGGLE,
+	ACTION
+};
+
 class MenuAction {
 public:
     String name;
     void (*action)();  // Function pointer for action
-    bool isLoop = false;
+    // bool isLoop = false;
+	ActionType type = ActionType::ACTION;
     bool* isActive = nullptr;
-    bool isAutomatic = true;
+    // bool isAutomatic = true;
     bool hasMenu = false;
     void (*render)();
 
     // Constructor for actions with an action function and render function
-    MenuAction(String name, void (*action)() = nullptr, bool isLoop = false, bool hasMenu = false, void (*render)() = nullptr, bool* isActive = nullptr)
-        : name(name), action(action), isLoop(isLoop), hasMenu(hasMenu), render(render) {
+    MenuAction(String name, void (*action)() = nullptr, ActionType acType = ActionType::ACTION, bool hasMenu = false, void (*render)() = nullptr, bool* isActive = nullptr)
+        : name(name), action(action), type(acType), hasMenu(hasMenu), render(render) {
             if (isActive == nullptr) // If no isActive pointer is provided, create a new bool variable
                 this->isActive = new bool(false);
         	else {
                 this->isActive = isActive;
-				this->isAutomatic = false;
+				// this->isAutomatic = false;
 			}
         }
 
     // Constructor for actions with no action function but with a render function
     MenuAction(String name, bool hasMenu, void (*render)(), bool* isActive = nullptr)
-        : name(name), action(nullptr), isLoop(false), hasMenu(hasMenu), render(render) {
+        : name(name), action(nullptr), type(ActionType::ACTION), hasMenu(hasMenu), render(render) {
             if (isActive == nullptr) 
                 this->isActive = new bool(false);
         	else {
                 this->isActive = isActive;
-				this->isAutomatic = false;
+				// this->isAutomatic = false;
 			}
         }
 
 	// Constructor for actions with no action or render function
     MenuAction(String name, bool hasMenu)
-        : name(name), action(nullptr), isLoop(false), hasMenu(hasMenu), render(nullptr) {}
+        : name(name), action(nullptr), type(ActionType::ACTION), hasMenu(hasMenu), render(nullptr) {}
 };
 
 struct MenuItem
@@ -146,20 +153,21 @@ public:
 			if (currentSubMenuOption >= 0)
 			{
 				String opt_name = currentSubMenu[currentSubMenuOption].name;
-				bool is_loop = currentSubMenu[currentSubMenuOption].isLoop;
-				bool is_auto = currentSubMenu[currentSubMenuOption].isAutomatic;
-				bool is_active = currentSubMenu[currentSubMenuOption].isActive != nullptr ? *(currentSubMenu[currentSubMenuOption].isActive) : false;
+				ActionType ac_type = currentSubMenu[currentSubMenuOption].type;
+				// bool is_auto = currentSubMenu[currentSubMenuOption].isAutomatic;
+				bool is_active = *(currentSubMenu[currentSubMenuOption].isActive);
 				bool has_sub = currentSubMenu[currentSubMenuOption].hasMenu;
 
 				l.log(Logger::INFO, "Option Name: " + opt_name);
-				l.log(Logger::INFO, "Is Loop: " + String(is_loop));
-				l.log(Logger::INFO, "Is Automatic: " + String(is_auto));
+				// l.log(Logger::INFO, "Is Loop: " + String(is_loop));
+				// l.log(Logger::INFO, "Is Automatic: " + String(is_auto));
+				l.log(Logger::INFO, "Action Type: " + String(ac_type));
 				l.log(Logger::INFO, "Is Active: " + String(is_active));
 				l.log(Logger::INFO, "Has Submenu: " + String(has_sub));	
 
-				if (!is_auto && is_active)
+				if (is_active && (ac_type == ActionType::LOOP || ac_type == ActionType::TOGGLE))
 					M5.Lcd.setTextColor(GREEN);
-				else if (is_loop) 
+				else if (ac_type == ActionType::LOOP) 
 					M5.Lcd.setTextColor(DARKCYAN);
 				else 
 					M5.Lcd.setTextColor(ORANGE);
@@ -233,10 +241,11 @@ public:
 		if (!currentSubMenu)
 			return;
 
-		bool is_active = currentSubMenu[currentSubMenuOption].isActive != nullptr ? *(currentSubMenu[currentSubMenuOption].isActive) : false;
+		bool is_active = *(currentSubMenu[currentSubMenuOption].isActive);
+		ActionType ac_type = currentSubMenu[currentSubMenuOption].type;
 		bool has_sub = currentSubMenu[currentSubMenuOption].hasMenu;
 
-		if (is_active && has_sub) {
+		if ((is_active || ac_type == ActionType::ACTION) && has_sub) {
 			if (!prevFeatureState)
 				M5.Lcd.fillScreen(BLACK); // Reset the screen, so we dont have to do it inside the sub render
 
@@ -253,6 +262,7 @@ public:
 	void select() {
 		if (currentSubMenu) {
 			String name = currentSubMenu[currentSubMenuOption].name;
+			ActionType ac_type = currentSubMenu[currentSubMenuOption].type;
 			l.log(Logger::INFO, "Menu::select() subaction name: " + name);
 			if (name == "Back")
 				return exitSubMenu();
@@ -260,9 +270,10 @@ public:
 			/**
 			 * @brief This should invert the state of the boolean pointer just if it has been created by the menu and hasnt been provided
 			 */
-			if (currentSubMenu[currentSubMenuOption].isAutomatic) // I know its not clean, but i cant think about anything 
-				if (currentSubMenu[currentSubMenuOption].isActive != nullptr)
-					*(currentSubMenu[currentSubMenuOption].isActive) = !*(currentSubMenu[currentSubMenuOption].isActive);
+			// if (currentSubMenu[currentSubMenuOption].isAutomatic) // I know its not clean, but i cant think about anything 
+			// if (ac_type == ActionType::LOOP || ac_type == ActionType::TOGGLE)
+			// 	if (currentSubMenu[currentSubMenuOption].isActive != nullptr)
+			// 		*(currentSubMenu[currentSubMenuOption].isActive) = !*(currentSubMenu[currentSubMenuOption].isActive);
 
 			// if (*(currentSubMenu[currentSubMenuOption].isActive))
 				if (currentSubMenu[currentSubMenuOption].action != nullptr) 

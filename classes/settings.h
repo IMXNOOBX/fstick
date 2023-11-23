@@ -40,15 +40,6 @@ public:
 		this->save();
 	}
 
-	String getVersion() const {
-        return this->version;
-    }
-
-    void setVersion(const String& newVersion) {
-        this->version = newVersion;
-        this->save(); 
-    }
-
     bool toggleScretMode() {
         this->secret_mode = true;
         return this->secret_mode;
@@ -71,11 +62,12 @@ public:
     }
 
     void toggleLed() {
+        this->led_enable = !this->led_enable;
+        led.is_enabled = this->led_enable;
+
         led.flash();
-        led.is_enabled = !led_enable;
-        led_enable = !led_enable;
         this->save();
-        l.log(Logger::INFO, "Setting changed, led is now " + String(led_enable ? "enabled" : "disabled"));
+        l.log(Logger::INFO, "Setting changed, led is now " + String(this->led_enable ? "enabled" : "disabled"));
     }
 
     bool getSound() const {
@@ -83,8 +75,9 @@ public:
     }
 
     void toggleSound() {
-        led.flash();
         this->sound_enable = !this->sound_enable;
+
+        led.flash();
         this->save();
         l.log(Logger::INFO, "Setting changed, sound is now " + String(this->sound_enable ? "enabled" : "disabled"));
     }
@@ -94,9 +87,10 @@ public:
     }
 
     void toggleBattSaver() {
-        led.flash();
-        battery.setBT(this->battery_saver);
         this->battery_saver = !this->battery_saver;
+        battery.setBT(this->battery_saver);
+
+        led.flash();
         this->save();
         l.log(Logger::INFO, "Setting changed, battery saver is now " + String(this->battery_saver ? "enabled" : "disabled"));
     }
@@ -105,27 +99,29 @@ public:
         return rotation;
     }
 
+    void switchRotation() {
+        this->rotation = (this->rotation > 2 ? 0 : this->rotation + 1);
+        this->setRotation(this->rotation);
+    }
+
     void setRotation(int pos) {
-        led.flash();
-	    M5.Lcd.setRotation(pos);
         this->rotation = pos;
+	    M5.Lcd.setRotation(pos); // 0 to 3 rotate clockwise, 4 to 7 rotate counterclockwise (default is 1)
+
+        led.flash();
         this->save();
         l.log(Logger::INFO, "Setting changed, rotation is now " + String(this->rotation));
     }
 
-    bool led_enable = true;
 public:
+    bool led_enable = true;
     bool battery_saver = true;
     bool sound_enable = false;
+    uint8_t rotation = 1;
 
     bool secret_mode = false;
     int secret_count = 0;
 private:
-    String version = VERSION;
-    int rotation = 1;
-
-	// Keep track of cumulative size
-    size_t sizeOffset = 0;
 
     void load() {
 		if(!this->read()) {
@@ -134,49 +130,51 @@ private:
             return;
         }
 
-        battery.setBT(battery_saver);
-        led.is_enabled = !this->led_enable;
+        battery.setBT(this->battery_saver);
+        led.is_enabled = this->led_enable;
 		setRotation(rotation);
     }
 
     bool read() {
-        EEPROM.get(0, version);
-		
-		sizeOffset += sizeof(String);
-        EEPROM.get(sizeOffset, led_enable); 
-		
-		sizeOffset += sizeof(bool);
-        EEPROM.get(sizeOffset, sound_enable);
-		
-		sizeOffset += sizeof(bool);
-        EEPROM.get(sizeOffset, battery_saver);
+        size_t offset = 0;
 
-		sizeOffset += sizeof(int);
-        EEPROM.get(sizeOffset, rotation);
+        // led_enable
+        led_enable = static_cast<bool>(EEPROM.read(offset++));
+        l.log(Logger::INFO, "Led is " + String(led_enable ? "enabled" : "disabled"));
 
-        if (rotation <= 3 || rotation >= 0)
+        // sound_enable
+        sound_enable = static_cast<bool>(EEPROM.read(offset++));
+        l.log(Logger::INFO, "Sound is " + String(sound_enable ? "enabled" : "disabled"));
+
+        // battery_saver
+        battery_saver = static_cast<bool>(EEPROM.read(offset++));
+        l.log(Logger::INFO, "Battery saver is " + String(battery_saver ? "enabled" : "disabled"));
+
+        // rotation
+        rotation = EEPROM.read(offset++);
+        l.log(Logger::INFO, "Rotation is " + String(rotation));
+        
+        if (rotation < 0 || rotation > 3)
             return false;
 
-		sizeOffset = 0;
         return true;
     }
 
     void save() {
-        EEPROM.put(0, version);
+        size_t offset = 0;
 
-		sizeOffset += sizeof(String);
-        EEPROM.put(sizeOffset, led_enable);
+        // led_enable
+        EEPROM.write(offset++, led_enable);
 
-		sizeOffset += sizeof(bool);
-        EEPROM.put(sizeOffset, sound_enable);
+        // sound_enable
+        EEPROM.write(offset++, sound_enable);
 
-		sizeOffset += sizeof(bool);
-        EEPROM.put(sizeOffset, battery_saver);
+        // battery_saver
+        EEPROM.write(offset++, battery_saver);
 
-		sizeOffset += sizeof(int);
-        EEPROM.put(sizeOffset, rotation);
+        // rotation
+        EEPROM.write(offset++, rotation);
 
         EEPROM.commit(); // Commit the changes to EEPROM
-		sizeOffset = 0;
     }
 };

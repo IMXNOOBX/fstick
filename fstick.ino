@@ -44,29 +44,30 @@ int is_ready = false;
  */
 MenuAction subInfraRedUtilities[] = {
     {"Back", nullptr },
-    {"Spam Sig", []() { ir.sendAllPowerCodes(); }, true, true, []() { ir.sendAllPowerCodesRender(); }, &ir.send_codes },
+    {"Spam Sig", []() { ir.sendAllPowerCodes(); }, ActionType::LOOP, true, []() { ir.sendAllPowerCodesRender(); }, &ir.send_codes },
 };
 MenuAction subWifiManager[] = {
     {"Back", nullptr },
-    {"Scan AP", []() { wi.scanNetworks(); }, false, true, []() { wi.scanNetworksRender(); } },
-	{"Spam AP", []() { wi.accessPointLoop(); }, true },
-	{"Clone AP", []() { wi.cloneAPLoop(); }, true },
-	{"Rogue AP", []() { wi.rogueAPloop(); }, true },
-	{"Probe AP", []() { wi.probeAPloop(); }, true },
-	{"Deauth", []() { wi.deauthLoop(); }, true },
+    {"Scan AP", []() { wi.scanNetworks(); }, ActionType::ACTION, true, []() { wi.scanNetworksRender(); } },
+	{"Spam AP", []() { wi.accessPointLoop(); }, ActionType::LOOP },
+	{"Clone AP", []() { wi.cloneAPLoop(); }, ActionType::LOOP },
+	{"Rogue AP", []() { wi.rogueAPloop(); }, ActionType::LOOP },
+	{"Probe AP", []() { wi.probeAPloop(); }, ActionType::LOOP },
+	{"Deauth", []() { wi.deauthLoop(); }, ActionType::LOOP },
 };
 MenuAction subBleUtils[] = {
     {"Back", nullptr },
     {"Apple Spm", []() { b.advertiseApple(); } },
     {"Android Sp", []() { b.advertiseAndroid(); } },
 	{"Windows S", []() { b.advertiseWindows(); } },
-	{"@everyone", []() { b.toggleAdvertiseEveryone(); }, true, true, []() { b.advertiseEveryoneRender(); }, &b.advertise_everyone },
+	{"@everyone", []() { b.toggleAdvertiseEveryone(); }, ActionType::LOOP, true, []() { b.advertiseEveryoneRender(); }, &b.advertise_everyone },
 };
 MenuAction subSettingsMenu[] = {
     {"Back", nullptr },
-    {"Bat Saver", []() { cfg.toggleBattSaver(); }, false, false, nullptr, new bool(cfg.battery_saver) },
-    {"Sounds", []() { cfg.toggleSound(); }, false, false, nullptr, new bool(cfg.sound_enable) },
-    {"Led", []() { cfg.toggleLed(); }, false, false, nullptr, new bool(cfg.led_enable) },
+    {"Bat Saver", []() { cfg.toggleBattSaver(); }, ActionType::TOGGLE, false, nullptr, &cfg.battery_saver },
+    {"Sounds", []() { cfg.toggleSound(); }, ActionType::TOGGLE, false, nullptr, &cfg.sound_enable },
+    {"Led", []() { cfg.toggleLed(); }, ActionType::TOGGLE, false, nullptr, &cfg.led_enable },
+    {"Rotate Sc", []() { cfg.switchRotation(); }, ActionType::TOGGLE, false, nullptr },
     {"Restart", []() { M5.Axp.DeepSleep(5); } },
     {"Shutdown", []() { M5.Axp.PowerOff(); } },
 };
@@ -81,7 +82,7 @@ MenuItem mainMenuOptions[] = {
     {"IR Utils", nullptr, 2, subInfraRedUtilities },
     {"WiFi Mng", nullptr, 7, subWifiManager },
     {"BLE Utils", nullptr, 5, subBleUtils },
-    {"Settings", nullptr, 6, subSettingsMenu },
+    {"Settings", nullptr, 7, subSettingsMenu },
     {"Info", nullptr, 4, subInfoMenu },
 };
 
