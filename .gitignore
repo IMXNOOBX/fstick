@@ -4,6 +4,7 @@
 
 # Prerequisites
 build/
+*.bin
 
 # Prerequisites
 *.d

@@ -44,6 +44,12 @@ This is a simple project to play around with the [M5StickC Plus](https://m5stack
 ## 🧶 Contribute/Issues
 Feel free to contribute or open any issue for the project, just make sure to read the [**CONTRIBUTE.md**](./CONTRIBUTE.md) file first and you follow the steps acordingly.
 
+### Donations
+
+Please consider donating, so i can keep improving this project and get a flipper zero to work on many more projects like this ❤
+
+[![Donate](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/itsxnoobx) [![Donate](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://ko-fi.com/imxnoobx)
+
 ## 🧾 License And CopyRight
 This project is licensed under the [**Apache 2.0**](./LICENSE) license. Copiright (c) 2023 IMXNOOBX
 
