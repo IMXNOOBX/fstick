@@ -22,7 +22,7 @@
 #endif
 
 #define NAME "FStick"
-#define VERSION "v1.3.7"
+#define VERSION "v1.3.9"
 
 #include <M5Display.h>
 #include <EEPROM.h>

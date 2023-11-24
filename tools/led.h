@@ -34,7 +34,7 @@ public:
 			digitalWrite(M5_LED, LOW);
 			delay(10);
 			digitalWrite(M5_LED, HIGH);
-			delay(100);
+			delay(50);
 		}
     }
 

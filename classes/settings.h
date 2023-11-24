@@ -49,14 +49,6 @@ public:
         return this->secret_mode;
     }
 
-    int getSecretCount() {
-        return ++secret_count;
-    }
-
-    void resetSecretCount() {
-        this->secret_count = 0;
-    }
-
     bool getLed() const {
         return this->led_enable;
     }
@@ -120,7 +112,6 @@ public:
     uint8_t rotation = 1;
 
     bool secret_mode = false;
-    int secret_count = 0;
 private:
 
     void load() {

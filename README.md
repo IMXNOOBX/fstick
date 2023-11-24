@@ -9,6 +9,8 @@ This is a simple project to play around with the [M5StickC Plus](https://m5stack
 * To Select an option, press the M5 button.
 * To go to the last page/option, press the TOP button.
 * To go to the next page/option, press the BOTTOM button.
+* (TIP) If you mantain the M5 button pressed for 3 seconds, you will enter a secret menu where it will simulate a hadware wallet and lock the device until restart.
+
 
 ## ➰ Features (WIP)
 1. [x] IR Controller (TV, AC, etc)

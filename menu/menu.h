@@ -24,10 +24,8 @@ public:
         : name(name), action(action), type(acType), hasMenu(hasMenu), render(render) {
             if (isActive == nullptr) // If no isActive pointer is provided, create a new bool variable
                 this->isActive = new bool(false);
-        	else {
+        	else 
                 this->isActive = isActive;
-				// this->isAutomatic = false;
-			}
         }
 
     // Constructor for actions with no action function but with a render function
@@ -35,10 +33,8 @@ public:
         : name(name), action(nullptr), type(ActionType::ACTION), hasMenu(hasMenu), render(render) {
             if (isActive == nullptr) 
                 this->isActive = new bool(false);
-        	else {
+        	else 
                 this->isActive = isActive;
-				// this->isAutomatic = false;
-			}
         }
 
 	// Constructor for actions with no action or render function
@@ -245,7 +241,7 @@ public:
 		ActionType ac_type = currentSubMenu[currentSubMenuOption].type;
 		bool has_sub = currentSubMenu[currentSubMenuOption].hasMenu;
 
-		if ((is_active || ac_type == ActionType::ACTION) && has_sub) {
+		if ((is_active/* || ac_type == ActionType::ACTION*/) && has_sub) {
 			if (!prevFeatureState)
 				M5.Lcd.fillScreen(BLACK); // Reset the screen, so we dont have to do it inside the sub render
 
@@ -263,19 +259,19 @@ public:
 		if (currentSubMenu) {
 			String name = currentSubMenu[currentSubMenuOption].name;
 			ActionType ac_type = currentSubMenu[currentSubMenuOption].type;
+			bool* is_active = currentSubMenu[currentSubMenuOption].isActive;
+			bool has_sub = currentSubMenu[currentSubMenuOption].hasMenu;
 			l.log(Logger::INFO, "Menu::select() subaction name: " + name);
 			if (name == "Back")
 				return exitSubMenu();
 
 			/**
-			 * @brief This should invert the state of the boolean pointer just if it has been created by the menu and hasnt been provided
+			 * @brief This should invert the state of the boolean pointer if the item is an action
+			 * and if it has sub menu so we can get in and out of it
 			 */
-			// if (currentSubMenu[currentSubMenuOption].isAutomatic) // I know its not clean, but i cant think about anything 
-			// if (ac_type == ActionType::LOOP || ac_type == ActionType::TOGGLE)
-			// 	if (currentSubMenu[currentSubMenuOption].isActive != nullptr)
-			// 		*(currentSubMenu[currentSubMenuOption].isActive) = !*(currentSubMenu[currentSubMenuOption].isActive);
+			if (ac_type == ActionType::ACTION && has_sub)
+				*(is_active) = !*(is_active);
 
-			// if (*(currentSubMenu[currentSubMenuOption].isActive))
 				if (currentSubMenu[currentSubMenuOption].action != nullptr) 
 					currentSubMenu[currentSubMenuOption].action();
 		} else {

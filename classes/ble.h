@@ -46,7 +46,7 @@ public:
 
 			adv->start();
 			led.flash();
-			delay(100);
+			delay(20);
 			adv->stop();
 		}
 	}
@@ -63,7 +63,7 @@ public:
 
 			adv->start();
 			led.flash();
-			delay(100);
+			delay(20);
 			adv->stop();
 		}
 	}
@@ -80,7 +80,7 @@ public:
 
 			adv->start();
 			led.flash();
-			delay(100);
+			delay(20);
 			adv->stop();
 		}
 	}
@@ -91,7 +91,7 @@ public:
 	}
 
 	void advertiseEveryoneRender() {
-		if (circle_size == 50) 
+		if (circle_size > 50) 
 			circle_size = 1;
 			
 		int x = M5.Lcd.width() / 2;

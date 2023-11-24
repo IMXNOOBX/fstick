@@ -18,7 +18,7 @@
  */
 
 #define PLUS
-#define DEV // Mostly to disable battery saver and some debug messages
+// #define DEV // Mostly to disable battery saver and some debug messages
 #include "classes/globals.h"
 
 /**
@@ -49,11 +49,11 @@ MenuAction subInfraRedUtilities[] = {
 MenuAction subWifiManager[] = {
     {"Back", nullptr },
     {"Scan AP", []() { wi.scanNetworks(); }, ActionType::ACTION, true, []() { wi.scanNetworksRender(); } },
-	{"Spam AP", []() { wi.accessPointLoop(); }, ActionType::LOOP },
-	{"Clone AP", []() { wi.cloneAPLoop(); }, ActionType::LOOP },
-	{"Rogue AP", []() { wi.rogueAPloop(); }, ActionType::LOOP },
-	{"Probe AP", []() { wi.probeAPloop(); }, ActionType::LOOP },
-	{"Deauth", []() { wi.deauthLoop(); }, ActionType::LOOP },
+	{"Spam AP", []() { wi.accessPointLoop(); }, ActionType::LOOP, false, nullptr, &wi.loop_spam_ap },
+	{"Clone AP", []() { wi.cloneAPLoop(); }, ActionType::LOOP, false, nullptr, &wi.loop_clone_spam_ap },
+	{"Rogue AP", []() { wi.rogueAPloop(); }, ActionType::LOOP, false, nullptr, &wi.loop_rogue_ap },
+	{"Probe AP", []() { wi.probeAPloop(); }, ActionType::LOOP, false, nullptr, &wi.loop_probe_ap },
+	{"Deauth", []() { wi.deauthLoop(); }, ActionType::LOOP, false, nullptr, &wi.loop_deauth_ap },
 };
 MenuAction subBleUtils[] = {
     {"Back", nullptr },
@@ -205,15 +205,6 @@ void loop() {
 		}
 		#endif
 		
-		if (millis() - battery.getLI() < 250) {
-			if(cfg.getSecretCount() >= 2) {
-				cfg.toggleScretMode();
-				l.log(Logger::WARNING, "Secret mode has been activated, restart the device to exit it.");
-			}
-		} else {
-			cfg.resetSecretCount();
-		}
-		
 		battery.setLI(millis());
         mainMenu.previousOption();
 		mainMenu.render(true);
@@ -233,6 +224,11 @@ void loop() {
 		mainMenu.render_feature(); // Not clean but should do its job
 		battery.restoreBrightness();
     }
+
+	if (M5.BtnA.wasReleasefor(3000)) {
+		cfg.toggleScretMode();
+		l.log(Logger::WARNING, "Secret mode has been activated, restart the device to exit it.");
+	}
 
 	if (cfg.getSecretMode()) 
 		mainMenu.render_hww();

@@ -63,7 +63,7 @@ public:
 		M5.Lcd.setCursor(5, 20);
 		M5.Lcd.println("Please consider donating so i can keep improving this project and get a flipper zero to work on more projects :D");
 
-		M5.Lcd.qrcode("https://www.paypal.com/donate/?business=imxnoobx@gmail.com&cmd=_donations&amount=10", SCREEN_WIDTH - 85, SCREEN_HEIGHT - 85, 80, 5);
+		M5.Lcd.qrcode("https://www.paypal.com/donate/?business=imxnoobx@gmail.com&cmd=_donations", SCREEN_WIDTH - 85, SCREEN_HEIGHT - 85, 80, 5);
 
 		M5.Lcd.setTextSize(1);
 		M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);
