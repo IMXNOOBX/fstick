@@ -52,10 +52,24 @@ Please consider donating, so i can keep improving this project and get a flipper
 
 [![Donate](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/itsxnoobx) [![Donate](https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://ko-fi.com/imxnoobx)
 
-## 🧾 License And CopyRight
-This project is licensed under the [**Apache 2.0**](./LICENSE) license. Copiright (c) 2023 IMXNOOBX
-
 ## 📚 Credits
 * [nemo](https://github.com/n0xa/m5stick-nemo) project for the idea, assistance with the m5burner and useful code!
 * [SourApple](https://github.com/RapierXbox/ESP32-Sour-Apple) for the ble spammer
 * [wifi-penetration-tool](https://github.com/risinek/esp32-wifi-penetration-tool) for incredible well documented code and such great tools
+
+# 🔖 License & Copyright
+
+This project is licensed under [**CC BY-NC 4.0**](https://creativecommons.org/licenses/by-nc/4.0/).
+```diff
++ You are free to:
+	• Share: Copy and redistribute the material in any medium or format.
+	• Adapt: Remix, transform, and build upon the material.
++ Under the following terms:
+	• Attribution: You must give appropriate credit, provide a link to original the source repository, and indicate if changes were made.
+	• Non-Commercial: You may not use the material for commercial purposes.
+- You are not allowed to:
+	• Sell: This license forbids selling original or modified material for commercial purposes.
+	• Sublicense: This license forbids sublicensing original or modified material.
+```
+### ©️ Copyright
+The content of this project is ©️ by [IMXNOOBX](https://github.com/IMXNOOBX) and the respective contributors. See the [LICENSE.md](LICENSE.md) file for details.
