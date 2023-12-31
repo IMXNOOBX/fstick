@@ -4,6 +4,10 @@
 
 This is a simple project to play around with the [M5StickC Plus](https://m5stack.com/products/m5stickc-plus-esp32-pico-mini-iot-development-kit) trying to mimic a flipper zero functionality. I bought it cause i couldn't afford the flipper zero myself :c. This project is based on many different projects credited below. Even though the project is published, it is still a work in progress, and I will continue working on it for a while. Feel free to contribute and share your incredible ideas.
 
+## 💖 Donors
+Thanks to all the donors for supporting this project! ❤
+>🌟 [**Killer74-hub**](https://github.com/Killer74-hub) for a generous donation to keep this project going! Thank you so much! 
+
 ## 🪀 Usage
 * The device has three different buttons, we will call them TOP (the one on the top), M5 (the one in the front) and BOTTOM (the one on the bottom).
 * To Select an option, press the M5 button.
@@ -16,7 +20,7 @@ This is a simple project to play around with the [M5StickC Plus](https://m5stack
 1. [x] IR Controller (TV, AC, etc)
 	1. Spam ir codes to turn off tvs
 
-2. [x] Wifi Utilities (WIP)
+2. [x] Wifi Utilities
 	1. Scan Access Points
 	2. Spam Access Points
 	3. Clone Access Points
@@ -24,15 +28,15 @@ This is a simple project to play around with the [M5StickC Plus](https://m5stack
 	5. Probe Request Spam
 	6. Deauth Attack
 
-3. [x] Bluetooth Utilities (WIP)
+3. [x] Bluetooth Utilities
 	1. Apple BLE Spam
-	2. Android BLE Spam
+	2. Android BLE Spam (WIP)
 	3. Windows BLE Spam
 	4. Loop everyone BLE Spam
 
 4. [x] Settings (WIP)
 	1. Battery Saver
-	2. Sound On/Off
+	2. Sound On/Off (WIP)
 	3. Led On/Off
 	4. Restart Device
 	5. Shutdown Device
