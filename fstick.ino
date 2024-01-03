@@ -18,7 +18,7 @@
  */
 
 #define PLUS
-// #define DEV // Mostly to disable battery saver and some debug messages
+#define DEV // Mostly to disable battery saver and some debug messages
 #include "classes/globals.h"
 
 /**
@@ -42,27 +42,35 @@ int is_ready = false;
 /**
  * @brief Menu options
  */
-MenuAction subInfraRedUtilities[] = {
+MenuAction ma_sub_infrared[] = {
     {"Back", nullptr },
     {"Spam Sig", []() { ir.sendAllPowerCodes(); }, ActionType::LOOP, true, []() { ir.sendAllPowerCodesRender(); }, &ir.send_codes },
 };
-MenuAction subWifiManager[] = {
+
+MenuAction ma_sub_wifi[] = {
     {"Back", nullptr },
     {"Scan AP", []() { wi.scanNetworks(); }, ActionType::ACTION, true, []() { wi.scanNetworksRender(); } },
+    {"Select AP", []() { wi.scanNetworksAndSelect(); }, ActionType::ACTION, true, []() { wi.scanNetworksRenderSelect(); } },
 	{"Spam AP", []() { wi.accessPointLoop(); }, ActionType::LOOP, false, nullptr, &wi.loop_spam_ap },
 	{"Clone AP", []() { wi.cloneAPLoop(); }, ActionType::LOOP, false, nullptr, &wi.loop_clone_spam_ap },
 	{"Rogue AP", []() { wi.rogueAPloop(); }, ActionType::LOOP, false, nullptr, &wi.loop_rogue_ap },
 	{"Probe AP", []() { wi.probeAPloop(); }, ActionType::LOOP, false, nullptr, &wi.loop_probe_ap },
 	{"Deauth", []() { wi.deauthLoop(); }, ActionType::LOOP, false, nullptr, &wi.loop_deauth_ap },
 };
-MenuAction subBleUtils[] = {
+
+MenuItem mi_sub_wifi[] = {
+    {"Back", nullptr },
+};
+
+MenuAction ma_sub_ble[] = {
     {"Back", nullptr },
     {"Apple Spm", []() { b.advertiseApple(); } },
     {"Android Sp", []() { b.advertiseAndroid(); } },
 	{"Windows S", []() { b.advertiseWindows(); } },
 	{"@everyone", []() { b.toggleAdvertiseEveryone(); }, ActionType::LOOP, true, []() { b.advertiseEveryoneRender(); }, &b.advertise_everyone },
 };
-MenuAction subSettingsMenu[] = {
+
+MenuAction ma_sub_settings[] = {
     {"Back", nullptr },
     {"Bat Saver", []() { cfg.toggleBattSaver(); }, ActionType::TOGGLE, false, nullptr, &cfg.battery_saver },
     {"Sounds", []() { cfg.toggleSound(); }, ActionType::TOGGLE, false, nullptr, &cfg.sound_enable },
@@ -71,22 +79,25 @@ MenuAction subSettingsMenu[] = {
     {"Restart", []() { M5.Axp.DeepSleep(5); } },
     {"Shutdown", []() { M5.Axp.PowerOff(); } },
 };
-MenuAction subInfoMenu[] = {
+
+MenuAction ma_sub_info[] = {
     {"Back", nullptr },
     {"Donate", true, []() { inf.renderDonate(); } },
+    {"Supporters", true, []() { inf.renderDonate(); } },
     {"Repository", true, []() { inf.renderRepository(); } },
     {"Credits", true, []() { inf.renderCredits(); } },
 };
 
-MenuItem mainMenuOptions[] = {
-    {"IR Utils", nullptr, 2, subInfraRedUtilities },
-    {"WiFi Mng", nullptr, 7, subWifiManager },
-    {"BLE Utils", nullptr, 5, subBleUtils },
-    {"Settings", nullptr, 7, subSettingsMenu },
-    {"Info", nullptr, 4, subInfoMenu },
+MenuItem mi_menu[] = {
+    {"Infra Red", nullptr, 2, ma_sub_infrared },
+    {"WiFi", nullptr, 8, ma_sub_wifi },
+	{"Select WiFi", mi_sub_wifi, 11, nullptr },
+    {"BLE", nullptr, 5, ma_sub_ble },
+    {"Settings", nullptr, 7, ma_sub_settings },
+    {"Info", nullptr, 4, ma_sub_info },
 };
 
-MenuRenderer mainMenu(NAME, mainMenuOptions, sizeof(mainMenuOptions) / sizeof(mainMenuOptions[0]));
+MenuRenderer mainMenu(NAME, mi_menu, sizeof(mi_menu) / sizeof(mi_menu[0]));
 
 /**
  * @brief Display startup menu
@@ -95,10 +106,19 @@ void setup() {
 	M5.begin();
 	
 	#ifdef DEV
-	{
-		// while (!Serial) // Wait for the serial connection to be establised.
-		delay(1000);
-	}
+		l.log(Logger::WARNING, "This is a DEVELOPMENT build made in " + String(__DATE__) + ", its not recommended for every day use.");
+
+		int attempts = 0;
+		while (!Serial.available()) { // Wait for the serial connection to be establised.
+			l.log(Logger::WARNING, "(" + String(attempts) + ") Waiting for serial to be available...");
+
+			if (attempts > 3)
+				break;
+
+			attempts++;
+
+			delay(300);
+		}
 	#endif 
 	l.log(Logger::INFO, "Starting " + String(NAME) + "...");
 

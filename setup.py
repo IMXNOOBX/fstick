@@ -5,7 +5,6 @@ def add_flags_to_platform(file_path):
         with open(file_path, 'r') as file:
             content = file.read()
 
-        # Check if flags are already present
         if 'build.extra_flags.esp32=-w' not in content:
             # Add -w to build.extra_flags
             content = content.replace('build.extra_flags.esp32=', 'build.extra_flags.esp32=-w ')

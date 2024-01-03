@@ -13,13 +13,20 @@ namespace utilities
 	{
 		float b = M5.Axp.GetVbatData() * 1.1 / 1000;
 		int battery = ((b - 3.0) / 1.2) * 100;
+
+		if (battery > 100 || battery < 0)
+			return -1;
+
 		return battery;
 	}
 
 	String get_battery_str()
 	{
-		float b = M5.Axp.GetVbatData() * 1.1 / 1000;
-		int battery = ((b - 3.0) / 1.2) * 100;
+		int battery = get_battery();
+
+		if (battery == -1)
+			return "...";
+
 		return String(battery) + "%";
 	}
 	

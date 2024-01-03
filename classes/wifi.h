@@ -1,6 +1,5 @@
 #include "globals.h"
 
-
 extern Logger l;
 extern Led led;
 
@@ -140,6 +139,8 @@ public:
 
 	void scanNetworks() {
 		led.flash();		
+		l.log(Logger::INFO, "Scanning nearby APs...");
+		l.setShouldDisplayLog(true);
 
 		if (!updateScanAp()) {
 			l.log(Logger::ERROR, "Failed to scan nearby AP");
@@ -159,6 +160,8 @@ public:
 			Serial.println("]");
 		}
 
+		l.setShouldDisplayLog(false);
+
 		led.flash(2);
 	}
 
@@ -177,6 +180,57 @@ public:
 			offset += 10;
 		}
 	}
+
+	void scanNetworksAndSelect() {
+		led.flash();		
+
+		if (!select_status && !updateScanAp()) {
+			l.log(Logger::ERROR, "Failed to scan nearby AP");
+			return;
+		}
+
+		selected_ap = (selected_ap + 1) % scanned_ap_count;
+		select_status = true;
+		
+		led.flash(2);
+	}
+
+	void scanNetworksRenderSelect() {
+		M5.Lcd.setTextColor(WHITE, BLACK);
+		M5.Lcd.setTextSize(1);
+
+		int offset = 25;
+		for (int i = 0; i < scanned_ap_count; i++) {
+			if (scanned_ap[i].bssid == nullptr) break;
+
+			M5.Lcd.setCursor(5, offset);
+
+
+			if (i == selected_ap)
+				M5.Lcd.setTextColor(BLACK, WHITE);
+			else
+				M5.Lcd.setTextColor(WHITE, BLACK);
+
+			if (i == selected_ap)
+				M5.Lcd.print("-> " + scanned_ap[i].ssid + ": " + scanned_ap[i].bssid_str);
+			else
+				M5.Lcd.print("(" + String((int)scanned_ap[i].rssi) + ") " +scanned_ap[i].ssid + ": " + scanned_ap[i].bssid_str);
+
+			offset += 10;
+		}
+	}
+
+	// void next() {
+	// 	selected_ap = (selected_ap + 1) % scanned_ap_count;
+	// }
+
+	// void prev() {
+	// 	selected_ap = (selected_ap - 1 + scanned_ap_count) % scanned_ap_count;
+	// }
+
+	// void select() {
+	// 	selected_ap_selected = selected_ap;
+	// }
 
 	void createAccessPoint(String apName, String apPassword) {
 		WiFi.softAP(apName, apPassword);
@@ -273,6 +327,9 @@ public:
 	bool loop_probe_ap = false;
 	bool loop_deauth_ap = false;
 	bool loop_clone_spam_ap = false;
+
+	int selected_ap = 0;
+	bool select_status = false;
 private:
 	int current_channel = 0;
 	wifi_init_config_t cfg;

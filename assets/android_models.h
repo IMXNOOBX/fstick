@@ -196,7 +196,6 @@ DeviceType android_models[] = {
 
     // Custom debug popups
     {0xD99CA1, "Flipper Zero"},
-    {0x77FF67, "Free Robux"},
     {0xAA187F, "Free VBucks"},
     {0xDCE9EA, "Rickroll"},
     {0x87B25F, "Animated Rickroll"},
