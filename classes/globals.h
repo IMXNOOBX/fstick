@@ -6,19 +6,24 @@
 	#define DEVICE "M5StickCPlus"
 	#define SCREEN_WIDTH 240
 	#define SCREEN_HEIGHT 135
-	#define BIG_TEXT 4
-	#define MEDIUM_TEXT 3
-	#define SMALL_TEXT 2
-	#define TINY_TEXT 1
+	// #define BIG_TEXT 4
+	// #define MEDIUM_TEXT 3
+	// #define SMALL_TEXT 2
+	// #define TINY_TEXT 1
+#elif defined(PLUS2)
+	#include <M5StickCPlus2.h>
+	#define DEVICE "M5StickCPlus2"
+	#define SCREEN_WIDTH 240
+	#define SCREEN_HEIGHT 135
 #else
 	#include <M5StickC.h>
 	#define DEVICE "M5StickC"
 	#define SCREEN_WIDTH 80
 	#define SCREEN_HEIGHT 160
-	#define BIG_TEXT 2
-	#define MEDIUM_TEXT 2
-	#define SMALL_TEXT 1
-	#define TINY_TEXT 1
+	// #define BIG_TEXT 2
+	// #define MEDIUM_TEXT 2
+	// #define SMALL_TEXT 1
+	// #define TINY_TEXT 1
 #endif
 
 #define NAME "FStick"

@@ -5,7 +5,8 @@ extern Logger l;
 enum ActionType {
 	LOOP,
 	TOGGLE,
-	ACTION
+	ACTION,
+	ACTION_MENU
 };
 
 class MenuAction {
@@ -22,29 +23,41 @@ public:
 	void (*select)();
 
     // Constructor for actions with an action function and render function
-    MenuAction(String name, void (*action)() = nullptr, ActionType acType = ActionType::ACTION, bool has_menu = false, void (*render)() = nullptr, bool* is_active = nullptr)
-        : name(name), action(action), type(acType), has_menu(has_menu), render(render) {
-            if (is_active == nullptr) // If no is_active pointer is provided, create a new bool variable
-                this->is_active = new bool(false);
-        	else 
-                this->is_active = is_active;
+    MenuAction(String name, void (*action)() = nullptr, ActionType acType = ActionType::ACTION, bool has_menu = false, void (*render)() = nullptr, bool* is_active = nullptr) {
+			this->name = name;
+			this->action = action;
+			this->type = acType;
+			this->has_menu = has_menu;
+			this->render = render;
+
+			// If no is_active pointer is provided, create a new bool variable
+            if (is_active == nullptr) this->is_active = new bool(false);
+			else this->is_active = is_active;
         }
 
-	// MenuAction(String name, void (*action)() = nullptr, ActionType acType = ActionType::ACTION, bool has_menu = false, void (*render)() = nullptr, void (*next)() = nullptr, void (*prev)() = nullptr, void (*select)() = nullptr)
-    //     : name(name), action(action), type(acType), has_menu(has_menu), render(render), next(next), prev(prev), select(select) {
-    //         if (is_active == nullptr)
-    //             this->is_active = new bool(false);
-    //     	else 
-    //             this->is_active = is_active;
-    //     }
+	MenuAction(String name, ActionType acType = ActionType::ACTION_MENU, bool* is_active = nullptr, void (*render)() = nullptr, void (*next)() = nullptr, void (*prev)() = nullptr, void (*select)() = nullptr) {
+			this->name = name;
+			this->type = acType;
+			this->has_menu = true;
+			this->render = render;
+			this->next = next;
+			this->prev = prev;
+			this->select = select;
+
+            if (is_active == nullptr) this->is_active = new bool(false);
+			else this->is_active = is_active;
+        }
 
     // Constructor for actions with no action function but with a render function
-    MenuAction(String name, bool has_menu, void (*render)(), bool* is_active = nullptr)
-        : name(name), action(nullptr), type(ActionType::ACTION), has_menu(has_menu), render(render) {
-            if (is_active == nullptr) 
-                this->is_active = new bool(false);
-        	else 
-                this->is_active = is_active;
+    MenuAction(String name, bool has_menu, void (*render)(), bool* is_active = nullptr) {
+			this->name = name;
+			this->action = nullptr;
+			this->type = ActionType::ACTION;
+			this->has_menu = has_menu;
+			this->render = render;
+
+            if (is_active == nullptr) this->is_active = new bool(false);
+			else this->is_active = is_active;
         }
 
 	// Constructor for actions with no action or render function
@@ -271,7 +284,7 @@ public:
 		M5.Lcd.print("Version: " + String(VERSION));
 	}
 
-	void render_feature() {
+	void render_feature(bool refresh = false) {
 		if (!subm_actions)
 			return;
 
@@ -284,7 +297,11 @@ public:
 				M5.Lcd.fillScreen(BLACK); // Reset the screen, so we dont have to do it inside the sub render
 
 			this->topBar();
-			subm_actions[subm_actions_selected].render();
+
+			if ((ac_type == ActionType::ACTION_MENU && !refresh) || ac_type != ActionType::ACTION_MENU) {
+				subm_actions[subm_actions_selected].render();
+				l.log(Logger::INFO, "Feature menu is been rerendered...");
+			}
 		}
 
 		if (prev_feature_state && !is_active)
@@ -301,7 +318,7 @@ public:
 			bool has_sub = subm_actions[subm_actions_selected].has_menu;
 			l.log(Logger::INFO, "Menu::select() on action -> sub action name: " + name);
 			if (name == "Back")
-				return exit_action_menu();
+				exit_action_menu();
 
 			/**
 			 * @brief This should invert the state of the boolean pointer if the item is an action
@@ -310,8 +327,15 @@ public:
 			if (ac_type == ActionType::ACTION && has_sub)
 				*(is_active) = !*(is_active);
 
+			if (ac_type == ActionType::ACTION_MENU) {
+				subm_actions[subm_actions_selected].select(); // We perform the action
+				return render_feature(); // We rerender for to show new changes
+			}
+
 			if (subm_actions[subm_actions_selected].action != nullptr) 
 				subm_actions[subm_actions_selected].action();
+
+			this->render_feature();
 		} else if (this->subm_options) {
 			String name = subm_options[subm_options_selected].name;
 			auto sub_actions = subm_options[subm_options_selected].actions;
@@ -319,7 +343,7 @@ public:
 
 			l.log(Logger::INFO, "Menu::select() on submenu -> sub option name: " + name);
 			if (name == "Back")
-				return exit_sub_menu();
+				exit_sub_menu();
 			
 			if (sub_actions)
 				enter_action_menu(sub_actions);
@@ -336,24 +360,41 @@ public:
 			else if (sub_menu) 
 				enter_sub_menu(sub_menu);
 		}
+
+		this->render(true);
 	}
 
 	void nextOption() {
-		if (subm_actions)
+		if (subm_actions) {
+			if (subm_actions[subm_actions_selected].type == ActionType::ACTION_MENU && *(subm_actions[subm_actions_selected].is_active)){
+				this->render_feature();
+				return subm_actions[subm_actions_selected].next();
+			}
+
 			subm_actions_selected = (subm_actions_selected + 1) % subm_actions_size;
+		}
 		else if (subm_options)
 			subm_options_selected = (subm_options_selected + 1) % subm_options_size;
-		else
+		else 
 			menu_selected = (menu_selected + 1) % menu_size;
+
+		this->render(true);
 	}
 
 	void previousOption() {
-		if (subm_actions)
+		if (subm_actions) {
+			if (subm_actions[subm_actions_selected].type == ActionType::ACTION_MENU && *(subm_actions[subm_actions_selected].is_active)) {
+				this->render_feature();
+				return subm_actions[subm_actions_selected].prev();
+			}
 			subm_actions_selected = (subm_actions_selected - 1 + subm_actions_size) % subm_actions_size;
+		}
 		else if (subm_options)
 			subm_options_selected = (subm_options_selected - 1 + subm_options_size) % subm_options_size;
 		else
 			menu_selected = (menu_selected - 1 + menu_size) % menu_size;
+		
+		this->render(true);
 	}
 
 	void enter_action_menu(MenuAction* sub_action) {

@@ -18,6 +18,7 @@
  */
 
 #define PLUS
+// #define PLUS2
 #define DEV // Mostly to disable battery saver and some debug messages
 #include "classes/globals.h"
 
@@ -50,7 +51,7 @@ MenuAction ma_sub_infrared[] = {
 MenuAction ma_sub_wifi[] = {
     {"Back", nullptr },
     {"Scan AP", []() { wi.scanNetworks(); }, ActionType::ACTION, true, []() { wi.scanNetworksRender(); } },
-    {"Select AP", []() { wi.scanNetworksAndSelect(); }, ActionType::ACTION, true, []() { wi.scanNetworksRenderSelect(); } },
+    {"Select AP", ActionType::ACTION_MENU, &wi.select_status, []() { wi.scanNetworksRenderSelect(); }, []() { wi.next(); }, []() { wi.prev(); }, []() { wi.select(); } },
 	{"Spam AP", []() { wi.accessPointLoop(); }, ActionType::LOOP, false, nullptr, &wi.loop_spam_ap },
 	{"Clone AP", []() { wi.cloneAPLoop(); }, ActionType::LOOP, false, nullptr, &wi.loop_clone_spam_ap },
 	{"Rogue AP", []() { wi.rogueAPloop(); }, ActionType::LOOP, false, nullptr, &wi.loop_rogue_ap },
@@ -214,7 +215,6 @@ void loop() {
 
 		battery.setLI(millis());
         mainMenu.nextOption();
-	    mainMenu.render(true);
 		battery.restoreBrightness();
     }
 
@@ -227,7 +227,6 @@ void loop() {
 		
 		battery.setLI(millis());
         mainMenu.previousOption();
-		mainMenu.render(true);
 		battery.restoreBrightness();
     }
 
@@ -240,8 +239,8 @@ void loop() {
 
 		battery.setLI(millis());
         mainMenu.select();
-		mainMenu.render(true);
-		mainMenu.render_feature(); // Not clean but should do its job
+		// mainMenu.render(true);
+		// mainMenu.render_feature(); // Not clean but should do its job
 		battery.restoreBrightness();
     }
 
@@ -254,7 +253,7 @@ void loop() {
 		mainMenu.render_hww();
 	
 	if (last_update < millis()) { // refresh the screen every x seconds
-		mainMenu.render_feature();
+		mainMenu.render_feature(true);
 		mainMenu.topBar(); // Should be the last to be on top of everything
 		last_update = millis() + 1000; // Refresh every 1s
 	}
