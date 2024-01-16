@@ -50,8 +50,8 @@ MenuAction ma_sub_infrared[] = {
 
 MenuAction ma_sub_wifi[] = {
     {"Back", nullptr },
-    {"Scan AP", []() { wi.scanNetworks(); }, ActionType::ACTION, true, []() { wi.scanNetworksRender(); } },
-    {"Select AP", ActionType::ACTION_MENU, &wi.select_status, []() { wi.scanNetworksRenderSelect(); }, []() { wi.next(); }, []() { wi.prev(); }, []() { wi.select(); } },
+    // {"Scan AP", []() { wi.scanNetworks(); }, ActionType::ACTION, true, []() { wi.scanNetworksRender(); } },
+    {"Select AP", ActionType::ACTION_MENU, &wi.is_selecting_ap, []() { wi.scanNetworksRenderSelect(); }, []() { wi.scanNetworksRenderSelect(true, false); }, []() { wi.scanNetworksRenderSelect(false, true); }, []() { wi.select(); } },
 	{"Spam AP", []() { wi.accessPointLoop(); }, ActionType::LOOP, false, nullptr, &wi.loop_spam_ap },
 	{"Clone AP", []() { wi.cloneAPLoop(); }, ActionType::LOOP, false, nullptr, &wi.loop_clone_spam_ap },
 	{"Rogue AP", []() { wi.rogueAPloop(); }, ActionType::LOOP, false, nullptr, &wi.loop_rogue_ap },
@@ -59,22 +59,28 @@ MenuAction ma_sub_wifi[] = {
 	{"Deauth", []() { wi.deauthLoop(); }, ActionType::LOOP, false, nullptr, &wi.loop_deauth_ap },
 };
 
-MenuItem mi_sub_wifi[] = {
-    {"Back", nullptr },
-};
+/**
+ * @brief Attempt to make a sub menu for wifi selection
+ * MenuItem mi_sub_wifi[] = {
+ *     {"Back", nullptr },
+ * };
+ */
 
 MenuAction ma_sub_ble[] = {
     {"Back", nullptr },
-    {"Apple Spm", []() { b.advertiseApple(); } },
-    {"Android Sp", []() { b.advertiseAndroid(); } },
-	{"Windows S", []() { b.advertiseWindows(); } },
-	{"@everyone", []() { b.toggleAdvertiseEveryone(); }, ActionType::LOOP, true, []() { b.advertiseEveryoneRender(); }, &b.advertise_everyone },
+	{"Apple Spm", []() { b.t_advertise_apple(); }, ActionType::LOOP, false, nullptr, &b.advertise_apple },
+	{"Android Sp", []() { b.t_advertise_android(); }, ActionType::LOOP, false, nullptr, &b.advertise_android },
+	{"Windows S", []() { b.t_advertise_windows(); }, ActionType::LOOP, false, nullptr, &b.advertise_windows },
+	{"@everyone", []() { b.t_advertise_everyone(); }, ActionType::LOOP, true, []() { b.t_advertise_everyone(); }, &b.advertise_everyone },
+    // {"Apple Spm", []() { b.advertiseApple(); } },
+	// {"Android Sp", []() { b.advertiseAndroid(); } },
+	// {"Windows S", []() { b.advertiseWindows(); } },
 };
 
 MenuAction ma_sub_settings[] = {
     {"Back", nullptr },
     {"Bat Saver", []() { cfg.toggleBattSaver(); }, ActionType::TOGGLE, false, nullptr, &cfg.battery_saver },
-    {"Sounds", []() { cfg.toggleSound(); }, ActionType::TOGGLE, false, nullptr, &cfg.sound_enable },
+    // {"Sounds", []() { cfg.toggleSound(); }, ActionType::TOGGLE, false, nullptr, &cfg.sound_enable },
     {"Led", []() { cfg.toggleLed(); }, ActionType::TOGGLE, false, nullptr, &cfg.led_enable },
     {"Rotate Sc", []() { cfg.switchRotation(); }, ActionType::TOGGLE, false, nullptr },
     {"Restart", []() { M5.Axp.DeepSleep(5); } },
@@ -91,10 +97,10 @@ MenuAction ma_sub_info[] = {
 
 MenuItem mi_menu[] = {
     {"Infra Red", nullptr, 2, ma_sub_infrared },
-    {"WiFi", nullptr, 8, ma_sub_wifi },
-	{"Select WiFi", mi_sub_wifi, 11, nullptr },
+    {"WiFi", nullptr, 7, ma_sub_wifi },
+	// {"Select WiFi", mi_sub_wifi, 11, nullptr },
     {"BLE", nullptr, 5, ma_sub_ble },
-    {"Settings", nullptr, 7, ma_sub_settings },
+    {"Settings", nullptr, 6, ma_sub_settings },
     {"Info", nullptr, 4, ma_sub_info },
 };
 
@@ -120,6 +126,9 @@ void setup() {
 
 			delay(300);
 		}
+
+		M5.Beep.setBeep(4000, 100);
+		M5.Beep.beep();
 	#endif 
 	l.log(Logger::INFO, "Starting " + String(NAME) + "...");
 

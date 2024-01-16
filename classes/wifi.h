@@ -188,58 +188,54 @@ public:
 		led.flash(2);
 	}
 
-	void scanNetworksRenderSelect() {
+	void scanNetworksRenderSelect(bool next = false, bool prev = false) {
+		const int maxDisplayItems = 7;
+		
+		if (next) 
+			current_ap = (current_ap + 1) % (scanned_ap_count + 1);  // +1 to include the "None" option
+		else if (prev) 
+			current_ap = (current_ap - 1 + scanned_ap_count + 1) % (scanned_ap_count + 1);
+
 		M5.Lcd.setTextColor(WHITE, BLACK);
 		M5.Lcd.setTextSize(1);
 
 		l.log(Logger::INFO, "Rendering scanNetworksRenderSelect()");
 
 		int offset = 25;
-		for (int i = 0; i < scanned_ap_count; i++) {
-			if (scanned_ap[i].bssid == nullptr) break;
+		for (int i = current_ap - maxDisplayItems; i < current_ap + maxDisplayItems; i++) {
+			int index = (i + scanned_ap_count + 1) % (scanned_ap_count + 1);  // +1 to include the "None" option
+
+			if (scanned_ap[index].bssid == nullptr) break;
 
 			M5.Lcd.setCursor(5, offset);
 
-			// Trust me this is not the way to do it
 			M5.Lcd.setTextColor( 
-				i == selected_ap ? BLUE : i == selected_ap_selected ? BLACK : WHITE,
-				 i == selected_ap_selected ? WHITE : BLACK
+				index == current_ap ? BLUE : index == selected_ap ? BLACK : WHITE,
+				index == selected_ap ? WHITE : BLACK
 			);
 
-			if (i == selected_ap) 
-				M5.Lcd.print("-> " + scanned_ap[i].ssid + ": " + scanned_ap[i].bssid_str);
+			if (index == current_ap) 
+				M5.Lcd.print("-> " + (index == 0 ? "None" : scanned_ap[index].ssid + "(" + String((int)scanned_ap[index].rssi) + ") "));
 			else
-				M5.Lcd.print("(" + String((int)scanned_ap[i].rssi) + ") " +scanned_ap[i].ssid + ": " + scanned_ap[i].bssid_str);
+				M5.Lcd.print("(" + String((int)scanned_ap[index].rssi) + ") " + (index == 0 ? "None" : scanned_ap[index].ssid + ": " + scanned_ap[index].bssid_str));
 
 			offset += 10;
 		}
 	}
 
-	void next() {
-		l.log(Logger::INFO, "Called next()");
-
-		selected_ap = (selected_ap + 1) % scanned_ap_count;
-	}
-
-	void prev() {
-		l.log(Logger::INFO, "Called prev()");
-
-		selected_ap = (selected_ap - 1 + scanned_ap_count) % scanned_ap_count;
-	}
-
 	void select() {
 		l.log(Logger::INFO, "Called select()");
 
-		select_status = !select_status;
+		is_selecting_ap = !is_selecting_ap;
 
-		if (select_status) 
+		if (is_selecting_ap) 
 			return scanNetworksAndSelect();
 
 		l.setShouldDisplayLog(true);
 
-		selected_ap_selected = selected_ap;
+		selected_ap = current_ap;
 
-		l.log(Logger::INFO, "Selected ap " + scanned_ap[selected_ap_selected].ssid);
+		l.log(Logger::INFO, "Selected ap " + scanned_ap[selected_ap].ssid);
 
 		delay(1000);
 
@@ -269,65 +265,78 @@ public:
 
 		if (loop_clone_spam_ap) { // every tick
 			for (int i = 0; i < scanned_ap_count; i++) {
-				if (scanned_ap[i].bssid == nullptr) break;
-				String ssid = scanned_ap[i].ssid;
+				if (selected_ap != 0 && i != selected_ap) 
+					continue;
 
-				ssid += utilities::gen_random_str(1);
-
-				beacon(ssid);
+				if (scanned_ap[i].bssid != nullptr) {
+					String ssid = scanned_ap[i].ssid + utilities::gen_random_str(1);
+					beacon(ssid);
+				}
 			}
+
 		}
 		
 		if (loop_rogue_ap && (last_update - 950 < millis())) { // every 50ms
 			for (int i = 0; i < scanned_ap_count; i++) {
-				if (scanned_ap[i].bssid == nullptr) break;
-				String ssid = scanned_ap[i].ssid;
-				uint8_t* bssid = scanned_ap[i].bssid;
+				if (selected_ap != 0 && i != selected_ap) 
+					continue;
 
-				#ifdef DEV
-				{
-					String bssid_s = scanned_ap[i].bssid_str;
-					l.log(Logger::INFO, "Sending cloned AP as " + ssid + " (" + bssid_s + ")");
-				}
-				#endif
+				if (scanned_ap[i].bssid != nullptr) {
+					String ssid = scanned_ap[i].ssid;
+					uint8_t* bssid = scanned_ap[i].bssid;
 
-				beacon(ssid, bssid);
+					#ifdef DEV
+					{
+						String bssid_s = scanned_ap[i].bssid_str;
+						l.log(Logger::INFO, "Sending cloned AP as " + ssid + " (" + bssid_s + ")");
+					}
+					#endif
+
+					beacon(ssid, bssid);
+				};
 			}
 		}
 
 		if (loop_probe_ap) { // every tick, is it meant to flood the AP?
 			for (int i = 0; i < scanned_ap_count; i++) {
-				if (scanned_ap[i].bssid == nullptr) break;
+				if (selected_ap != 0 && i != selected_ap) 
+					continue;
 
-				#ifdef DEV
-				{
-					String ssid = scanned_ap[i].ssid;
-					String bssid_s = scanned_ap[i].bssid_str;
-					l.log(Logger::INFO, "Sending probe request to " + ssid + " (" + bssid_s + ")");
+				if (scanned_ap[i].bssid != nullptr) {
+					#ifdef DEV
+					{
+						String ssid = scanned_ap[i].ssid;
+						String bssid_s = scanned_ap[i].bssid_str;
+						l.log(Logger::INFO, "Sending probe request to " + ssid + " (" + bssid_s + ")");
+					}
+					#endif
+
+					uint8_t* bssid = scanned_ap[i].bssid;
+
+					probe(bssid);
 				}
-				#endif
 
-				uint8_t* bssid = scanned_ap[i].bssid;
-
-				probe(bssid);
 			}
 		}
 
 		if (loop_deauth_ap && (last_update - 500 < millis())) { // every 1s
 			for (int i = 0; i < scanned_ap_count; i++) {
-				if (scanned_ap[i].bssid == nullptr) break;
+				if (selected_ap != 0 && i != selected_ap) 
+					continue;
 
-				#ifdef DEV
-				{
-					String ssid = scanned_ap[i].ssid;
-					String bssid_s = scanned_ap[i].bssid_str;
-					l.log(Logger::INFO, "Deauthing " + ssid + " (" + bssid_s + ")");
-				}
-				#endif
+				if (scanned_ap[i].bssid != nullptr) {
+					#ifdef DEV
+					{
+						String ssid = scanned_ap[i].ssid;
+						String bssid_s = scanned_ap[i].bssid_str;
+						l.log(Logger::INFO, "Deauthing " + ssid + " (" + bssid_s + ")");
+					}
+					#endif
 
-				uint8_t* bssid = scanned_ap[i].bssid;
+					uint8_t* bssid = scanned_ap[i].bssid;
 
-				deauth(bssid);
+					deauth(bssid);
+				};
 			}
 		}
 
@@ -342,9 +351,9 @@ public:
 	bool loop_deauth_ap = false;
 	bool loop_clone_spam_ap = false;
 
+	int current_ap = 0;
 	int selected_ap = 0;
-	bool select_status = false;
-	int selected_ap_selected = 0;
+	bool is_selecting_ap = false;
 private:
 	int current_channel = 0;
 	wifi_init_config_t cfg;

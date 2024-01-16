@@ -85,10 +85,17 @@ public:
 		}
 	}
 
-	bool toggleAdvertiseEveryone() {
+	bool t_advertise_everyone() {
 		advertise_everyone = !advertise_everyone;
+		advertise_apple, advertise_android, advertise_windows = false;
 		return advertise_everyone;
 	}
+
+	bool t_advertise_apple() { advertise_apple = !advertise_apple; return advertise_apple; }
+
+	bool t_advertise_android() { advertise_android = !advertise_android; return advertise_android; }
+
+	bool t_advertise_windows() { advertise_windows = !advertise_windows; return advertise_windows; }
 
 	void advertiseEveryoneRender() {
 		if (circle_size > 50) 
@@ -107,6 +114,13 @@ public:
 	}
 
 	void loop() {
+		if (advertise_apple)
+			advertiseApple();
+		if (advertise_android)
+			advertiseAndroid();
+		if (advertise_windows)
+			advertiseWindows();
+
 		if (advertise_everyone && (last_update < millis())) {
 			advertiseApple();
 			advertiseAndroid();
@@ -118,6 +132,9 @@ public:
 	}
 public:
 	bool advertise_everyone = false;
+	bool advertise_apple = false;
+	bool advertise_android = false;
+	bool advertise_windows = false;
 
 private:
 	NimBLEAdvertising *adv;
