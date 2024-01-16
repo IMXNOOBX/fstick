@@ -73,6 +73,7 @@ public:
 		if (!loop_deauth_ap) 
 			return led.flash(2);
 
+		if (selected_ap == 0)
 		if (!updateScanAp()) 
 			return l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
 
@@ -100,6 +101,7 @@ public:
 		if (!loop_clone_spam_ap) 
 			return led.flash(2);
 
+		if (selected_ap == 0)
 		if (!updateScanAp()) 
 			return l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
 
@@ -115,6 +117,7 @@ public:
 		if (!loop_rogue_ap) 
 			return led.flash(2);
 		
+		if (selected_ap == 0)
 		if (!updateScanAp()) 
 			return l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
 
@@ -130,6 +133,7 @@ public:
 		if (!loop_probe_ap) 
 			return led.flash(2);
 		
+		if (selected_ap == 0)
 		if (!updateScanAp()) 
 			return l.log(Logger::ERROR, "Failed to scan nearby AP to deauth");
 
@@ -189,23 +193,26 @@ public:
 	}
 
 	void scanNetworksRenderSelect(bool next = false, bool prev = false) {
-		const int maxDisplayItems = 7;
-		
-		if (next) 
+		const int maxDisplayItems = scanned_ap_count <= 5 ? scanned_ap_count : 5;
+
+		if (next)
 			current_ap = (current_ap + 1) % (scanned_ap_count + 1);  // +1 to include the "None" option
-		else if (prev) 
+		else if (prev)
 			current_ap = (current_ap - 1 + scanned_ap_count + 1) % (scanned_ap_count + 1);
+
+        M5.Lcd.fillRect(0, 25, SCREEN_WIDTH, SCREEN_HEIGHT - 20, BLACK); // Clear background
 
 		M5.Lcd.setTextColor(WHITE, BLACK);
 		M5.Lcd.setTextSize(1);
 
 		l.log(Logger::INFO, "Rendering scanNetworksRenderSelect()");
-
+		
 		int offset = 25;
-		for (int i = current_ap - maxDisplayItems; i < current_ap + maxDisplayItems; i++) {
+		for (int i = current_ap - maxDisplayItems+1; i < current_ap + maxDisplayItems+1; i++) {
 			int index = (i + scanned_ap_count + 1) % (scanned_ap_count + 1);  // +1 to include the "None" option
 
-			if (scanned_ap[index].bssid == nullptr) break;
+			// if (scanned_ap[index].bssid == nullptr && index != 0)
+			// 	break;
 
 			M5.Lcd.setCursor(5, offset);
 
@@ -214,14 +221,51 @@ public:
 				index == selected_ap ? WHITE : BLACK
 			);
 
-			if (index == current_ap) 
-				M5.Lcd.print("-> " + (index == 0 ? "None" : scanned_ap[index].ssid + "(" + String((int)scanned_ap[index].rssi) + ") "));
-			else
-				M5.Lcd.print("(" + String((int)scanned_ap[index].rssi) + ") " + (index == 0 ? "None" : scanned_ap[index].ssid + ": " + scanned_ap[index].bssid_str));
+			M5.Lcd.setTextSize(index == current_ap ? 2 : 1);
 
-			offset += 10;
+			if (index == current_ap)
+				M5.Lcd.print("-> " + String(index) + ". " + (index == 0 ? "None (All)" : scanned_ap[index-1].ssid));
+			else
+				M5.Lcd.print(String(index) + ". " + (index == 0 ? "None (All)" : scanned_ap[index-1].ssid + "(" + String((int)scanned_ap[index-1].rssi) + ")"));
+
+			offset += index == current_ap ? 20 : 10;  // Adjusted offset for greater text size
 		}
+		
+		/*
+		int index = (current_ap + scanned_ap_count + 1) % (scanned_ap_count + 1);
+		bool is_back = scanned_ap_count > 0 && index - 1 >= 0;
+		bool is_current = index >= 0 && index < scanned_ap_count;
+		bool is_next = scanned_ap_count > 0 && index + 1 < scanned_ap_count;
+
+		int yOffset = 40;
+
+		if (is_back) {
+			M5.Lcd.setTextSize(is_back && scanned_ap[index - 1].ssid.length() > 6 ? 2 : 3);
+			M5.Lcd.setCursor(20, yOffset);
+			M5.Lcd.setTextColor(index - 1 == selected_ap ? BLUE : WHITE, BLACK);
+			M5.Lcd.print(is_back ? scanned_ap[index - 1].ssid : "None (All)");
+			yOffset += is_back && scanned_ap[index - 1].ssid.length() > 6 ? 20 : 30;
+		}
+
+		if (is_current) {
+			M5.Lcd.setTextSize(is_current && scanned_ap[index].ssid.length() > 6 ? 2 : 3);
+			M5.Lcd.setCursor(20, yOffset);
+			M5.Lcd.setTextColor(index == selected_ap ? BLUE : YELLOW, BLACK);
+			M5.Lcd.print("- " + scanned_ap[index].ssid);
+			yOffset += is_current && scanned_ap[index].ssid.length() > 6 ? 20 : 30;
+		}
+
+		if (is_next) {
+			M5.Lcd.setTextSize(is_next && scanned_ap[index + 1].ssid.length() > 6 ? 2 : 3);
+			M5.Lcd.setCursor(20, yOffset);
+			M5.Lcd.setTextColor(index + 1 == selected_ap ? BLUE : WHITE, BLACK);
+			M5.Lcd.print(is_next ? scanned_ap[index + 1].ssid : "");
+			yOffset += is_next && scanned_ap[index + 1].ssid.length() > 6 ? 20 : 30;
+		}
+		*/
+		
 	}
+
 
 	void select() {
 		l.log(Logger::INFO, "Called select()");
@@ -235,7 +279,7 @@ public:
 
 		selected_ap = current_ap;
 
-		l.log(Logger::INFO, "Selected ap " + scanned_ap[selected_ap].ssid);
+		l.log(Logger::INFO, "Selected ap (" + String(selected_ap) + ") " + (selected_ap == 0 ? "None" : scanned_ap[selected_ap-1].ssid));
 
 		delay(1000);
 
@@ -265,7 +309,7 @@ public:
 
 		if (loop_clone_spam_ap) { // every tick
 			for (int i = 0; i < scanned_ap_count; i++) {
-				if (selected_ap != 0 && i != selected_ap) 
+				if (selected_ap != 0 && i != selected_ap-1) 
 					continue;
 
 				if (scanned_ap[i].bssid != nullptr) {
@@ -278,7 +322,7 @@ public:
 		
 		if (loop_rogue_ap && (last_update - 950 < millis())) { // every 50ms
 			for (int i = 0; i < scanned_ap_count; i++) {
-				if (selected_ap != 0 && i != selected_ap) 
+				if (selected_ap != 0 && i != selected_ap-1) 
 					continue;
 
 				if (scanned_ap[i].bssid != nullptr) {
@@ -299,7 +343,7 @@ public:
 
 		if (loop_probe_ap) { // every tick, is it meant to flood the AP?
 			for (int i = 0; i < scanned_ap_count; i++) {
-				if (selected_ap != 0 && i != selected_ap) 
+				if (selected_ap != 0 && i != selected_ap-1) 
 					continue;
 
 				if (scanned_ap[i].bssid != nullptr) {
@@ -321,7 +365,7 @@ public:
 
 		if (loop_deauth_ap && (last_update - 500 < millis())) { // every 1s
 			for (int i = 0; i < scanned_ap_count; i++) {
-				if (selected_ap != 0 && i != selected_ap) 
+				if (selected_ap != 0 && i != selected_ap-1) 
 					continue;
 
 				if (scanned_ap[i].bssid != nullptr) {
@@ -360,7 +404,8 @@ private:
     wifi_config_t ap_config;
 	ap scanned_ap[10]; // max 10 ap in the array
 	uint8_t original_mac_ap[6];
-	int scanned_ap_count = 10; // hardcoded
+	int scanned_ap_count = 0; // hardcoded
+	int max_scanned_ap_count = 10; // hardcoded
 	int last_update = 0;
 
 	void switchChannel() {
@@ -403,6 +448,7 @@ private:
         	scanned_ap[i].bssid_str = WiFi.BSSIDstr(i);
         	scanned_ap[i].bssid = WiFi.BSSID(i);
         	scanned_ap[i].rssi = WiFi.RSSI(i);
+			scanned_ap_count = i;
 		}
 
 		l.setShouldDisplayLog(false);

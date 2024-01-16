@@ -319,23 +319,24 @@ public:
 			l.log(Logger::INFO, "Menu::select() on action -> sub action name: " + name);
 			if (name == "Back")
 				exit_action_menu();
+			else {
+				/**
+				 * @brief This should invert the state of the boolean pointer if the item is an action
+				 * and if it has sub menu so we can get in and out of it
+				 */
+				if (ac_type == ActionType::ACTION && has_sub)
+					*(is_active) = !*(is_active);
 
-			/**
-			 * @brief This should invert the state of the boolean pointer if the item is an action
-			 * and if it has sub menu so we can get in and out of it
-			 */
-			if (ac_type == ActionType::ACTION && has_sub)
-				*(is_active) = !*(is_active);
+				if (ac_type == ActionType::ACTION_MENU) {
+					subm_actions[subm_actions_selected].select(); // We perform the action
+					return render_feature(); // We rerender for to show new changes
+				}
 
-			if (ac_type == ActionType::ACTION_MENU) {
-				subm_actions[subm_actions_selected].select(); // We perform the action
-				return render_feature(); // We rerender for to show new changes
+				if (subm_actions[subm_actions_selected].action != nullptr) 
+					subm_actions[subm_actions_selected].action();
+
+				this->render_feature();
 			}
-
-			if (subm_actions[subm_actions_selected].action != nullptr) 
-				subm_actions[subm_actions_selected].action();
-
-			this->render_feature();
 		} else if (this->subm_options) {
 			String name = subm_options[subm_options_selected].name;
 			auto sub_actions = subm_options[subm_options_selected].actions;
