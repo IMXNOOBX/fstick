@@ -127,7 +127,7 @@ void setup() {
 			delay(300);
 		}
 
-		M5.Beep.setBeep(4000, 100);
+		M5.Beep.tone(4000, 100);
 		M5.Beep.beep();
 	#endif 
 	l.log(Logger::INFO, "Starting " + String(NAME) + "...");
