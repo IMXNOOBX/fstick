@@ -141,17 +141,6 @@ public:
 		notify.send();
 	}
 
-	void scan_nearby_ap() {
-		notify.send();		
-
-		if (!updateScanAp()) {
-			logger.log(Logger::ERROR, "Failed to scan nearby AP");
-			return;
-		}
-
-		notify.send(2);
-	}
-
 	void scan_nearby_ap_render() {
 		M5.Lcd.setTextColor(WHITE, BLACK);
 		M5.Lcd.setTextSize(1);
@@ -166,6 +155,17 @@ public:
 
 			offset += 10;
 		}
+	}
+
+	void scan_nearby_ap() {
+		notify.send();		
+
+		if (!updateScanAp()) {
+			logger.log(Logger::ERROR, "Failed to scan nearby AP");
+			return;
+		}
+
+		notify.send(2);
 	}
 
 	void scan_nearby_ap_select(bool next = false, bool prev = false) {
@@ -263,14 +263,13 @@ public:
 		
 	}
 
-
 	void snaps_select() {
 		logger.log(Logger::INFO, "Called select()");
 
 		b_is_selecting_ap = !b_is_selecting_ap;
 
 		if (b_is_selecting_ap) 
-			return scan_nearby_ap_select();
+			return scan_nearby_ap();
 
 		logger.setShouldDisplayLog(true);
 

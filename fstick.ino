@@ -51,7 +51,7 @@ MenuAction ma_sub_infrared[] = {
 MenuAction ma_sub_wifi[] = {
     {"Back", nullptr },
     // {"Scan AP", []() { wi.scan_nearby_ap(); }, ActionType::ACTION, true, []() { wi.scan_nearby_ap_render(); } },
-    {"Select AP", ActionType::ACTION_MENU, &wi.b_is_selecting_ap, []() { wi.scan_nearby_ap(); }, []() { wi.scan_nearby_ap_select(true, false); }, []() { wi.scan_nearby_ap_select(false, true); }, []() { wi.snaps_select(); } },
+    {"Select AP", ActionType::ACTION_MENU, &wi.b_is_selecting_ap, []() { wi.scan_nearby_ap_select(); }, []() { wi.scan_nearby_ap_select(true, false); }, []() { wi.scan_nearby_ap_select(false, true); }, []() { wi.snaps_select(); } },
 	{"Spam AP", []() { wi.loop_ap_spam(); }, ActionType::LOOP, false, nullptr, &wi.b_loop_spam_ap },
 	{"Clone AP", []() { wi.loop_ap_clone(); }, ActionType::LOOP, false, nullptr, &wi.b_loop_clone_spam_ap },
 	{"Rogue AP", []() { wi.loop_ap_rogue(); }, ActionType::LOOP, false, nullptr, &wi.b_loop_rogue_ap },
