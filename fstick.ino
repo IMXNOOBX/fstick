@@ -65,7 +65,7 @@ MenuAction ma_sub_ble[] = {
 	{"Android Sp", []() { b.t_advertise_android(); }, ActionType::LOOP, false, nullptr, &b.advertise_android },
 	{"Samsung Sp", []() { b.t_advertise_samsung(); }, ActionType::LOOP, false, nullptr, &b.advertise_samsung },
 	{"Windows S", []() { b.t_advertise_windows(); }, ActionType::LOOP, false, nullptr, &b.advertise_windows },
-	{"@everyone", []() { b.t_advertise_everyone(); }, ActionType::LOOP, true, []() { b.t_advertise_everyone(); }, &b.advertise_everyone },
+	{"@everyone", []() { b.t_advertise_everyone(); }, ActionType::LOOP, true, []() { b.r_advertise_everyone(); }, &b.advertise_everyone },
 };
 
 MenuAction ma_sub_settings[] = {
@@ -90,7 +90,7 @@ MenuItem mi_menu[] = {
     {"Infra Red", nullptr, 2, ma_sub_infrared },
     {"WiFi", nullptr, 7, ma_sub_wifi },
     {"BLE", nullptr, 6, ma_sub_ble },
-    {"Settings", nullptr, 6, ma_sub_settings },
+    {"Settings", nullptr, 7, ma_sub_settings },
     {"Info", nullptr, 5, ma_sub_info },
 };
 
@@ -208,9 +208,7 @@ void loop() {
 
     if (M5.Axp.GetBtnPress()) {
 		#ifdef DEV
-		{
 			logger.log(Logger::INFO, "Pressed Axp button to navigate to the next option");
-		}
 		#endif
 
 		battery.setLI(millis());
@@ -220,9 +218,7 @@ void loop() {
 
 	if (M5.BtnB.wasReleased()) {
 		#ifdef DEV
-		{
 			logger.log(Logger::INFO, "Pressed BtnB button to navigate to the previous option");
-		}
 		#endif
 		
 		battery.setLI(millis());
@@ -232,9 +228,7 @@ void loop() {
 
     if (M5.BtnA.wasReleased()) {
 		#ifdef DEV
-		{
 			logger.log(Logger::INFO, "Pressed BtnA button to select option");
-		}
 		#endif
 
 		battery.setLI(millis());

@@ -48,6 +48,8 @@ public:
 			notify.send();
 			delay(20);
 			adv->stop();
+
+			logger.log(Logger::INFO, "Sending Apple (" + String(i) + ") advertisement packet with " + String(advData.getPayload().c_str()) + " payload");
 		}
 	}
 
@@ -65,6 +67,8 @@ public:
 			notify.send();
 			delay(20);
 			adv->stop();
+
+			logger.log(Logger::INFO, "Sending Windows (" + String(i) + ") advertisement packet with " + String(advData.getPayload().c_str()) + " payload");
 		}
 	}
 
@@ -82,6 +86,8 @@ public:
 			notify.send();
 			delay(20);
 			adv->stop();
+
+			logger.log(Logger::INFO, "Sending Android (" + String(i) + ") advertisement packet with " + String(advData.getPayload().c_str()) + " payload");
 		}
 	}
 
@@ -99,11 +105,15 @@ public:
 			notify.send();
 			delay(20);
 			adv->stop();
+			
+			logger.log(Logger::INFO, "Sending Samsung (" + String(i) + ") advertisement packet with " + String(advData.getPayload().c_str()) + " payload");
 		}
 	}
 
 	bool t_advertise_everyone() {
 		advertise_everyone = !advertise_everyone;
+
+		logger.setShouldDisplayLog(advertise_everyone);
 
 		{
 			advertise_apple = false, 
@@ -123,7 +133,7 @@ public:
 
 	bool t_advertise_windows() { advertise_windows = !advertise_windows; return advertise_windows; }
 
-	void advertiseEveryoneRender() {
+	void r_advertise_everyone() {
 		if (circle_size > 50) 
 			circle_size = 1;
 			
@@ -287,10 +297,10 @@ private:
 		packet[i++] = 2; // Size
 		packet[i++] = 0x0A; // AD Type (Tx Power Level)
 		packet[i++] = (rand() % 120) - 100; // -100 to +20 dBm
+		*/
 
 		oAdvertisementData.addData(std::string((char *)packet, 14));
-		
-		*/
+	
 		return oAdvertisementData;
 	}
 };

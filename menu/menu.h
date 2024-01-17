@@ -316,7 +316,9 @@ public:
 
 			if ((ac_type == ActionType::ACTION_MENU && !refresh) || ac_type != ActionType::ACTION_MENU) {
 				subm_actions[subm_actions_selected].render();
-				logger.log(Logger::INFO, "Feature menu is been rerendered...");
+				#ifdef DEV
+					logger.log(Logger::INFO, "Feature menu is been rerendered...");
+				#endif
 			}
 		}
 
@@ -332,7 +334,9 @@ public:
 			ActionType ac_type = subm_actions[subm_actions_selected].type;
 			bool* is_active = subm_actions[subm_actions_selected].is_active;
 			bool has_sub = subm_actions[subm_actions_selected].has_menu;
-			logger.log(Logger::INFO, "Menu::select() on action -> sub action name: " + name);
+			#ifdef DEV
+				logger.log(Logger::INFO, "Menu::select() on action -> sub action name: " + name);
+			#endif
 			if (name == "Back") {
 				exit_action_menu();
 				goto skip;
@@ -358,8 +362,9 @@ public:
 			String name = subm_options[subm_options_selected].name;
 			auto sub_actions = subm_options[subm_options_selected].actions;
 			auto sub_menu = subm_options[subm_options_selected].submenu;
-
-			logger.log(Logger::INFO, "Menu::select() on submenu -> sub option name: " + name);
+			#ifdef DEV
+				logger.log(Logger::INFO, "Menu::select() on submenu -> sub option name: " + name);
+			#endif
 			if (name == "Back") {
 				exit_sub_menu();
 				goto skip;
@@ -370,7 +375,9 @@ public:
 			else if (sub_menu)
 				enter_sub_menu(sub_menu);
 		} else {
-			logger.log(Logger::INFO, "Menu::select() on menu -> option name: " + menu_options[menu_selected].name);
+			#ifdef DEV
+				logger.log(Logger::INFO, "Menu::select() on menu -> option name: " + menu_options[menu_selected].name);
+			#endif
 
 			auto sub_actions = menu_options[menu_selected].actions;
 			auto sub_menu = menu_options[menu_selected].submenu;
@@ -422,7 +429,9 @@ public:
 		this->subm_actions = sub_action;
 		this->subm_actions_selected = 0;
 		this->subm_actions_size = menu_options[menu_selected].numOptions;
-		logger.log(Logger::INFO, "Entered action menu: " + menu_options[menu_selected].name + " (" + String(menu_options[menu_selected].numOptions) + " options)");
+		#ifdef DEV
+			logger.log(Logger::INFO, "Entered action menu: " + menu_options[menu_selected].name + " (" + String(menu_options[menu_selected].numOptions) + " options)");
+		#endif
 	}
 
 	void exit_action_menu() {
@@ -435,7 +444,9 @@ public:
 		this->subm_options = sub_menu;
 		this->subm_options_selected = 0;
 		this->subm_options_size = menu_options[menu_selected].numOptions;
-		logger.log(Logger::INFO, "Entered submenu: " + menu_options[menu_selected].name + " (" + String(menu_options[menu_selected].numOptions) + " options)");
+		#ifdef DEV
+			logger.log(Logger::INFO, "Entered submenu: " + menu_options[menu_selected].name + " (" + String(menu_options[menu_selected].numOptions) + " options)");
+		#endif
 	}
 
 	void exit_sub_menu() {
