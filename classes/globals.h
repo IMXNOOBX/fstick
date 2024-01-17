@@ -40,7 +40,7 @@
 #include "../tools/utilities.h"
 #include "../tools/battery.h"
 #include "../tools/logger.h"
-#include "../tools/led.h"
+#include "../tools/notify.h"
 
 #include "../menu/menu.h"
 
@@ -57,8 +57,8 @@
 /**
  * @brief Declare external references to classes
  */
-extern Led led;
-extern Logger l; 
+extern Notify notify;
+extern Logger logger; 
 extern Battery battery;
 extern BLE b;
 extern Info inf;

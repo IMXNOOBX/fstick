@@ -1,7 +1,7 @@
 #include "globals.h"
 
-extern Logger l;
-extern Led led;
+extern Logger logger;
+extern Notify notify;
 
 class Info
 {
@@ -17,7 +17,7 @@ public:
 		M5.Lcd.println("Nemo Project");
 		M5.Lcd.setTextSize(1);
 		M5.Lcd.setCursor(10, 40);
-		M5.Lcd.println("https://github.com/n0xa/m5stick-nemo");
+		M5.Lcd.println("gh n0xa/m5stick-nemo");
 
 		M5.Lcd.setTextSize(2);
 		M5.Lcd.setCursor(10, 50);
@@ -31,7 +31,26 @@ public:
 		M5.Lcd.println("BLE Spam");
 		M5.Lcd.setTextSize(1);
 		M5.Lcd.setCursor(10, 100);
-		M5.Lcd.println("github.com/RapierXbox/ESP32-Sour-Apple");
+		M5.Lcd.println("gh RapierXbox/ESP32-Sour-Apple");
+
+		M5.Lcd.setTextSize(1);
+		M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);
+		M5.Lcd.println("Click to return");
+	}
+
+	void render_supporters() {
+		M5.Lcd.setTextColor(PURPLE, BLACK);
+
+		// Display credits
+		M5.Lcd.setTextSize(2);
+		M5.Lcd.setCursor(10, 20);
+		M5.Lcd.println("Killer74-hub");
+		M5.Lcd.setTextColor(WHITE, BLACK);
+		M5.Lcd.setTextSize(1);
+		M5.Lcd.setCursor(10, 40);
+		M5.Lcd.println("For a generous donation to keep");
+		M5.Lcd.setCursor(10, 50);
+		M5.Lcd.println("this project going! Thank you so much!");
 
 		M5.Lcd.setTextSize(1);
 		M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);

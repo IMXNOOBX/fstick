@@ -1,6 +1,6 @@
 #include "../classes/globals.h"
 
-extern Logger l;
+extern Logger logger;
 
 enum ActionType {
 	LOOP,
@@ -85,9 +85,9 @@ public:
 		this->subm_actions = nullptr;
 
 		#ifdef DEV
-			l.log(Logger::INFO, "MenuRenderer initialized");
-			l.log(Logger::INFO, "Menu title: " + String(title));
-			l.log(Logger::INFO, "Menu options: " + String(menu_size));
+			logger.log(Logger::INFO, "MenuRenderer initialized");
+			logger.log(Logger::INFO, "Menu title: " + String(title));
+			logger.log(Logger::INFO, "Menu options: " + String(menu_size));
 		#endif
 	}
 
@@ -99,14 +99,16 @@ public:
 		M5.Lcd.setCursor(SCREEN_WIDTH / 2 - 5, 10);
 		#ifdef DEV
 			M5.Lcd.setTextColor(GREEN);
+			M5.Lcd.print("DEV");
 		#elif
 			M5.Lcd.setTextColor(BLUE);
+			M5.Lcd.print("FS");
 		#endif
 
-		M5.Lcd.print("FS");
 
 		/**
 		 * @todo Clean this part :D
+		 * Someday it will be done, I promise
 		 */
 		int battery = utilities::get_battery();
 		if (battery > 50)
@@ -162,12 +164,12 @@ public:
 			int nextOpt = this->subm_actions_selected + 1;
 
 			#ifdef DEV
-				l.log(Logger::INFO, "Rendering submenu (" + String(this->subm_actions_selected + 1) + "/" + String(this->subm_actions_size) + ") Back: " + String(backOpt) + " Next: " + String(nextOpt));
+				logger.log(Logger::INFO, "Rendering submenu (" + String(this->subm_actions_selected + 1) + "/" + String(this->subm_actions_size) + ") Back: " + String(backOpt) + " Next: " + String(nextOpt));
 			#endif
 
 			if (backOpt >= 0)
 			{
-				M5.Lcd.setTextColor(WHITE);
+				M5.Lcd.setTextColor(*(subm_actions[backOpt].is_active) ? GREEN : WHITE);
 				M5.Lcd.setTextSize(2);
 				M5.Lcd.setCursor(20, yOffset);
 				M5.Lcd.print(subm_actions[backOpt].name);
@@ -183,12 +185,12 @@ public:
 				bool has_sub = subm_actions[subm_actions_selected].has_menu;
 
 				#ifdef DEV
-					l.log(Logger::INFO, "Option Name: " + opt_name);
-					// l.log(Logger::INFO, "Is Loop: " + String(is_loop));
-					// l.log(Logger::INFO, "Is Automatic: " + String(is_auto));
-					l.log(Logger::INFO, "Action Type: " + String(ac_type));
-					l.log(Logger::INFO, "Is Active: " + String(is_active));
-					l.log(Logger::INFO, "Has Submenu: " + String(has_sub));	
+					logger.log(Logger::INFO, "Option Name: " + opt_name);
+					// logger.log(Logger::INFO, "Is Loop: " + String(is_loop));
+					// logger.log(Logger::INFO, "Is Automatic: " + String(is_auto));
+					logger.log(Logger::INFO, "Action Type: " + String(ac_type));
+					logger.log(Logger::INFO, "Is Active: " + String(is_active));
+					logger.log(Logger::INFO, "Has Submenu: " + String(has_sub));	
 				#endif
 
 				if (is_active && (ac_type == ActionType::LOOP || ac_type == ActionType::TOGGLE))
@@ -201,14 +203,28 @@ public:
 				M5.Lcd.setCursor(20, yOffset);
 				M5.Lcd.setTextSize(3);
 				M5.Lcd.print(ac_type == ActionType::LOOP ? "o " : "> ");
-				M5.Lcd.setTextSize(opt_name.length() >= 10 ? 2 : 3); // To better fit each feature
-				M5.Lcd.print(opt_name);
+				{
+					bool text_oversize = opt_name.length() > 8;
+					bool text_toooversize = opt_name.length() >= 12;
+
+					if (text_oversize)
+						M5.Lcd.setCursor(50, yOffset + 5);
+
+					M5.Lcd.setTextSize(text_oversize ? 2 : 3); // To better fit each feature
+					M5.Lcd.print(text_oversize ? (text_toooversize ? opt_name.substring(0, 12) : opt_name) : opt_name);
+
+					if (text_toooversize) {
+						// M5.Lcd.setCursor(50 + 12 * 10, yOffset + 10);
+						M5.Lcd.setTextSize(1);
+						M5.Lcd.print("...");
+					}
+				}
 				yOffset += 30;
 			}
 
 			if (nextOpt < subm_actions_size)
 			{
-				M5.Lcd.setTextColor(WHITE);
+				M5.Lcd.setTextColor(*(subm_actions[nextOpt].is_active) ? GREEN : WHITE);
 				M5.Lcd.setTextSize(2);
 				M5.Lcd.setCursor(20, yOffset);
 				M5.Lcd.print(subm_actions[nextOpt].name);
@@ -300,7 +316,7 @@ public:
 
 			if ((ac_type == ActionType::ACTION_MENU && !refresh) || ac_type != ActionType::ACTION_MENU) {
 				subm_actions[subm_actions_selected].render();
-				l.log(Logger::INFO, "Feature menu is been rerendered...");
+				logger.log(Logger::INFO, "Feature menu is been rerendered...");
 			}
 		}
 
@@ -316,42 +332,45 @@ public:
 			ActionType ac_type = subm_actions[subm_actions_selected].type;
 			bool* is_active = subm_actions[subm_actions_selected].is_active;
 			bool has_sub = subm_actions[subm_actions_selected].has_menu;
-			l.log(Logger::INFO, "Menu::select() on action -> sub action name: " + name);
-			if (name == "Back")
+			logger.log(Logger::INFO, "Menu::select() on action -> sub action name: " + name);
+			if (name == "Back") {
 				exit_action_menu();
-			else {
-				/**
-				 * @brief This should invert the state of the boolean pointer if the item is an action
-				 * and if it has sub menu so we can get in and out of it
-				 */
-				if (ac_type == ActionType::ACTION && has_sub)
-					*(is_active) = !*(is_active);
-
-				if (ac_type == ActionType::ACTION_MENU) {
-					subm_actions[subm_actions_selected].select(); // We perform the action
-					return render_feature(); // We rerender for to show new changes
-				}
-
-				if (subm_actions[subm_actions_selected].action != nullptr) 
-					subm_actions[subm_actions_selected].action();
-
-				this->render_feature();
+				goto skip;
 			}
+
+			/**
+			 * @brief This should invert the state of the boolean pointer if the item is an action
+			 * and if it has sub menu so we can get in and out of it
+			 */
+			if (ac_type == ActionType::ACTION && has_sub)
+				*(is_active) = !*(is_active);
+
+			if (ac_type == ActionType::ACTION_MENU) {
+				subm_actions[subm_actions_selected].select(); // We perform the action
+				return render_feature(); // We rerender for to show new changes
+			}
+
+			if (subm_actions[subm_actions_selected].action != nullptr) 
+				subm_actions[subm_actions_selected].action();
+
+			// this->render_feature();
 		} else if (this->subm_options) {
 			String name = subm_options[subm_options_selected].name;
 			auto sub_actions = subm_options[subm_options_selected].actions;
 			auto sub_menu = subm_options[subm_options_selected].submenu;
 
-			l.log(Logger::INFO, "Menu::select() on submenu -> sub option name: " + name);
-			if (name == "Back")
+			logger.log(Logger::INFO, "Menu::select() on submenu -> sub option name: " + name);
+			if (name == "Back") {
 				exit_sub_menu();
+				goto skip;
+			}
 			
 			if (sub_actions)
 				enter_action_menu(sub_actions);
 			else if (sub_menu)
 				enter_sub_menu(sub_menu);
 		} else {
-			l.log(Logger::INFO, "Menu::select() on menu -> option name: " + menu_options[menu_selected].name);
+			logger.log(Logger::INFO, "Menu::select() on menu -> option name: " + menu_options[menu_selected].name);
 
 			auto sub_actions = menu_options[menu_selected].actions;
 			auto sub_menu = menu_options[menu_selected].submenu;
@@ -361,11 +380,12 @@ public:
 			else if (sub_menu) 
 				enter_sub_menu(sub_menu);
 		}
-
-		this->render(true);
+		
+		skip:
+			this->render(true);
 	}
 
-	void nextOption() {
+	void next_option() {
 		if (subm_actions) {
 			if (subm_actions[subm_actions_selected].type == ActionType::ACTION_MENU && *(subm_actions[subm_actions_selected].is_active)){
 				this->render_feature();
@@ -382,7 +402,7 @@ public:
 		this->render(true);
 	}
 
-	void previousOption() {
+	void previous_option() {
 		if (subm_actions) {
 			if (subm_actions[subm_actions_selected].type == ActionType::ACTION_MENU && *(subm_actions[subm_actions_selected].is_active)) {
 				this->render_feature();
@@ -402,7 +422,7 @@ public:
 		this->subm_actions = sub_action;
 		this->subm_actions_selected = 0;
 		this->subm_actions_size = menu_options[menu_selected].numOptions;
-		l.log(Logger::INFO, "Entered action menu: " + menu_options[menu_selected].name + " (" + String(menu_options[menu_selected].numOptions) + " options)");
+		logger.log(Logger::INFO, "Entered action menu: " + menu_options[menu_selected].name + " (" + String(menu_options[menu_selected].numOptions) + " options)");
 	}
 
 	void exit_action_menu() {
@@ -415,7 +435,7 @@ public:
 		this->subm_options = sub_menu;
 		this->subm_options_selected = 0;
 		this->subm_options_size = menu_options[menu_selected].numOptions;
-		l.log(Logger::INFO, "Entered submenu: " + menu_options[menu_selected].name + " (" + String(menu_options[menu_selected].numOptions) + " options)");
+		logger.log(Logger::INFO, "Entered submenu: " + menu_options[menu_selected].name + " (" + String(menu_options[menu_selected].numOptions) + " options)");
 	}
 
 	void exit_sub_menu() {

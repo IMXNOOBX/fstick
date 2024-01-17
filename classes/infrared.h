@@ -1,7 +1,7 @@
 #include "globals.h"
 
-extern Logger l;
-extern Led led;
+extern Logger logger;
+extern Notify notify;
 
 class IrBlaster
 {
@@ -26,10 +26,10 @@ public:
 	bool sendAllPowerCodes() {
 		send_codes = !send_codes;
 
-		l.log(Logger::INFO, send_codes ? "Starting send ir code loop" : "Stopping sending ir code loop");
+		logger.log(Logger::INFO, send_codes ? "Starting send ir code loop" : "Stopping sending ir code loop");
 		code_index = 0;
 
-		l.setShouldDisplayLog(send_codes);
+		logger.setShouldDisplayLog(send_codes);
 		return send_codes;
 	}
 
@@ -49,14 +49,14 @@ public:
 	}
 
 	void loop() {
-		if (send_codes && (last_update < millis())) {
+		if (send_codes && (i_last_update < millis())) {
 			powerCode = powerCodes[code_index];
 
 			if (code_index >= powerCodesCount) {
-				l.log(Logger::INFO, "Finished sending (" + String(code_index) + "/" + String(powerCodesCount) + ") codes.");
+				logger.log(Logger::INFO, "Finished sending (" + String(code_index) + "/" + String(powerCodesCount) + ") codes.");
 				code_index = 0;
 				send_codes = false;
-				l.setShouldDisplayLog(false);
+				logger.setShouldDisplayLog(false);
 				return;
 			}
 
@@ -84,12 +84,12 @@ public:
 			digitalWrite(kIrSendPin, HIGH); // Needed to turn off the light, after each code is sent
 
 			bitsleft_r = 0;
-			l.log(Logger::INFO, "Sending code: (" + String(code_index) + "/" + String(powerCodesCount) + ") freq: " + String(freq) + ", pair: " + String(ontime) + ", " + String(offtime));
+			logger.log(Logger::INFO, "Sending code: (" + String(code_index) + "/" + String(powerCodesCount) + ") freq: " + String(freq) + ", pair: " + String(ontime) + ", " + String(offtime));
 			code_index++;
 		}
 
-		if (last_update < millis())
-			last_update = millis() + 20;
+		if (i_last_update < millis())
+			i_last_update = millis() + 20;
 	}
 public:
 	bool send_codes = false;
@@ -99,7 +99,7 @@ private:
 	uint16_t kIrSendPin = 9; // IR Emitter Pin - M5 IR Unit
 	uint16_t ontime, offtime;
 	int code_index = 0;
-	int last_update = 0;
+	int i_last_update = 0;
 	uint16_t rawData[300];
 
 	/**

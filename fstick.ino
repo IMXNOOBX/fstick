@@ -25,8 +25,8 @@
 /**
  * @brief initialize classes and variables
  */
-Led led;
-Logger l;
+Notify notify;
+Logger logger;
 Battery battery;
 
 BLE b;
@@ -37,7 +37,7 @@ WifiManager wi;
 
 // if (M5.Lcd.width() > 160)
 extern const unsigned char logo[];
-int last_update = millis() + 1000;
+int i_last_update = millis() + 1000;
 int is_ready = false;
 
 /**
@@ -50,39 +50,30 @@ MenuAction ma_sub_infrared[] = {
 
 MenuAction ma_sub_wifi[] = {
     {"Back", nullptr },
-    // {"Scan AP", []() { wi.scanNetworks(); }, ActionType::ACTION, true, []() { wi.scanNetworksRender(); } },
-    {"Select AP", ActionType::ACTION_MENU, &wi.is_selecting_ap, []() { wi.scanNetworksRenderSelect(); }, []() { wi.scanNetworksRenderSelect(true, false); }, []() { wi.scanNetworksRenderSelect(false, true); }, []() { wi.select(); } },
-	{"Spam AP", []() { wi.accessPointLoop(); }, ActionType::LOOP, false, nullptr, &wi.loop_spam_ap },
-	{"Clone AP", []() { wi.cloneAPLoop(); }, ActionType::LOOP, false, nullptr, &wi.loop_clone_spam_ap },
-	{"Rogue AP", []() { wi.rogueAPloop(); }, ActionType::LOOP, false, nullptr, &wi.loop_rogue_ap },
-	{"Probe AP", []() { wi.probeAPloop(); }, ActionType::LOOP, false, nullptr, &wi.loop_probe_ap },
-	{"Deauth", []() { wi.deauthLoop(); }, ActionType::LOOP, false, nullptr, &wi.loop_deauth_ap },
+    // {"Scan AP", []() { wi.scan_nearby_ap(); }, ActionType::ACTION, true, []() { wi.scan_nearby_ap_render(); } },
+    {"Select AP", ActionType::ACTION_MENU, &wi.b_is_selecting_ap, []() { wi.scan_nearby_ap(); }, []() { wi.scan_nearby_ap_select(true, false); }, []() { wi.scan_nearby_ap_select(false, true); }, []() { wi.snaps_select(); } },
+	{"Spam AP", []() { wi.loop_ap_spam(); }, ActionType::LOOP, false, nullptr, &wi.b_loop_spam_ap },
+	{"Clone AP", []() { wi.loop_ap_clone(); }, ActionType::LOOP, false, nullptr, &wi.b_loop_clone_spam_ap },
+	{"Rogue AP", []() { wi.loop_ap_rogue(); }, ActionType::LOOP, false, nullptr, &wi.b_loop_rogue_ap },
+	{"Probe AP", []() { wi.loop_ap_probe(); }, ActionType::LOOP, false, nullptr, &wi.b_loop_probe_ap },
+	{"Deauth", []() { wi.loop_deauth(); }, ActionType::LOOP, false, nullptr, &wi.b_loop_deauth_ap },
 };
-
-/**
- * @brief Attempt to make a sub menu for wifi selection
- * MenuItem mi_sub_wifi[] = {
- *     {"Back", nullptr },
- * };
- */
 
 MenuAction ma_sub_ble[] = {
     {"Back", nullptr },
 	{"Apple Spm", []() { b.t_advertise_apple(); }, ActionType::LOOP, false, nullptr, &b.advertise_apple },
 	{"Android Sp", []() { b.t_advertise_android(); }, ActionType::LOOP, false, nullptr, &b.advertise_android },
+	{"Samsung Sp", []() { b.t_advertise_samsung(); }, ActionType::LOOP, false, nullptr, &b.advertise_samsung },
 	{"Windows S", []() { b.t_advertise_windows(); }, ActionType::LOOP, false, nullptr, &b.advertise_windows },
 	{"@everyone", []() { b.t_advertise_everyone(); }, ActionType::LOOP, true, []() { b.t_advertise_everyone(); }, &b.advertise_everyone },
-    // {"Apple Spm", []() { b.advertiseApple(); } },
-	// {"Android Sp", []() { b.advertiseAndroid(); } },
-	// {"Windows S", []() { b.advertiseWindows(); } },
 };
 
 MenuAction ma_sub_settings[] = {
     {"Back", nullptr },
     {"Bat Saver", []() { cfg.toggleBattSaver(); }, ActionType::TOGGLE, false, nullptr, &cfg.battery_saver },
-    // {"Sounds", []() { cfg.toggleSound(); }, ActionType::TOGGLE, false, nullptr, &cfg.sound_enable },
+    {"Sounds", []() { cfg.toggleSound(); }, ActionType::TOGGLE, false, nullptr, &cfg.sound_enable },
     {"Led", []() { cfg.toggleLed(); }, ActionType::TOGGLE, false, nullptr, &cfg.led_enable },
-    {"Rotate Sc", []() { cfg.switchRotation(); }, ActionType::TOGGLE, false, nullptr },
+    {"Rotate Screen", []() { cfg.switchRotation(); }, ActionType::TOGGLE, false, nullptr },
     {"Restart", []() { M5.Axp.DeepSleep(5); } },
     {"Shutdown", []() { M5.Axp.PowerOff(); } },
 };
@@ -90,7 +81,7 @@ MenuAction ma_sub_settings[] = {
 MenuAction ma_sub_info[] = {
     {"Back", nullptr },
     {"Donate", true, []() { inf.renderDonate(); } },
-    {"Supporters", true, []() { inf.renderDonate(); } },
+    {"Supporters", true, []() { inf.render_supporters(); } },
     {"Repository", true, []() { inf.renderRepository(); } },
     {"Credits", true, []() { inf.renderCredits(); } },
 };
@@ -98,10 +89,9 @@ MenuAction ma_sub_info[] = {
 MenuItem mi_menu[] = {
     {"Infra Red", nullptr, 2, ma_sub_infrared },
     {"WiFi", nullptr, 7, ma_sub_wifi },
-	// {"Select WiFi", mi_sub_wifi, 11, nullptr },
-    {"BLE", nullptr, 5, ma_sub_ble },
+    {"BLE", nullptr, 6, ma_sub_ble },
     {"Settings", nullptr, 6, ma_sub_settings },
-    {"Info", nullptr, 4, ma_sub_info },
+    {"Info", nullptr, 5, ma_sub_info },
 };
 
 MenuRenderer mainMenu(NAME, mi_menu, sizeof(mi_menu) / sizeof(mi_menu[0]));
@@ -113,11 +103,11 @@ void setup() {
 	M5.begin();
 	
 	#ifdef DEV
-		l.log(Logger::WARNING, "This is a DEVELOPMENT build made in " + String(__DATE__) + ", its not recommended for every day use.");
+		logger.log(Logger::WARNING, "This is a DEVELOPMENT build made in " + String(__DATE__) + ", its not recommended for every day use.");
 
 		int attempts = 0;
 		while (!Serial.available()) { // Wait for the serial connection to be establised.
-			l.log(Logger::WARNING, "(" + String(attempts) + ") Waiting for serial to be available...");
+			logger.log(Logger::WARNING, "(" + String(attempts) + ") Waiting for serial to be available...");
 
 			if (attempts > 3)
 				break;
@@ -127,11 +117,11 @@ void setup() {
 			delay(300);
 		}
 
-		M5.Beep.tone(4500);
-		delay(50);
+		M5.Beep.tone(3000);
+		delay(100);
 		M5.Beep.mute();
 	#endif 
-	l.log(Logger::INFO, "Starting " + String(NAME) + "...");
+	logger.log(Logger::INFO, "Starting " + String(NAME) + "...");
 
 	M5.Lcd.setRotation(1);
 	M5.Lcd.fillScreen(BLACK);
@@ -153,43 +143,43 @@ void setup() {
 	/**
 	 * @brief initialize classes
 	 */
-	l.setShouldDisplayLog(true); // Set log output to screen
+	logger.setShouldDisplayLog(true); // Set log output to screen
 
 	if(cfg.init())
-		l.log(Logger::INFO, "Settings has been initialized successfully!");
+		logger.log(Logger::INFO, "Settings has been initialized successfully!");
 	else
-		l.log(Logger::ERROR, "Failed to initialize BLE");
+		logger.log(Logger::ERROR, "Failed to initialize BLE");
 
 	delay(500); // I know its not clean, but looks good for the end user
 
 	if(ir.init())
-		l.log(Logger::INFO, "IrBlaster has been initialized successfully!");
+		logger.log(Logger::INFO, "IrBlaster has been initialized successfully!");
 	else
-		l.log(Logger::ERROR, "Failed to initialize IrBlaster");
+		logger.log(Logger::ERROR, "Failed to initialize IrBlaster");
 
 	delay(500);
 
 	if(wi.init())
-		l.log(Logger::INFO, "WifiManager has been initialized successfully!");
+		logger.log(Logger::INFO, "WifiManager has been initialized successfully!");
 	else
-		l.log(Logger::ERROR, "Failed to initialize WifiManager");
+		logger.log(Logger::ERROR, "Failed to initialize WifiManager");
 
 	delay(500);
 
 	if(b.init())
-		l.log(Logger::INFO, "BLE has been initialized successfully!");
+		logger.log(Logger::INFO, "BLE has been initialized successfully!");
 	else
-		l.log(Logger::ERROR, "Failed to initialize BLE");
+		logger.log(Logger::ERROR, "Failed to initialize BLE");
 
 	delay(500);
 
-	l.setShouldDisplayLog(false); // Remove log output from screen
+	logger.setShouldDisplayLog(false); // Remove log output from screen
 		
-	led.flash();
-	M5.Lcd.setTextSize(1);
+	notify.send();
+	M5.Lcd.setTextSize(1);	
 	M5.Lcd.setCursor(120, SCREEN_HEIGHT - 20);
 	M5.Lcd.print("Click to continue");
-	l.log(Logger::INFO, "Menu is ready to use!");
+	logger.log(Logger::INFO, "Menu is ready to use!");
 
 	/**
 	 * @brief Wait until user interacts with the device
@@ -219,31 +209,31 @@ void loop() {
     if (M5.Axp.GetBtnPress()) {
 		#ifdef DEV
 		{
-			l.log(Logger::INFO, "Pressed Axp button to navigate to the next option");
+			logger.log(Logger::INFO, "Pressed Axp button to navigate to the next option");
 		}
 		#endif
 
 		battery.setLI(millis());
-        mainMenu.nextOption();
+        mainMenu.next_option();
 		battery.restoreBrightness();
     }
 
 	if (M5.BtnB.wasReleased()) {
 		#ifdef DEV
 		{
-			l.log(Logger::INFO, "Pressed BtnB button to navigate to the previous option");
+			logger.log(Logger::INFO, "Pressed BtnB button to navigate to the previous option");
 		}
 		#endif
 		
 		battery.setLI(millis());
-        mainMenu.previousOption();
+        mainMenu.previous_option();
 		battery.restoreBrightness();
     }
 
     if (M5.BtnA.wasReleased()) {
 		#ifdef DEV
 		{
-			l.log(Logger::INFO, "Pressed BtnA button to select option");
+			logger.log(Logger::INFO, "Pressed BtnA button to select option");
 		}
 		#endif
 
@@ -256,16 +246,16 @@ void loop() {
 
 	if (M5.BtnA.wasReleasefor(3000)) {
 		cfg.toggleScretMode();
-		l.log(Logger::WARNING, "Secret mode has been activated, restart the device to exit it.");
+		logger.log(Logger::WARNING, "Secret mode has been activated, restart the device to exit it.");
 	}
 
 	if (cfg.getSecretMode()) 
 		mainMenu.render_hww();
 	
-	if (last_update < millis()) { // refresh the screen every x seconds
+	if (i_last_update < millis()) { // refresh the screen every x seconds
 		mainMenu.render_feature(true);
 		mainMenu.topBar(); // Should be the last to be on top of everything
-		last_update = millis() + 1000; // Refresh every 1s
+		i_last_update = millis() + 1000; // Refresh every 1s
 	}
 
 	/**
