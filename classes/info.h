@@ -9,83 +9,83 @@ public:
 	Info() {}
 
 	void renderCredits() {
-		M5.Lcd.setTextColor(WHITE, BLACK);
+		SCREEN.setTextColor(WHITE, BLACK);
 
 		// Display credits
-		M5.Lcd.setTextSize(2);
-		M5.Lcd.setCursor(10, 20);
-		M5.Lcd.println("Nemo Project");
-		M5.Lcd.setTextSize(1);
-		M5.Lcd.setCursor(10, 40);
-		M5.Lcd.println("gh n0xa/m5stick-nemo");
+		SCREEN.setTextSize(2);
+		SCREEN.setCursor(10, 20);
+		SCREEN.println("Nemo Project");
+		SCREEN.setTextSize(1);
+		SCREEN.setCursor(10, 40);
+		SCREEN.println("gh n0xa/m5stick-nemo");
 
-		M5.Lcd.setTextSize(2);
-		M5.Lcd.setCursor(10, 50);
-		M5.Lcd.println("Penetration Tool");
-		M5.Lcd.setTextSize(1);
-		M5.Lcd.setCursor(10, 70);
-		M5.Lcd.println("gh risinek/esp32-wifi-penetration-tool");
+		SCREEN.setTextSize(2);
+		SCREEN.setCursor(10, 50);
+		SCREEN.println("Penetration Tool");
+		SCREEN.setTextSize(1);
+		SCREEN.setCursor(10, 70);
+		SCREEN.println("gh risinek/esp32-wifi-penetration-tool");
 
-		M5.Lcd.setTextSize(2);
-		M5.Lcd.setCursor(10, 80);
-		M5.Lcd.println("BLE Spam");
-		M5.Lcd.setTextSize(1);
-		M5.Lcd.setCursor(10, 100);
-		M5.Lcd.println("gh RapierXbox/ESP32-Sour-Apple");
+		SCREEN.setTextSize(2);
+		SCREEN.setCursor(10, 80);
+		SCREEN.println("BLE Spam");
+		SCREEN.setTextSize(1);
+		SCREEN.setCursor(10, 100);
+		SCREEN.println("gh RapierXbox/ESP32-Sour-Apple");
 
-		M5.Lcd.setTextSize(1);
-		M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);
-		M5.Lcd.println("Click to return");
+		SCREEN.setTextSize(1);
+		SCREEN.setCursor(10, SCREEN_HEIGHT - 20);
+		SCREEN.println("Click to return");
 	}
 
 	void render_supporters() {
-		M5.Lcd.setTextColor(PURPLE, BLACK);
+		SCREEN.setTextColor(PURPLE, BLACK);
 
 		// Display credits
-		M5.Lcd.setTextSize(2);
-		M5.Lcd.setCursor(10, 20);
-		M5.Lcd.println("Killer74-hub");
-		M5.Lcd.setTextColor(WHITE, BLACK);
-		M5.Lcd.setTextSize(1);
-		M5.Lcd.setCursor(10, 40);
-		M5.Lcd.println("For a generous donation to keep");
-		M5.Lcd.setCursor(10, 50);
-		M5.Lcd.println("this project going! Thank you so much!");
+		SCREEN.setTextSize(2);
+		SCREEN.setCursor(10, 20);
+		SCREEN.println("Killer74-hub");
+		SCREEN.setTextColor(WHITE, BLACK);
+		SCREEN.setTextSize(1);
+		SCREEN.setCursor(10, 40);
+		SCREEN.println("For a generous donation to keep");
+		SCREEN.setCursor(10, 50);
+		SCREEN.println("this project going! Thank you so much!");
 
-		M5.Lcd.setTextSize(1);
-		M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);
-		M5.Lcd.println("Click to return");
+		SCREEN.setTextSize(1);
+		SCREEN.setCursor(10, SCREEN_HEIGHT - 20);
+		SCREEN.println("Click to return");
 	}
 
 	void renderRepository() {
-		M5.Lcd.setTextColor(WHITE, BLACK);
+		SCREEN.setTextColor(WHITE, BLACK);
 
-		M5.Lcd.setTextSize(2);
-		M5.Lcd.setCursor(10, 40);
-		M5.Lcd.println("Repository:");
-		M5.Lcd.setTextSize(1);
-		M5.Lcd.setCursor(10, 80);
-		M5.Lcd.println("https://github.com");
-		M5.Lcd.setCursor(10, 90);
-		M5.Lcd.println("/IMXNOOBX/fstick");
+		SCREEN.setTextSize(2);
+		SCREEN.setCursor(10, 40);
+		SCREEN.println("Repository:");
+		SCREEN.setTextSize(1);
+		SCREEN.setCursor(10, 80);
+		SCREEN.println("https://github.com");
+		SCREEN.setCursor(10, 90);
+		SCREEN.println("/IMXNOOBX/fstick");
 
-		M5.Lcd.qrcode("https://github.com/IMXNOOBX/fstick", SCREEN_WIDTH - 85, SCREEN_HEIGHT - 85, 80, 5);
+		SCREEN.qrcode("https://github.com/IMXNOOBX/fstick", SCREEN_WIDTH - 85, SCREEN_HEIGHT - 85, 80, 5);
 
-		M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);
-		M5.Lcd.println("Click to return");
+		SCREEN.setCursor(10, SCREEN_HEIGHT - 20);
+		SCREEN.println("Click to return");
 	}
 
 	void renderDonate() {
-		M5.Lcd.setTextColor(WHITE, BLACK);
+		SCREEN.setTextColor(WHITE, BLACK);
 
-		M5.Lcd.setTextSize(1);
-		M5.Lcd.setCursor(5, 20);
-		M5.Lcd.println("Please consider donating so i can keep improving this project and get a flipper zero to work on more projects :D");
+		SCREEN.setTextSize(1);
+		SCREEN.setCursor(5, 20);
+		SCREEN.println("Please consider donating so i can keep improving this project and get a flipper zero to work on more projects :D");
 
-		M5.Lcd.qrcode("https://www.paypal.com/donate/?business=imxnoobx@gmail.com&cmd=_donations", SCREEN_WIDTH - 85, SCREEN_HEIGHT - 85, 80, 5);
+		SCREEN.qrcode("https://www.paypal.com/donate/?business=imxnoobx@gmail.com&cmd=_donations", SCREEN_WIDTH - 85, SCREEN_HEIGHT - 85, 80, 5);
 
-		M5.Lcd.setTextSize(1);
-		M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);
-		M5.Lcd.println("Click to return");
+		SCREEN.setTextSize(1);
+		SCREEN.setCursor(10, SCREEN_HEIGHT - 20);
+		SCREEN.println("Click to return");
 	}
 };

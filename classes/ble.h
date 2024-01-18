@@ -137,13 +137,13 @@ public:
 		if (circle_size > 50) 
 			circle_size = 1;
 			
-		int x = M5.Lcd.width() / 2;
-		int y = M5.Lcd.height() / 2;
+		int x = SCREEN.width() / 2;
+		int y = SCREEN.height() / 2;
 
-		M5.Lcd.fillCircle(x, y, 100, BLACK);
+		SCREEN.fillCircle(x, y, 100, BLACK);
 		for (int i = 1; i <= 4; i++) {
 			if (circle_size != 0)
-				M5.Lcd.drawCircle(x, y, circle_size / i, BLUE);
+				SCREEN.drawCircle(x, y, circle_size / i, BLUE);
 		}
 
 		circle_size += 15;

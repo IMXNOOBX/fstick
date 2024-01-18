@@ -17,8 +17,8 @@
  * This notice applies to all files within this repository
  */
 
-#define PLUS
-// #define PLUS2
+// #define PLUS
+#define PLUS2
 #define DEV // Mostly to disable battery saver and some debug messages
 #include "classes/globals.h"
 
@@ -35,7 +35,7 @@ Settings cfg;
 IrBlaster ir; // const uint16_t kIrSendPin = 9;  // IR Emitter Pin - M5 IR Unit
 WifiManager wi;
 
-// if (M5.Lcd.width() > 160)
+// if (SCREEN.width() > 160)
 extern const unsigned char logo[];
 int i_last_update = millis() + 1000;
 int is_ready = false;
@@ -74,8 +74,13 @@ MenuAction ma_sub_settings[] = {
     {"Sounds", []() { cfg.toggleSound(); }, ActionType::TOGGLE, false, nullptr, &cfg.sound_enable },
     {"Led", []() { cfg.toggleLed(); }, ActionType::TOGGLE, false, nullptr, &cfg.led_enable },
     {"Rotate Screen", []() { cfg.switchRotation(); }, ActionType::TOGGLE, false, nullptr },
-    {"Restart", []() { M5.Axp.DeepSleep(5); } },
-    {"Shutdown", []() { M5.Axp.PowerOff(); } },
+	#if !defined(PLUS2)
+    	{"Restart", []() { M5.Axp.DeepSleep(5); } },
+    	{"Shutdown", []() { M5.Axp.PowerOff(); } },
+	#else
+	    {"Restart", []() { StickCP2.Power.timerSleep(5); } },
+		{"Shutdown", []() { StickCP2.Power.powerOff(); } },
+	#endif
 };
 
 MenuAction ma_sub_info[] = {
@@ -117,29 +122,27 @@ void setup() {
 			delay(300);
 		}
 
-		M5.Beep.tone(3000);
-		delay(100);
-		M5.Beep.mute();
+		notify.send(2);
 	#endif 
 	logger.log(Logger::INFO, "Starting " + String(NAME) + "...");
 
-	M5.Lcd.setRotation(1);
-	M5.Lcd.fillScreen(BLACK);
-	M5.Lcd.setTextColor(WHITE, BLACK);
+	SCREEN.setRotation(1);
+	SCREEN.fillScreen(BLACK);
+	SCREEN.setTextColor(WHITE, BLACK);
 
 	mainMenu.topBar();
 
 	// Logo
-	M5.Lcd.drawBitmap(10, 20, 105, 105, (uint16_t*)logo);
+	SCREEN.drawBitmap(10, 20, 105, 105, (uint16_t*)logo);
 
-	M5.Lcd.setCursor(120, 40);
-	M5.Lcd.setTextSize(2);
-	M5.Lcd.print(NAME);
-	M5.Lcd.setCursor(120, 60);
-	M5.Lcd.setTextSize(1);
-	M5.Lcd.println(VERSION);
-	M5.Lcd.setCursor(120, 70);
-	M5.Lcd.println(DEVICE);
+	SCREEN.setCursor(120, 40);
+	SCREEN.setTextSize(2);
+	SCREEN.print(NAME);
+	SCREEN.setCursor(120, 60);
+	SCREEN.setTextSize(1);
+	SCREEN.println(VERSION);
+	SCREEN.setCursor(120, 70);
+	SCREEN.println(DEVICE);
 	/**
 	 * @brief initialize classes
 	 */
@@ -176,9 +179,9 @@ void setup() {
 	logger.setShouldDisplayLog(false); // Remove log output from screen
 		
 	notify.send();
-	M5.Lcd.setTextSize(1);	
-	M5.Lcd.setCursor(120, SCREEN_HEIGHT - 20);
-	M5.Lcd.print("Click to continue");
+	SCREEN.setTextSize(1);	
+	SCREEN.setCursor(120, SCREEN_HEIGHT - 20);
+	SCREEN.print("Click to continue");
 	logger.log(Logger::INFO, "Menu is ready to use!");
 
 	/**
@@ -206,6 +209,7 @@ void loop() {
 	if (cfg.getSecretMode()) 
 		return;
 
+#if !defined(PLUS2)
     if (M5.Axp.GetBtnPress()) {
 		#ifdef DEV
 			logger.log(Logger::INFO, "Pressed Axp button to navigate to the next option");
@@ -215,6 +219,10 @@ void loop() {
         mainMenu.next_option();
 		battery.restoreBrightness();
     }
+#else
+	// fstick.ino:215:21: error: 'class m5::Power_Class' has no member named 'wasReleased'
+	// if (StickCP2.Power.wasReleased()) {
+#endif
 
 	if (M5.BtnB.wasReleased()) {
 		#ifdef DEV

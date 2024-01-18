@@ -8,7 +8,11 @@ public:
 
 	void brightness(int ammount) {
 		current_brightness = ammount;
-		M5.Axp.ScreenBreath(ammount);
+		#if !defined(PLUS2)
+			M5.Axp.ScreenBreath(ammount);
+		#else
+		    analogWrite(BACKLIGHT, 155 + (ammount));
+		#endif
 	}
 
 	int getBrightness() {
@@ -26,14 +30,24 @@ public:
 	}
 
 	int get() {
+#if !defined(PLUS2)
 		float b = M5.Axp.GetVbatData() * 1.1 / 1000;
+#else
+		float b = StickCP2.Power.getBatteryVoltage() * 1.1 / 1000;
+#endif
 		int battery = ((b - 3.0) / 1.2) * 100;
+		if (battery > 100 || battery < 0)
+			return -1;
+
 		return battery;
 	}
 
 	String get_str() {
-		float b = M5.Axp.GetVbatData() * 1.1 / 1000;
-		int battery = ((b - 3.0) / 1.2) * 100;
+		int battery = get();
+
+		if (battery == -1)
+			return "...";
+
 		return String(battery) + "%";
 	}
 

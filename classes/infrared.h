@@ -34,18 +34,18 @@ public:
 	}
 
 	void sendAllPowerCodesRender() {
-		M5.Lcd.setTextColor(WHITE, BLACK);
+		SCREEN.setTextColor(WHITE, BLACK);
 
 		int barWidth = 200;
 		int progress = map(code_index, 0, powerCodesCount, 0, barWidth);
 
-		M5.Lcd.drawRect(20, 80, barWidth, 20, WHITE);
+		SCREEN.drawRect(20, 80, barWidth, 20, WHITE);
 
-		M5.Lcd.fillRect(20, 80, progress, 20, WHITE);
+		SCREEN.fillRect(20, 80, progress, 20, WHITE);
 
-		M5.Lcd.setTextSize(2);
-		M5.Lcd.setCursor(20, 50);
-		M5.Lcd.print("Sending: (" + String(code_index) + "/" + String(powerCodesCount) + ")");
+		SCREEN.setTextSize(2);
+		SCREEN.setCursor(20, 50);
+		SCREEN.print("Sending: (" + String(code_index) + "/" + String(powerCodesCount) + ")");
 	}
 
 	void loop() {

@@ -142,16 +142,16 @@ public:
 	}
 
 	void scan_nearby_ap_render() {
-		M5.Lcd.setTextColor(WHITE, BLACK);
-		M5.Lcd.setTextSize(1);
+		SCREEN.setTextColor(WHITE, BLACK);
+		SCREEN.setTextSize(1);
 
 		int offset = 25;
 		for (int i = 0; i < i_scanned_ap_count; i++) {
 			if (s_scanned_ap[i].bssid == nullptr) break;
 
-			M5.Lcd.setCursor(5, offset);
+			SCREEN.setCursor(5, offset);
 
-			M5.Lcd.print("(" + String((int)s_scanned_ap[i].rssi) + ") " +s_scanned_ap[i].ssid + ": " + s_scanned_ap[i].bssid_str);
+			SCREEN.print("(" + String((int)s_scanned_ap[i].rssi) + ") " +s_scanned_ap[i].ssid + ": " + s_scanned_ap[i].bssid_str);
 
 			offset += 10;
 		}
@@ -176,20 +176,20 @@ public:
 		else if (prev)
 			i_current_ap = (i_current_ap - 1 + i_scanned_ap_count + 1) % (i_scanned_ap_count + 1);
 
-        M5.Lcd.fillRect(0, 25, SCREEN_WIDTH, SCREEN_HEIGHT - 20, BLACK); // Clear background
+        SCREEN.fillRect(0, 25, SCREEN_WIDTH, SCREEN_HEIGHT - 20, BLACK); // Clear background
 
-		M5.Lcd.setTextColor(WHITE, BLACK);
-		M5.Lcd.setTextSize(1);
+		SCREEN.setTextColor(WHITE, BLACK);
+		SCREEN.setTextSize(1);
 
 		logger.log(Logger::INFO, "Rendering scanNetworksRenderSelect()");
 
 		if (i_scanned_ap_count == 0) {
-			M5.Lcd.setCursor(10, SCREEN_HEIGHT / 2 - 10);
-			M5.Lcd.setTextSize(3);
-			M5.Lcd.print("No APs found");
-			M5.Lcd.setCursor(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 25);
-			M5.Lcd.setTextSize(2);
-			M5.Lcd.print(":C");
+			SCREEN.setCursor(10, SCREEN_HEIGHT / 2 - 10);
+			SCREEN.setTextSize(3);
+			SCREEN.print("No APs found");
+			SCREEN.setCursor(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 25);
+			SCREEN.setTextSize(2);
+			SCREEN.print(":C");
 			return;
 		}
 
@@ -200,8 +200,8 @@ public:
 			int sb_height = (SCREEN_HEIGHT / (i_scanned_ap_count+1) * maxDisplayItems) / 2;
 			int sb_pos = ((SCREEN_HEIGHT - sb_height) * i_current_ap / (i_scanned_ap_count+1 - maxDisplayItems)) / 2;
 
-			M5.Lcd.fillRect(SCREEN_WIDTH - 10, 0, 4, SCREEN_HEIGHT, BLACK);
-			M5.Lcd.fillRect(SCREEN_WIDTH - 10, sb_pos, 4, sb_height, WHITE);
+			SCREEN.fillRect(SCREEN_WIDTH - 10, 0, 4, SCREEN_HEIGHT, BLACK);
+			SCREEN.fillRect(SCREEN_WIDTH - 10, sb_pos, 4, sb_height, WHITE);
 		}
 		
 		int offset = 25;
@@ -211,19 +211,19 @@ public:
 			auto ssid = s_scanned_ap[index-1].ssid;
 			int rssi = s_scanned_ap[index-1].rssi;
 
-			M5.Lcd.setCursor(5, offset);
+			SCREEN.setCursor(5, offset);
 
-			M5.Lcd.setTextColor(
+			SCREEN.setTextColor(
 				index == i_current_ap ? BLUE : index == i_selected_ap ? BLACK : WHITE,
 				index == i_selected_ap ? WHITE : BLACK
 			);
 
-			M5.Lcd.setTextSize(index == i_current_ap ? 2 : 1);
+			SCREEN.setTextSize(index == i_current_ap ? 2 : 1);
 
 			if (index == i_current_ap)
-				M5.Lcd.print("> " + String(index) + ". " + (index == 0 ? "None (All)" : (ssid.length() > 10 ? (ssid.substring(0, 10) + "...") : ssid)));
+				SCREEN.print("> " + String(index) + ". " + (index == 0 ? "None (All)" : (ssid.length() > 10 ? (ssid.substring(0, 10) + "...") : ssid)));
 			else
-				M5.Lcd.print(String(index) + ". " + (index == 0 ? "None (All)" : ssid + "(" + String(rssi) + ")"));
+				SCREEN.print(String(index) + ". " + (index == 0 ? "None (All)" : ssid + "(" + String(rssi) + ")"));
 
 			offset += index == i_current_ap ? 20 : 10;  // Adjusted offset for greater text size
 		}
@@ -237,26 +237,26 @@ public:
 		int yOffset = 40;
 
 		if (is_back) {
-			M5.Lcd.setTextSize(is_back && s_scanned_ap[index - 1].ssid.length() > 6 ? 2 : 3);
-			M5.Lcd.setCursor(20, yOffset);
-			M5.Lcd.setTextColor(index - 1 == i_selected_ap ? BLUE : WHITE, BLACK);
-			M5.Lcd.print(is_back ? s_scanned_ap[index - 1].ssid : "None (All)");
+			SCREEN.setTextSize(is_back && s_scanned_ap[index - 1].ssid.length() > 6 ? 2 : 3);
+			SCREEN.setCursor(20, yOffset);
+			SCREEN.setTextColor(index - 1 == i_selected_ap ? BLUE : WHITE, BLACK);
+			SCREEN.print(is_back ? s_scanned_ap[index - 1].ssid : "None (All)");
 			yOffset += is_back && s_scanned_ap[index - 1].ssid.length() > 6 ? 20 : 30;
 		}
 
 		if (is_current) {
-			M5.Lcd.setTextSize(is_current && s_scanned_ap[index].ssid.length() > 6 ? 2 : 3);
-			M5.Lcd.setCursor(20, yOffset);
-			M5.Lcd.setTextColor(index == i_selected_ap ? BLUE : YELLOW, BLACK);
-			M5.Lcd.print("- " + s_scanned_ap[index].ssid);
+			SCREEN.setTextSize(is_current && s_scanned_ap[index].ssid.length() > 6 ? 2 : 3);
+			SCREEN.setCursor(20, yOffset);
+			SCREEN.setTextColor(index == i_selected_ap ? BLUE : YELLOW, BLACK);
+			SCREEN.print("- " + s_scanned_ap[index].ssid);
 			yOffset += is_current && s_scanned_ap[index].ssid.length() > 6 ? 20 : 30;
 		}
 
 		if (is_next) {
-			M5.Lcd.setTextSize(is_next && s_scanned_ap[index + 1].ssid.length() > 6 ? 2 : 3);
-			M5.Lcd.setCursor(20, yOffset);
-			M5.Lcd.setTextColor(index + 1 == i_selected_ap ? BLUE : WHITE, BLACK);
-			M5.Lcd.print(is_next ? s_scanned_ap[index + 1].ssid : "");
+			SCREEN.setTextSize(is_next && s_scanned_ap[index + 1].ssid.length() > 6 ? 2 : 3);
+			SCREEN.setCursor(20, yOffset);
+			SCREEN.setTextColor(index + 1 == i_selected_ap ? BLUE : WHITE, BLACK);
+			SCREEN.print(is_next ? s_scanned_ap[index + 1].ssid : "");
 			yOffset += is_next && s_scanned_ap[index + 1].ssid.length() > 6 ? 20 : 30;
 		}
 		*/

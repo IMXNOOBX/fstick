@@ -92,17 +92,17 @@ public:
 	}
 
 	void topBar() {
-		M5.Lcd.setTextColor(WHITE, BLACK);
-		M5.Lcd.setCursor(10, 10);
-		M5.Lcd.setTextSize(1);
-		M5.Lcd.print(utilities::get_time_str());
-		M5.Lcd.setCursor(SCREEN_WIDTH / 2 - 5, 10);
+		SCREEN.setTextColor(WHITE, BLACK);
+		SCREEN.setCursor(10, 10);
+		SCREEN.setTextSize(1);
+		SCREEN.print(utilities::get_time_str());
+		SCREEN.setCursor(SCREEN_WIDTH / 2 - 5, 10);
 		#ifdef DEV
-			M5.Lcd.setTextColor(GREEN);
-			M5.Lcd.print("DEV");
+			SCREEN.setTextColor(GREEN);
+			SCREEN.print("DEV");
 		#elif
-			M5.Lcd.setTextColor(BLUE);
-			M5.Lcd.print("FS");
+			SCREEN.setTextColor(BLUE);
+			SCREEN.print("FS");
 		#endif
 
 
@@ -112,39 +112,39 @@ public:
 		 */
 		int battery = utilities::get_battery();
 		if (battery > 50)
-			M5.Lcd.setTextColor(GREEN, BLACK);
+			SCREEN.setTextColor(GREEN, BLACK);
 		else if (battery > 25)
-			M5.Lcd.setTextColor(YELLOW, BLACK);
+			SCREEN.setTextColor(YELLOW, BLACK);
 		else
-			M5.Lcd.setTextColor(RED, BLACK);
-		M5.Lcd.setCursor(SCREEN_WIDTH - 30, 10);
-		M5.Lcd.print(utilities::get_battery_str());
-		M5.Lcd.setTextColor(WHITE, BLACK);
+			SCREEN.setTextColor(RED, BLACK);
+		SCREEN.setCursor(SCREEN_WIDTH - 30, 10);
+		SCREEN.print(utilities::get_battery_str());
+		SCREEN.setTextColor(WHITE, BLACK);
 	}
 
 	void render(bool reset = false)
 	{
 		if (reset)
-			M5.Lcd.fillScreen(BLACK);
+			SCREEN.fillScreen(BLACK);
 
 		topBar();
-		M5.Lcd.setTextColor(WHITE);
+		SCREEN.setTextColor(WHITE);
 
 		if (this->subm_actions == nullptr && this->subm_options == nullptr)
 		{
-			M5.Lcd.setTextSize(2);
-			M5.Lcd.setCursor(10, 20);
-			M5.Lcd.setTextColor(BLUE);
-			M5.Lcd.print(title);
-			M5.Lcd.setTextColor(WHITE);
+			SCREEN.setTextSize(2);
+			SCREEN.setCursor(10, 20);
+			SCREEN.setTextColor(BLUE);
+			SCREEN.print(title);
+			SCREEN.setTextColor(WHITE);
 
-			M5.Lcd.setTextSize(menu_options[menu_selected].name.length() >= 8 ? 3 : 4);
-			M5.Lcd.setCursor(20, 60);
-			M5.Lcd.print(menu_options[menu_selected].name);
+			SCREEN.setTextSize(menu_options[menu_selected].name.length() >= 8 ? 3 : 4);
+			SCREEN.setCursor(20, 60);
+			SCREEN.print(menu_options[menu_selected].name);
 
-			M5.Lcd.setTextSize(1);
-			M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);
-			M5.Lcd.print(
+			SCREEN.setTextSize(1);
+			SCREEN.setCursor(10, SCREEN_HEIGHT - 20);
+			SCREEN.print(
 				"<" + String(menu_selected + 1) + "/" + String(menu_size) +
 				"> Navigate" +
 				String(
@@ -153,11 +153,11 @@ public:
 						: ""));
 		} else if (this->subm_actions) { // Render the submenu
 			int yOffset = 20;
-			M5.Lcd.setCursor(10, yOffset);
-			M5.Lcd.setTextSize(2);
-			M5.Lcd.setTextColor(BLUE);
-			M5.Lcd.print(menu_options[menu_selected].name);
-			M5.Lcd.setTextColor(WHITE);
+			SCREEN.setCursor(10, yOffset);
+			SCREEN.setTextSize(2);
+			SCREEN.setTextColor(BLUE);
+			SCREEN.print(menu_options[menu_selected].name);
+			SCREEN.setTextColor(WHITE);
 			yOffset += 20;
 
 			int backOpt = this->subm_actions_selected - 1;
@@ -169,10 +169,10 @@ public:
 
 			if (backOpt >= 0)
 			{
-				M5.Lcd.setTextColor(*(subm_actions[backOpt].is_active) ? GREEN : WHITE);
-				M5.Lcd.setTextSize(2);
-				M5.Lcd.setCursor(20, yOffset);
-				M5.Lcd.print(subm_actions[backOpt].name);
+				SCREEN.setTextColor(*(subm_actions[backOpt].is_active) ? GREEN : WHITE);
+				SCREEN.setTextSize(2);
+				SCREEN.setCursor(20, yOffset);
+				SCREEN.print(subm_actions[backOpt].name);
 				yOffset += 20;
 			}
 
@@ -194,29 +194,29 @@ public:
 				#endif
 
 				if (is_active && (ac_type == ActionType::LOOP || ac_type == ActionType::TOGGLE))
-					M5.Lcd.setTextColor(GREEN);
+					SCREEN.setTextColor(GREEN);
 				else if (ac_type == ActionType::LOOP) 
-					M5.Lcd.setTextColor(DARKCYAN);
+					SCREEN.setTextColor(DARKCYAN);
 				else 
-					M5.Lcd.setTextColor(ORANGE);
+					SCREEN.setTextColor(ORANGE);
 				
-				M5.Lcd.setCursor(20, yOffset);
-				M5.Lcd.setTextSize(3);
-				M5.Lcd.print(ac_type == ActionType::LOOP ? "o " : "> ");
+				SCREEN.setCursor(20, yOffset);
+				SCREEN.setTextSize(3);
+				SCREEN.print(ac_type == ActionType::LOOP ? "o " : "> ");
 				{
 					bool text_oversize = opt_name.length() > 8;
 					bool text_toooversize = opt_name.length() >= 12;
 
 					if (text_oversize)
-						M5.Lcd.setCursor(50, yOffset + 5);
+						SCREEN.setCursor(50, yOffset + 5);
 
-					M5.Lcd.setTextSize(text_oversize ? 2 : 3); // To better fit each feature
-					M5.Lcd.print(text_oversize ? (text_toooversize ? opt_name.substring(0, 12) : opt_name) : opt_name);
+					SCREEN.setTextSize(text_oversize ? 2 : 3); // To better fit each feature
+					SCREEN.print(text_oversize ? (text_toooversize ? opt_name.substring(0, 12) : opt_name) : opt_name);
 
 					if (text_toooversize) {
-						// M5.Lcd.setCursor(50 + 12 * 10, yOffset + 10);
-						M5.Lcd.setTextSize(1);
-						M5.Lcd.print("...");
+						// SCREEN.setCursor(50 + 12 * 10, yOffset + 10);
+						SCREEN.setTextSize(1);
+						SCREEN.print("...");
 					}
 				}
 				yOffset += 30;
@@ -224,40 +224,40 @@ public:
 
 			if (nextOpt < subm_actions_size)
 			{
-				M5.Lcd.setTextColor(*(subm_actions[nextOpt].is_active) ? GREEN : WHITE);
-				M5.Lcd.setTextSize(2);
-				M5.Lcd.setCursor(20, yOffset);
-				M5.Lcd.print(subm_actions[nextOpt].name);
+				SCREEN.setTextColor(*(subm_actions[nextOpt].is_active) ? GREEN : WHITE);
+				SCREEN.setTextSize(2);
+				SCREEN.setCursor(20, yOffset);
+				SCREEN.print(subm_actions[nextOpt].name);
 				yOffset += 20;
 			}
 
 			if (nextOpt < subm_actions_size - 1)
 			{
-				M5.Lcd.setTextColor(WHITE);
-				M5.Lcd.setTextSize(1);
-				M5.Lcd.setCursor(20, yOffset);
-				M5.Lcd.print("...");
+				SCREEN.setTextColor(WHITE);
+				SCREEN.setTextSize(1);
+				SCREEN.setCursor(20, yOffset);
+				SCREEN.print("...");
 			}
 
-			M5.Lcd.setTextColor(WHITE); // Reset text color
+			SCREEN.setTextColor(WHITE); // Reset text color
 
-			M5.Lcd.setTextSize(1);
-			M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);
-			M5.Lcd.print(String(subm_actions_selected + 1) + "/" + String(subm_actions_size) + " Navigate");
+			SCREEN.setTextSize(1);
+			SCREEN.setCursor(10, SCREEN_HEIGHT - 20);
+			SCREEN.print(String(subm_actions_selected + 1) + "/" + String(subm_actions_size) + " Navigate");
 		} else if (this->subm_options) {
-				M5.Lcd.setTextSize(1);
-				M5.Lcd.setCursor(10, 20);
-				M5.Lcd.setTextColor(BLUE);
-				M5.Lcd.print(String(title) + " > " + menu_options[menu_selected].name);
-				M5.Lcd.setTextColor(WHITE);
+				SCREEN.setTextSize(1);
+				SCREEN.setCursor(10, 20);
+				SCREEN.setTextColor(BLUE);
+				SCREEN.print(String(title) + " > " + menu_options[menu_selected].name);
+				SCREEN.setTextColor(WHITE);
 
-				M5.Lcd.setTextSize(subm_options[subm_options_selected].name.length() >= 8 ? 3 : 4);
-				M5.Lcd.setCursor(20, 60);
-				M5.Lcd.print(subm_options[subm_options_selected].name);
+				SCREEN.setTextSize(subm_options[subm_options_selected].name.length() >= 8 ? 3 : 4);
+				SCREEN.setCursor(20, 60);
+				SCREEN.print(subm_options[subm_options_selected].name);
 
-				M5.Lcd.setTextSize(1);
-				M5.Lcd.setCursor(10, SCREEN_HEIGHT - 20);
-				M5.Lcd.print(
+				SCREEN.setTextSize(1);
+				SCREEN.setCursor(10, SCREEN_HEIGHT - 20);
+				SCREEN.print(
 					"<" + String(subm_options_selected + 1) + "/" + String(subm_options_size) +
 					"> Navigate" +
 					String(
@@ -272,32 +272,32 @@ public:
 	 * To exit this screen the user will have to restart the device.
 	 */
 	void render_hww() {
-		M5.Lcd.fillScreen(BLACK);
+		SCREEN.fillScreen(BLACK);
 		this->topBar();
 
-		M5.Lcd.setTextSize(2);
-		M5.Lcd.setTextColor(BLUE);
-		M5.Lcd.setCursor(SCREEN_WIDTH / 4, 30);
-		M5.Lcd.print("M5 | Wallet");
+		SCREEN.setTextSize(2);
+		SCREEN.setTextColor(BLUE);
+		SCREEN.setCursor(SCREEN_WIDTH / 4, 30);
+		SCREEN.print("M5 | Wallet");
 		
-		M5.Lcd.setTextColor(WHITE);
-		M5.Lcd.setCursor(10, 60);
-		M5.Lcd.print("Type:");
-		M5.Lcd.setCursor(80, 60);
-		M5.Lcd.setTextColor(ORANGE);
-		M5.Lcd.print("BTC");
-		M5.Lcd.setTextColor(WHITE);
+		SCREEN.setTextColor(WHITE);
+		SCREEN.setCursor(10, 60);
+		SCREEN.print("Type:");
+		SCREEN.setCursor(80, 60);
+		SCREEN.setTextColor(ORANGE);
+		SCREEN.print("BTC");
+		SCREEN.setTextColor(WHITE);
 
-		M5.Lcd.setCursor(10, 80);
-		M5.Lcd.setTextSize(2);
-		M5.Lcd.print("Amt: 0.027");
+		SCREEN.setCursor(10, 80);
+		SCREEN.setTextSize(2);
+		SCREEN.print("Amt: 0.027");
 
 		// 				Ctrl + Click the URL
-		M5.Lcd.qrcode("https://youtu.be/dQw4w9WgXcQ", SCREEN_WIDTH - 85, SCREEN_HEIGHT - 85, 80, 5);
+		SCREEN.qrcode("https://youtu.be/dQw4w9WgXcQ", SCREEN_WIDTH - 85, SCREEN_HEIGHT - 85, 80, 5);
 
-		M5.Lcd.setTextSize(1);
-		M5.Lcd.setCursor(10, SCREEN_HEIGHT - 15);
-		M5.Lcd.print("Version: " + String(VERSION));
+		SCREEN.setTextSize(1);
+		SCREEN.setCursor(10, SCREEN_HEIGHT - 15);
+		SCREEN.print("Version: " + String(VERSION));
 	}
 
 	void render_feature(bool refresh = false) {
@@ -310,7 +310,7 @@ public:
 
 		if ((is_active/* || ac_type == ActionType::ACTION*/) && has_sub) {
 			if (!prev_feature_state)
-				M5.Lcd.fillScreen(BLACK); // Reset the screen, so we dont have to do it inside the sub render
+				SCREEN.fillScreen(BLACK); // Reset the screen, so we dont have to do it inside the sub render
 
 			this->topBar();
 

@@ -2,18 +2,31 @@ namespace utilities
 {
 	String get_time_str()
 	{
-		M5.Rtc.GetBm8563Time();
-		String time = String(M5.Rtc.Hour) + ":" + String(M5.Rtc.Minute) + ":" + String(M5.Rtc.Second);
-		if (time.length() < 8)
-			time += "  ";
+		#if !defined(PLUS2)
+			M5.Rtc.GetBm8563Time();
+
+			String time = String(M5.Rtc.Hour) + ":" + String(M5.Rtc.Minute) + ":" + String(M5.Rtc.Second);
+			if (time.length() < 8)
+				time += "  ";
+		#else
+		    auto dt = M5.Rtc.getDateTime();
+			String time = String(dt.time.hours) + ":" + String(dt.time.minutes) + ":" + String(dt.time.seconds);
+			if (time.length() < 8)
+				time += "  ";
+		#endif
 		return time;
 	}
 
 	int get_battery()
 	{
-		float b = M5.Axp.GetVbatData() * 1.1 / 1000;
-		int battery = ((b - 3.0) / 1.2) * 100;
+		#if !defined(PLUS2)
+			float b = M5.Axp.GetVbatData() * 1.1 / 1000;
+		#else
+			float b = StickCP2.Power.getBatteryVoltage() * 1.1 / 1000;
+		#endif
 
+		int battery = ((b - 3.0) / 1.2) * 100;
+		
 		if (battery > 100 || battery < 0)
 			return -1;
 

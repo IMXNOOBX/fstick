@@ -8,10 +8,13 @@ public:
 
 	void beep() {
 		if (!is_enabled) return;
-
-		M5.Beep.tone(4500);
-		delay(50);
-		M5.Beep.mute();
+		#if !defined(PLUS2)
+			BUZZER.tone(4500);
+			delay(50);
+			BUZZER.mute();
+		#else
+			BUZZER.tone(4500, 50);
+		#endif
 	}
 
 	void beep(int times) {

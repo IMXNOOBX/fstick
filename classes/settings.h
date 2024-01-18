@@ -32,11 +32,13 @@ public:
 	}
 
 	void setClock(uint8_t hour, uint8_t minute, uint8_t second) {
-        RTC_TimeTypeDef TimeStruct;
-        TimeStruct.Hours = hour;
-        TimeStruct.Minutes = minute;
-        TimeStruct.Seconds = second;
-		M5.Rtc.SetTime(&TimeStruct);
+        #if !defined(PLUS2)
+            RTC_TimeTypeDef TimeStruct;
+            TimeStruct.Hours = hour;
+            TimeStruct.Minutes = minute;
+            TimeStruct.Seconds = second;
+            M5.Rtc.SetTime(&TimeStruct);
+        #endif
 		this->save();
 	}
 
@@ -99,7 +101,7 @@ public:
 
     void setRotation(int pos) {
         this->rotation = pos;
-	    M5.Lcd.setRotation(pos); // 0 to 3 rotate clockwise, 4 to 7 rotate counterclockwise (default is 1)
+	    SCREEN.setRotation(pos); // 0 to 3 rotate clockwise, 4 to 7 rotate counterclockwise (default is 1)
 
         notify.send();
         this->save();
