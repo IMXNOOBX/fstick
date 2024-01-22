@@ -18,7 +18,7 @@
 	#define SCREEN_HEIGHT 135
 	#define M5_LED 19
 	#define BACKLIGHT 27
-	#define SCREEN M5.Lcd
+	#define SCREEN StickCP2.Display
 	#define BUZZER StickCP2.Speaker
 #else
 	#include <M5StickC.h>

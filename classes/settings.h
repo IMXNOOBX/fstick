@@ -109,33 +109,30 @@ public:
     }
 
     void set_hour(bool next = false, bool prev = false, bool click = false) {
-        if (next) {
-            if (b_is_selecting_hours) {
-                if (notify.hour == 23)
-                    notify.hour = 0;
+        if (b_is_selecting_hours) {
+            if (next) 
+                if (u8t_hour == 23)
+                    u8t_hour = 0;
                 else
-                    notify.hour++;
-            }
-            else if (b_is_selecting_minutes) {
-                if (notify.minute == 59)
-                    notify.minute = 0;
+                    u8t_hour++;
+
+            if (prev)
+                if (u8t_hour == 0)
+                    u8t_hour = 23;
                 else
-                    notify.minute++;
-            }
+                    u8t_hour--;
         }
-        else if (prev) {
-            if (b_is_selecting_hours) {
-                if (notify.hour == 0)
-                    notify.hour = 23;
+        else if (b_is_selecting_minutes) {
+            if (next)
+                if (u8t_minute == 59)
+                    u8t_minute = 0;
                 else
-                    notify.hour--;
-            }
-            else if (b_is_selecting_minutes) {
-                if (notify.minute == 0)
-                    notify.minute = 59;
+                    u8t_minute++;
+            if (prev)
+                if (u8t_minute == 0)
+                    u8t_minute = 59;
                 else
-                    notify.minute--;
-            }
+                    u8t_minute--;
         }
         else if (click) {
             if (b_is_selecting_hours) {
@@ -158,8 +155,6 @@ public:
             b_is_selecting_minutes = false;
         }
 
-        
-
         notify.send();
     }
 
@@ -173,6 +168,9 @@ public:
     bool b_is_selecting_time = false;
     bool b_is_selecting_hours = false;
     bool b_is_selecting_minutes = false;
+
+    uint8_t u8t_hour = 0;
+    uint8_t u8t_minute = 0;
 
 private:
 

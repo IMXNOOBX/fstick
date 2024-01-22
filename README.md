@@ -13,7 +13,7 @@ Thanks to all the donors for supporting this project! ❤
 * To Select an option, press the M5 button.
 * To go to the last page/option, press the TOP button.
 * To go to the next page/option, press the BOTTOM button.
-* (TIP) If you mantain the M5 button pressed for 3 seconds, you will enter a secret menu where it will simulate a hadware wallet and lock the device until restart.
+* (TIP) If you mantain the M5 button pressed for 3 seconds, you will enter a secret menu where it will simulate a hadware wallet, and lock the device until restart.
 
 
 ## ➰ Features (WIP)

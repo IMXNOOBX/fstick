@@ -17,8 +17,8 @@
  * This notice applies to all files within this repository
  */
 
-#define PLUS
-// #define PLUS2
+// #define PLUS
+#define PLUS2
 #define DEV // Mostly to disable battery saver and some debug messages
 #include "classes/globals.h"
 
@@ -73,7 +73,7 @@ MenuAction ma_sub_settings[] = {
     {"Bat Saver", []() { cfg.toggleBattSaver(); }, ActionType::TOGGLE, false, nullptr, &cfg.battery_saver },
     {"Sounds", []() { cfg.toggleSound(); }, ActionType::TOGGLE, false, nullptr, &cfg.sound_enable },
     {"Led", []() { cfg.toggleLed(); }, ActionType::TOGGLE, false, nullptr, &cfg.led_enable },
-    {"Time", ActionType::ACTION_MENU, &cfg.b_is_selecting_hour, []() { cfg.set_hour(); }, []() { cfg.set_hour(true); }, []() { cfg.set_hour(false, true); }, []() { cfg.set_hour(false, false, true); } },
+    {"Time", ActionType::ACTION_MENU, &cfg.b_is_selecting_time, []() { cfg.set_hour(); }, []() { cfg.set_hour(true); }, []() { cfg.set_hour(false, true); }, []() { cfg.set_hour(false, false, true); } },
     {"Rotate Screen", []() { cfg.switchRotation(); }, ActionType::TOGGLE, false, nullptr },
 	#if !defined(PLUS2)
     	{"Restart", []() { M5.Axp.DeepSleep(5); } },
@@ -106,7 +106,12 @@ MenuRenderer mainMenu(NAME, mi_menu, sizeof(mi_menu) / sizeof(mi_menu[0]));
  * @brief Display startup menu
  */
 void setup() {
-	M5.begin();
+	#if !defined(PLUS2)
+		M5.begin();
+	#else
+		auto m5cfg = M5.config();
+		StickCP2.begin(m5cfg);
+	#endif
 	
 	#ifdef DEV
 		logger.log(Logger::WARNING, "This is a DEVELOPMENT build made in " + String(__DATE__) + ", its not recommended for every day use.");
