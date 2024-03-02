@@ -5,6 +5,8 @@
 
 #if defined(PLUS)
 	#include <M5StickCPlus.h>
+	#include <M5Display.h>
+
 	#define DEVICE "M5StickCPlus"
 	#define SCREEN_WIDTH 240
 	#define SCREEN_HEIGHT 135
@@ -13,6 +15,7 @@
 	#define BUZZER M5.Beep
 #elif defined(PLUS2)
 	#include <M5StickCPlus2.h>
+
 	#define DEVICE "M5StickCPlus2"
 	#define SCREEN_WIDTH 240
 	#define SCREEN_HEIGHT 135
@@ -22,6 +25,8 @@
 	#define BUZZER StickCP2.Speaker
 #else
 	#include <M5StickC.h>
+	#include <M5Display.h>
+
 	#define DEVICE "M5StickC"
 	#define SCREEN_WIDTH 80
 	#define SCREEN_HEIGHT 160
@@ -32,7 +37,6 @@
 #define NAME "FStick"
 #define VERSION "v1.3.9"
 
-#include <M5Display.h>
 #include <EEPROM.h>
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
