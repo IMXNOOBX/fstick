@@ -17,8 +17,8 @@
  * This notice applies to all files within this repository
  */
 
-// #define PLUS
-#define PLUS2
+#define PLUS
+// #define PLUS2
 #define DEV // Mostly to disable battery saver and some debug messages
 #include "classes/globals.h"
 

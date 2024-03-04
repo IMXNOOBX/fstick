@@ -172,6 +172,8 @@ public:
     uint8_t u8t_hour = 0;
     uint8_t u8t_minute = 0;
 
+    bool had_fs_before = true;
+    size_t fs_offset = 0x75;
 private:
 
     void load() {
@@ -189,6 +191,13 @@ private:
 
     bool read() {
         size_t offset = 0;
+
+        // had_fs_before
+        had_fs_before = static_cast<bool>(EEPROM.read(fs_offset));
+        logger.log(Logger::INFO, "Did the use had fs before? " + String(had_fs_before ? "yes" : "no"));
+
+        if (!had_fs_before)
+            return false;
 
         // led_enable
         led_enable = static_cast<bool>(EEPROM.read(offset++));
@@ -214,6 +223,9 @@ private:
 
     void save() {
         size_t offset = 0;
+
+        // had_fs_before
+        EEPROM.write(fs_offset, true);
 
         // led_enable
         EEPROM.write(offset++, led_enable);
