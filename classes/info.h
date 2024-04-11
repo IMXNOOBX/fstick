@@ -3,10 +3,10 @@
 extern Logger logger;
 extern Notify notify;
 
-class Info
+class CInfo
 {
 public:
-	Info() {}
+	CInfo() {}
 
 	void renderCredits() {
 		SCREEN.setTextColor(WHITE, BLACK);

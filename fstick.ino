@@ -29,11 +29,12 @@ Notify notify;
 Logger logger;
 Battery battery;
 
-BLE b;
-Info inf;
-Settings cfg;
-IrBlaster ir; // const uint16_t kIrSendPin = 9;  // IR Emitter Pin - M5 IR Unit
-WifiManager wi;
+CBle ble;
+CInfo info;
+CSettings cfg;
+CIrBlaster ir; // const uint16_t kIrSendPin = 9;  // IR Emitter Pin - M5 IR Unit
+CWiFi wifi;
+CPortal portal;
 
 // if (SCREEN.width() > 160)
 extern const unsigned char logo[];
@@ -50,22 +51,28 @@ MenuAction ma_sub_infrared[] = {
 
 MenuAction ma_sub_wifi[] = {
     {"Back", nullptr },
-    // {"Scan AP", []() { wi.scan_nearby_ap(); }, ActionType::ACTION, true, []() { wi.scan_nearby_ap_render(); } },
-    {"Select AP", ActionType::ACTION_MENU, &wi.b_is_selecting_ap, []() { wi.scan_nearby_ap_select(); }, []() { wi.scan_nearby_ap_select(true, false); }, []() { wi.scan_nearby_ap_select(false, true); }, []() { wi.snaps_select(); } },
-	{"Spam AP", []() { wi.loop_ap_spam(); }, ActionType::LOOP, false, nullptr, &wi.b_loop_spam_ap },
-	{"Clone AP", []() { wi.loop_ap_clone(); }, ActionType::LOOP, false, nullptr, &wi.b_loop_clone_spam_ap },
-	{"Rogue AP", []() { wi.loop_ap_rogue(); }, ActionType::LOOP, false, nullptr, &wi.b_loop_rogue_ap },
-	{"Probe AP", []() { wi.loop_ap_probe(); }, ActionType::LOOP, false, nullptr, &wi.b_loop_probe_ap },
-	{"Deauth", []() { wi.loop_deauth(); }, ActionType::LOOP, false, nullptr, &wi.b_loop_deauth_ap },
+    // {"Scan AP", []() { wifi.scan_nearby_ap(); }, ActionType::ACTION, true, []() { wifi.scan_nearby_ap_render(); } },
+    {"Select AP", ActionType::ACTION_MENU, &wifi.b_is_selecting_ap, []() { wifi.scan_nearby_ap_select(); }, []() { wifi.scan_nearby_ap_select(true, false); }, []() { wifi.scan_nearby_ap_select(false, true); }, []() { wifi.snaps_select(); } },
+	{"Spam AP", []() { wifi.loop_ap_spam(); }, ActionType::LOOP, false, nullptr, &wifi.b_loop_spam_ap },
+	{"Clone AP", []() { wifi.loop_ap_clone(); }, ActionType::LOOP, false, nullptr, &wifi.b_loop_clone_spam_ap },
+	{"Rogue AP", []() { wifi.loop_ap_rogue(); }, ActionType::LOOP, false, nullptr, &wifi.b_loop_rogue_ap },
+	{"Probe AP", []() { wifi.loop_ap_probe(); }, ActionType::LOOP, false, nullptr, &wifi.b_loop_probe_ap },
+	{"Deauth", []() { wifi.loop_deauth(); }, ActionType::LOOP, false, nullptr, &wifi.b_loop_deauth_ap },
+};
+
+MenuAction ma_sub_portal[] = {
+    {"Back", nullptr },
+    {"Create", []() { portal.run(); }, ActionType::ACTION },
+    {"Stop", []() { portal.stop(); }, ActionType::ACTION },
 };
 
 MenuAction ma_sub_ble[] = {
     {"Back", nullptr },
-	{"Apple Spm", []() { b.t_advertise_apple(); }, ActionType::LOOP, false, nullptr, &b.advertise_apple },
-	{"Android Sp", []() { b.t_advertise_android(); }, ActionType::LOOP, false, nullptr, &b.advertise_android },
-	{"Samsung Sp", []() { b.t_advertise_samsung(); }, ActionType::LOOP, false, nullptr, &b.advertise_samsung },
-	{"Windows S", []() { b.t_advertise_windows(); }, ActionType::LOOP, false, nullptr, &b.advertise_windows },
-	{"@everyone", []() { b.t_advertise_everyone(); }, ActionType::LOOP, true, []() { b.r_advertise_everyone(); }, &b.advertise_everyone },
+	{"Apple Spm", []() { ble.t_advertise_apple(); }, ActionType::LOOP, false, nullptr, &ble.advertise_apple },
+	{"Android Sp", []() { ble.t_advertise_android(); }, ActionType::LOOP, false, nullptr, &ble.advertise_android },
+	{"Samsung Sp", []() { ble.t_advertise_samsung(); }, ActionType::LOOP, false, nullptr, &ble.advertise_samsung },
+	{"Windows S", []() { ble.t_advertise_windows(); }, ActionType::LOOP, false, nullptr, &ble.advertise_windows },
+	{"@everyone", []() { ble.t_advertise_everyone(); }, ActionType::LOOP, true, []() { ble.r_advertise_everyone(); }, &ble.advertise_everyone },
 };
 
 MenuAction ma_sub_settings[] = {
@@ -86,15 +93,16 @@ MenuAction ma_sub_settings[] = {
 
 MenuAction ma_sub_info[] = {
     {"Back", nullptr },
-    {"Donate", true, []() { inf.renderDonate(); } },
-    {"Supporters", true, []() { inf.render_supporters(); } },
-    {"Repository", true, []() { inf.renderRepository(); } },
-    {"Credits", true, []() { inf.renderCredits(); } },
+    {"Donate", true, []() { info.renderDonate(); } },
+    {"Supporters", true, []() { info.render_supporters(); } },
+    {"Repository", true, []() { info.renderRepository(); } },
+    {"Credits", true, []() { info.renderCredits(); } },
 };
 
 MenuItem mi_menu[] = {
     {"Infra Red", nullptr, 2, ma_sub_infrared },
     {"WiFi", nullptr, 7, ma_sub_wifi },
+    {"Portal", nullptr, 3, ma_sub_portal },
     {"BLE", nullptr, 6, ma_sub_ble },
     {"Settings", nullptr, 8, ma_sub_settings },
     {"Info", nullptr, 5, ma_sub_info },
@@ -128,7 +136,7 @@ void setup() {
 			delay(300);
 		}
 
-		notify.send(2);
+		// notify.send(2); 
 	#endif 
 	logger.log(Logger::INFO, "Starting " + String(NAME) + "...");
 
@@ -162,20 +170,20 @@ void setup() {
 	delay(500); // I know its not clean, but looks good for the end user
 
 	if(ir.init())
-		logger.log(Logger::INFO, "IrBlaster has been initialized successfully!");
+		logger.log(Logger::INFO, "CIrBlaster has been initialized successfully!");
 	else
-		logger.log(Logger::ERROR, "Failed to initialize IrBlaster");
+		logger.log(Logger::ERROR, "Failed to initialize CIrBlaster");
 
 	delay(500);
 
-	if(wi.init())
-		logger.log(Logger::INFO, "WifiManager has been initialized successfully!");
+	if(wifi.init())
+		logger.log(Logger::INFO, "WiFi has been initialized successfully!");
 	else
-		logger.log(Logger::ERROR, "Failed to initialize WifiManager");
+		logger.log(Logger::ERROR, "Failed to initialize WiFi");
 
 	delay(500);
 
-	if(b.init())
+	if(ble.init())
 		logger.log(Logger::INFO, "BLE has been initialized successfully!");
 	else
 		logger.log(Logger::ERROR, "Failed to initialize BLE");
@@ -271,8 +279,10 @@ void loop() {
 	 * Run the loop() function of each class every tick
 	 */
 	ir.loop();
-	wi.loop();
-	b.loop();
+	wifi.loop();
+	ble.loop();
 
 	battery.loop();
+
+	portal.loop();
 }

@@ -38,11 +38,17 @@
 #define VERSION "v1.3.9"
 
 #include <EEPROM.h>
+
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
+
 #include <WiFi.h>
+#include <DNSServer.h>
+#include <WebServer.h>
+
 #include <esp_wifi.h>
 #include <NimBLEDevice.h>
+
 
 #include "../tools/utilities.h"
 #include "../tools/battery.h"
@@ -57,6 +63,7 @@
 
 #include "infrared.h"
 #include "settings.h"
+#include "portal.h"
 #include "info.h"
 #include "wifi.h"
 #include "ble.h"
@@ -67,11 +74,13 @@
 extern Notify notify;
 extern Logger logger; 
 extern Battery battery;
-extern BLE b;
-extern Info inf;
-extern IrBlaster ir;
-extern WifiManager wi;
-extern Settings cfg;
+
+extern CIrBlaster ir;
+extern CSettings cfg;
+extern CPortal portal;
+extern CInfo info;
+extern CWiFi wifi;
+extern CBle ble;
 
 #endif
 

@@ -3,10 +3,10 @@
 extern Logger logger;
 extern Notify notify;
 
-class IrBlaster
+class CIrBlaster
 {
 public:
-	IrBlaster() {}
+	CIrBlaster() {}
 
 	bool init()
 	{
