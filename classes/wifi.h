@@ -19,10 +19,10 @@ struct ap {
 	float rssi;
 };
 
-class WifiManager
+class CWiFi
 {	
 public:
-	WifiManager() {}
+	CWiFi() {}
 
 	bool init() {
 		try {
@@ -227,40 +227,6 @@ public:
 
 			offset += index == i_current_ap ? 20 : 10;  // Adjusted offset for greater text size
 		}
-		
-		/*
-		int index = (i_current_ap + i_scanned_ap_count + 1) % (i_scanned_ap_count + 1);
-		bool is_back = i_scanned_ap_count > 0 && index - 1 >= 0;
-		bool is_current = index >= 0 && index < i_scanned_ap_count;
-		bool is_next = i_scanned_ap_count > 0 && index + 1 < i_scanned_ap_count;
-
-		int yOffset = 40;
-
-		if (is_back) {
-			SCREEN.setTextSize(is_back && s_scanned_ap[index - 1].ssid.length() > 6 ? 2 : 3);
-			SCREEN.setCursor(20, yOffset);
-			SCREEN.setTextColor(index - 1 == i_selected_ap ? BLUE : WHITE, BLACK);
-			SCREEN.print(is_back ? s_scanned_ap[index - 1].ssid : "None (All)");
-			yOffset += is_back && s_scanned_ap[index - 1].ssid.length() > 6 ? 20 : 30;
-		}
-
-		if (is_current) {
-			SCREEN.setTextSize(is_current && s_scanned_ap[index].ssid.length() > 6 ? 2 : 3);
-			SCREEN.setCursor(20, yOffset);
-			SCREEN.setTextColor(index == i_selected_ap ? BLUE : YELLOW, BLACK);
-			SCREEN.print("- " + s_scanned_ap[index].ssid);
-			yOffset += is_current && s_scanned_ap[index].ssid.length() > 6 ? 20 : 30;
-		}
-
-		if (is_next) {
-			SCREEN.setTextSize(is_next && s_scanned_ap[index + 1].ssid.length() > 6 ? 2 : 3);
-			SCREEN.setCursor(20, yOffset);
-			SCREEN.setTextColor(index + 1 == i_selected_ap ? BLUE : WHITE, BLACK);
-			SCREEN.print(is_next ? s_scanned_ap[index + 1].ssid : "");
-			yOffset += is_next && s_scanned_ap[index + 1].ssid.length() > 6 ? 20 : 30;
-		}
-		*/
-		
 	}
 
 	void snaps_select() {
@@ -428,9 +394,9 @@ private:
 	bool configure_wifi(uint8_t channel) {
 		wifi_config_t ap_config = {
 			.ap = {
-				// .ssid = "SSID Name",
+				// .ssid = "Name",
 				// .ssid_len = 22,
-				// .password = "Super Secure Password",
+				// .password = "Password",
 				.channel = channel,
 				// .authmode = WIFI_AUTH_WPA2_PSK,
 				// .ssid_hidden = 0,

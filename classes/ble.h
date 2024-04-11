@@ -3,10 +3,10 @@
 extern Logger logger;
 extern Notify notify;
 
-class BLE
+class CBle
 {
 public:
-	BLE() {}
+	CBle() {}
 
 	bool init()
 	{

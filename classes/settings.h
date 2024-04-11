@@ -4,10 +4,10 @@ extern Logger logger;
 extern Notify notify;
 extern Battery battery;
 
-class Settings
+class CSettings
 {
 public:
-	Settings() {}
+	CSettings() {}
 
 	bool init()
 	{
@@ -186,7 +186,9 @@ private:
         battery.setBT(this->battery_saver);
         notify.led.is_enabled = this->led_enable;
         notify.beeper.is_enabled = this->sound_enable;
-		setRotation(rotation);
+        
+        if (had_fs_before)
+		    setRotation(rotation);
     }
 
     bool read() {
@@ -194,7 +196,7 @@ private:
 
         // had_fs_before
         had_fs_before = static_cast<bool>(EEPROM.read(fs_offset));
-        logger.log(Logger::INFO, "Did the use had fs before? " + String(had_fs_before ? "yes" : "no"));
+        logger.log(Logger::INFO, "Was fs installed before? " + String(had_fs_before ? "yes" : "no"));
 
         if (!had_fs_before)
             return false;
