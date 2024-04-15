@@ -355,79 +355,6 @@ public:
 			i_last_update = millis() + 1000;
 	}
 
-public:
-	bool b_loop_spam_ap = false;
-	bool b_loop_rogue_ap = false;
-	bool b_loop_probe_ap = false;
-	bool b_loop_deauth_ap = false;
-	bool b_loop_clone_spam_ap = false;
-
-	int i_current_ap = 0;
-	int i_selected_ap = 0;
-	bool b_is_selecting_ap = false;
-private:
-	int b_current_channel = 0;
-	
-	wifi_init_config_t cfg;
-    wifi_config_t ap_config;
-	
-	int i_scanned_ap_count = 0; 
-	int i_max_scanned_ap_count = 10; // hardcoded
-
-	ap s_scanned_ap[10]; // max 10 ap in the array
-	uint8_t u8t_original_mac_ap[6];
-
-	int i_last_update = 0;
-
-	void switchChannel() {
-		b_current_channel++;
-
-		if (b_current_channel > 14)
-			b_current_channel = 1;
-
-		// logger.log(Logger::INFO, "Switching to channel " + String(b_current_channel) + "...");
-	    esp_wifi_set_channel(b_current_channel, WIFI_SECOND_CHAN_NONE);
-		// configure_wifi(b_current_channel);
-		delay(1);
-	}
-
-	bool configure_wifi(uint8_t channel) {
-		wifi_config_t ap_config = {
-			.ap = {
-				// .ssid = "Name",
-				// .ssid_len = 22,
-				// .password = "Password",
-				.channel = channel,
-				// .authmode = WIFI_AUTH_WPA2_PSK,
-				// .ssid_hidden = 0,
-				.max_connection = 4,
-				.beacon_interval = 60000
-			}
-		};
-
-		return esp_wifi_set_config(WIFI_IF_AP, &ap_config) == ESP_OK;
-	}
-
-	bool updateScanAp()
-	{
-		logger.setShouldDisplayLog(true);
-
-		logger.log(Logger::INFO, "Scanning nearby APs...");
-		int numNetworks = WiFi.scanNetworks();
-		i_scanned_ap_count = (numNetworks > i_max_scanned_ap_count ? i_max_scanned_ap_count : numNetworks);
-
-		for (int i = 0; i < i_scanned_ap_count; i++) {
-			s_scanned_ap[i].ssid = WiFi.SSID(i);
-        	s_scanned_ap[i].bssid_str = WiFi.BSSIDstr(i);
-        	s_scanned_ap[i].bssid = WiFi.BSSID(i);
-        	s_scanned_ap[i].rssi = WiFi.RSSI(i);
-		}
-
-		logger.setShouldDisplayLog(false);
-
-		return numNetworks != 0;
-	}
-
 	void beacon(String ssid, uint8_t bssid[6]) {
 		int ssidLen = ssid.length();
 
@@ -435,7 +362,6 @@ private:
 			return;
 
 		switchChannel();
-
 		
 		// Create a buffer for the packet
 		uint8_t buffer[beacon_packet_size];
@@ -531,6 +457,79 @@ private:
 		esp_wifi_80211_tx(WIFI_IF_AP, buffer, probe_packet_size, false);
 	}
 
+public:
+	bool b_loop_spam_ap = false;
+	bool b_loop_rogue_ap = false;
+	bool b_loop_probe_ap = false;
+	bool b_loop_deauth_ap = false;
+	bool b_loop_clone_spam_ap = false;
+
+	int i_current_ap = 0;
+	int i_selected_ap = 0;
+	bool b_is_selecting_ap = false;
+
+private:
+	int b_current_channel = 0;
+	
+	wifi_init_config_t cfg;
+    wifi_config_t ap_config;
+	
+	int i_scanned_ap_count = 0; 
+	int i_max_scanned_ap_count = 10; // hardcoded
+
+	ap s_scanned_ap[10]; // max 10 ap in the array
+	uint8_t u8t_original_mac_ap[6];
+
+	int i_last_update = 0;
+
+	void switchChannel() {
+		b_current_channel++;
+
+		if (b_current_channel > 14)
+			b_current_channel = 1;
+
+		// logger.log(Logger::INFO, "Switching to channel " + String(b_current_channel) + "...");
+	    esp_wifi_set_channel(b_current_channel, WIFI_SECOND_CHAN_NONE);
+		// configure_wifi(b_current_channel);
+		delay(1);
+	}
+
+	bool configure_wifi(uint8_t channel) {
+		wifi_config_t ap_config = {
+			.ap = {
+				// .ssid = "Name",
+				// .ssid_len = 22,
+				// .password = "Password",
+				.channel = channel,
+				// .authmode = WIFI_AUTH_WPA2_PSK,
+				// .ssid_hidden = 0,
+				.max_connection = 4,
+				.beacon_interval = 60000
+			}
+		};
+
+		return esp_wifi_set_config(WIFI_IF_AP, &ap_config) == ESP_OK;
+	}
+
+	bool updateScanAp()
+	{
+		logger.setShouldDisplayLog(true);
+
+		logger.log(Logger::INFO, "Scanning nearby APs...");
+		int numNetworks = WiFi.scanNetworks();
+		i_scanned_ap_count = (numNetworks > i_max_scanned_ap_count ? i_max_scanned_ap_count : numNetworks);
+
+		for (int i = 0; i < i_scanned_ap_count; i++) {
+			s_scanned_ap[i].ssid = WiFi.SSID(i);
+        	s_scanned_ap[i].bssid_str = WiFi.BSSIDstr(i);
+        	s_scanned_ap[i].bssid = WiFi.BSSID(i);
+        	s_scanned_ap[i].rssi = WiFi.RSSI(i);
+		}
+
+		logger.setShouldDisplayLog(false);
+
+		return numNetworks != 0;
+	}
 	void printBuffer(const uint8_t* buffer, size_t size) {
 		for (size_t i = 0; i < size; i++) {
 			Serial.print(buffer[i], HEX);

@@ -62,8 +62,8 @@ MenuAction ma_sub_wifi[] = {
 
 MenuAction ma_sub_portal[] = {
     {"Back", nullptr },
-    {"Create", []() { portal.run(); }, ActionType::ACTION },
-    {"Stop", []() { portal.stop(); }, ActionType::ACTION },
+    {"Open AP", []() { portal.run(); }, ActionType::LOOP, false, nullptr, &portal.menu_is_running },
+    {"FStop", []() { portal.stop(); }, ActionType::ACTION },
 };
 
 MenuAction ma_sub_ble[] = {
