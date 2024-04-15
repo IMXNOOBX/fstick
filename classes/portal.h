@@ -3,65 +3,92 @@
 /**
  * @brief Docs and other useful information
  * @details WebServer https://github.com/khoih-prog/WiFiWebServer
- * @details DNSServer 
- * 
+ * @details DNSServer
+ *
  */
 extern Logger logger;
 extern Notify notify;
+CWiFi cwifi;
 
 class CPortal
 {
 public:
-	CPortal(): gateway(172, 0, 0, 1), mask(255, 255, 255, 0) { }
+	CPortal() : gateway(192, 168, 0, 1), mask(255, 255, 255, 0) {}
 
-	void run() {
+	void run()
+	{
+		if (menu_is_running)
+			return this->stop();
+
 		WiFi.mode(WIFI_AP);
 		WiFi.softAPConfig(gateway, gateway, mask);
 		WiFi.softAP("TEST");
 
+		esp_wifi_get_mac(WIFI_IF_AP, u8t_mac_ap);
+
+		logger.log(Logger::INFO, "Creating Captive Portal on " + String(WiFi.localIP()) + " with gateway " + String(gateway) + " and mask " + String(mask));
+
 		webServer = new WebServer(http_port);
 		dnsServer.start(dns_port, "*", gateway);
 
-		// webServer->on("/", [this]() {
-		// 	webServer->send(this->http_ok, "text/html", "<a href='/rick'>Click me</a>");
-		// });
+		webServer->on("/goto", [this]() { 
+			logger.log(Logger::INFO, "Received request in /goto endpoint.");
+			webServer->send(this->http_ok, "text/html", "<a href='/rick'>Click me</a>"); 
+		});
 		webServer->on("/rick", [this]() {
-			webServer->sendHeader("Location", "https://www.youtube.com/watch?v=dQw4w9WgXcQ", true);
-			webServer->send(302, "text/plain", "");
-
-			this->stop();
+			logger.log(Logger::INFO, "Received request in /rick endpoint.");
+			
+			String htmlResponse = "<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"0;URL='https://www.youtube.com/watch?v=dQw4w9WgXcQ'\" /></head><body></body></html>";
+			webServer->send(this->http_ok, "text/html", htmlResponse);
+			
+			logger.log(Logger::INFO, "Redirecting to Rick Roll & Deauthing client.");
+			
+			// Deauth for a quick disconnect
+			for (int i = 0; i < 3; i++)
+				cwifi.deauth(u8t_mac_ap); 
+			
+			this->stop(); // Disable the portal after redirecting, cant find any other way to disconnect the client
 		});
 		webServer->onNotFound([this]() {
-			String test = "<!DOCTYPE html><html><head><title>Largest companies by market cap — US Stock Market</title><meta charset=\"UTF-8\"></head><body><h1>Apple : 2037 Billion</h1><h2>Microsoft : 1624 Billion</h2><h3>Amazon : 1611 Billion</h3><h4>Google : 1058 Billion</h4><h5>Alibaba : 826 Billion</h5><b>This data is as of 21 Sep 2020.</b></body></html>";
+			logger.log(Logger::INFO, "Received request in not found endpoint.");
+
+			String test = "<!DOCTYPE html><html><head><title>TEST Captive Portal</title><meta charset=\"UTF-8\"></head><body><h1>TEST Captive Portal</h1><a href='/rick' target='_blank'>Click me</a></body></html>";
 
 			webServer->send(
 				this->http_ok, 
-				"text/html", 
+				"text/html; charset=utf-8", 
 				test
-			);
+			); 
 		});
 
 		webServer->begin();
 
 		is_running = true;
+		menu_is_running = is_running;
 	}
 
-	void stop() {
+	void stop()
+	{
 		is_running = false;
 		dnsServer.stop();
 		webServer->stop();
 		// WiFi.disconnect();
 		WiFi.mode(WIFI_OFF);
+
+		menu_is_running = is_running;
+		logger.log(Logger::INFO, "Stopped Captive Portal.");
 	}
 
-	void loop() {
+	void loop()
+	{
 		if (!is_running)
 			return;
 
 		dnsServer.processNextRequest();
 		webServer->handleClient();
 	}
-
+public:
+	bool menu_is_running = false;
 private:
 	IPAddress gateway;
 	IPAddress mask;
@@ -69,12 +96,14 @@ private:
 	int8_t dns_port = 53;
 	int8_t http_port = 80;
 
-	int8_t http_ok = 200;
-	int8_t http_redirect = 302;
-	int8_t http_not_found = 404;
+	int16_t http_ok = 200;
+	int16_t http_redirect = 302;
+	int16_t http_not_found = 404;
 
 	DNSServer dnsServer;
-	WebServer* webServer;
+	WebServer *webServer;
+
+	uint8_t u8t_mac_ap[6];
 
 	bool is_running = false;
 };

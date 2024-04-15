@@ -63,9 +63,9 @@
 
 #include "infrared.h"
 #include "settings.h"
-#include "portal.h"
 #include "info.h"
 #include "wifi.h"
+#include "portal.h"
 #include "ble.h"
 
 /**
