@@ -42,10 +42,40 @@ Thanks to all the donors for supporting this project! ❤
 	5. Shutdown Device
 
 ## 📦 How To Build
+> [!IMPORTANT]
+> You can build the project semi automatically following [`this guide`]()
+
+### 🚀 Automatic Build
+>[!WARNING]
+> ***Windows/Linux only***
+
+> Follow each step precisely to avoid any issues with the build process
+1. Download [**Docker**](https://www.docker.com/products/docker-desktop/) and install it (*restart*)
+2. Download [**Python**](https://www.python.org/downloads/) and install it
+	2.1. Install dependencies using `pip install pyserial`
+3. Download the **Respository** and move inside the folder 
+4. Run the command `python3 setup/manager.py` to build the project
+5. While the docker is building the project, you can connect the device to the computer
+
+
+
+### 🧩 Manually Build
 1. Clone the repo using `git clone https://github.com/IMXNOOBX/fstick.git`
 2. Download the [**Arduino IDE**](https://www.arduino.cc/en/software) and install it or use visual studio code with the [**Arduino extension**](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino)
 3. Run the python script `python3 setup.py` to be able to to build the project
 4. In your Arduino IDE or VSCode extension go to the main file `fstick.ino` and click on the build button in the top Left/Right in Arduino/VSCode respectively.
+
+### 🐋 Build with Docker
+*Asuming the repo is already downloaded and you have docker*
+1. Run the command `docker build -t fstick-build .` to build the docker image
+2. Run the following commands to export the project to your local machine
+	```bash
+	docker create --name temp-fstick-build fstick-build
+	docker cp temp-fstick-build:/root/fstick/fstick.ino .
+	docker rm temp-fstick-build
+	```
+3. The files will be exported to the `build/` directory
+
 
 ## 🧶 Contribute/Issues
 Feel free to contribute or open any issue for the project, just make sure to read the [**CONTRIBUTE.md**](./CONTRIBUTE.md) file first and you follow the steps acordingly.
