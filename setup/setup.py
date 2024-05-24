@@ -1,4 +1,5 @@
 import os
+import sys
 
 def add_flags_to_platform(file_path):
     try:
@@ -31,8 +32,17 @@ def add_flags_to_platform(file_path):
         print(f'Error: {e}')
 
 def main():
-    esp32_folder = os.path.join(os.getenv('LOCALAPPDATA'), 'Arduino15', 'packages', 'esp32', 'hardware', 'esp32')
-    m5stack_folder = os.path.join(os.getenv('LOCALAPPDATA'), 'Arduino15', 'packages', 'm5stack', 'hardware', 'esp32')
+    esp32_folder = ""
+    m5stack_folder = ""
+
+    if sys.platform == 'linux' or sys.platform == 'linux2':
+        esp32_folder = os.path.join(os.getenv('HOME'), '.arduino15', 'packages', 'esp32', 'hardware', 'esp32')
+        m5stack_folder = os.path.join(os.getenv('HOME'), '.arduino15', 'packages', 'm5stack', 'hardware', 'esp32')
+    elif sys.platform == 'win32':
+        esp32_folder = os.path.join(os.getenv('LOCALAPPDATA'), 'Arduino15', 'packages', 'esp32', 'hardware', 'esp32')
+        m5stack_folder = os.path.join(os.getenv('LOCALAPPDATA'), 'Arduino15', 'packages', 'm5stack', 'hardware', 'esp32')
+    else:
+        raise Exception(f'Unsupported OS ({sys.platform})')
 
     platform_files = ['platform.txt']
 
