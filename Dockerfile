@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.9-slim AS builder
 
 RUN apt-get update && apt-get install -y \
     curl \
@@ -9,8 +9,6 @@ RUN apt-get update && apt-get install -y \
 RUN curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
 
 ENV PATH=$PATH:/root/bin
-
-RUN pip install esptool
 
 # Install Arduino core for ESP32
 RUN arduino-cli core update-index \
@@ -37,7 +35,11 @@ RUN python /setup_flags.py
 # Compile the sketch
 RUN arduino-cli compile --fqbn m5stack:esp32:m5stack_stickc_plus /fstick
 
-CMD ["bash", "-c", "cp /fstick/build/fstick.ino.bin /output/fstick.ino.bin"]
+FROM python:3.9-slim
+
+COPY --from=builder /fstick/build /fstick/build
+
+WORKDIR /fstick
 
 # Flash the compiled binary to the device
 # Linux
