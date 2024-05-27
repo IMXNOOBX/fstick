@@ -35,9 +35,9 @@ WORKDIR /fstick
 RUN python /setup_flags.py
 
 # Compile the sketch
-RUN arduino-cli compile --fqbn m5stack:esp32:m5stack_stickc_plus /fstick
+RUN arduino-cli compile --fqbn m5stack:esp32:m5stack_stickc_plus /fstick --build-path "./build" --verbose
 
-RUN ls /fstick
+RUN ls -la /fstick
 
 FROM python:3.9-slim
 

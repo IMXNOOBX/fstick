@@ -48,10 +48,10 @@ def export_docker_image():
     print("Docker container created.")
 
     # docker cp temp-fstick-build:/fstick/build .
-    subprocess.run(['docker', 'cp', 'temp-fstick:/fstick/build', '.'], check=True)
+    subprocess.run(['docker', 'cp', 'temp-fstick-build:/fstick/build', '.'], check=True)
     print("Firmware exported.")
 
-    # docker rm temp-fstick
+    # docker rm temp-fstick-build
     subprocess.run(['docker', 'rm', 'temp-fstick-build'], check=True)
     print("Docker container removed.")
 
@@ -126,10 +126,11 @@ def main():
 
         try: 
             build_docker_image(args.nocache)
-            export_docker_image()
         except Exception as e:
             print(f"Error building Docker image: {e}")
             exit(1)
+
+        export_docker_image()
 
     if args.export:
         export_docker_image()
