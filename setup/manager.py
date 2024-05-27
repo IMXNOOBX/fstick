@@ -135,10 +135,9 @@ def main():
     if args.export:
         export_docker_image()
     
-
-    bootloader_path = '../build/fstick.ino.bootloader.bin'
-    partitions_path = '../build/fstick.ino.partitions.bin'
-    firmware_path = '../build/fstick.ino.bin'
+    firmware_path = 'build/fstick.ino.bin'
+    bootloader_path = 'build/fstick.ino.bootloader.bin'
+    partitions_path = 'build/fstick.ino.partitions.bin'
 
     if not os.path.exists(firmware_path) or not os.path.exists(partitions_path) or not os.path.exists(bootloader_path):
         print(f"Could not find firmware file '{firmware_path}'. Please build the firmware first. See https://github.com/IMXNOOBX/fstick#-automatic-build for instructions.")
