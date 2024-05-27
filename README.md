@@ -52,7 +52,7 @@ Thanks to all the donors for supporting this project! ❤
 > Follow each step precisely to avoid any issues with the build process
 1. Download [**Docker**](https://www.docker.com/products/docker-desktop/) and install it (*restart*)
 2. Download [**Python**](https://www.python.org/downloads/) and install it
-	2.1. Install dependencies using `pip install pyserial`
+    1. Install dependencies using `pip install pyserial`
 3. Download the **Respository** and move inside the folder 
 4. Run the command `python3 setup/manager.py` to build the project
 5. While the docker is building the project, you can connect the device to the computer (~5-10mins)
