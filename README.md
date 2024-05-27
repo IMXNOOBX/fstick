@@ -59,7 +59,7 @@ Thanks to all the donors for supporting this project! ❤
 6. Once the docker finishes building, the project will be exported to the `build/` directory automatically
 7. The script will ask you to select the port where the device is connected, select the correct one and press enter. if the device is not detected, you can use the flag `--flash` to skip the build and try again
 8. The device will be flashed with the new firmware and you can start using it!
-* If something goes wrong, i sugges you open an issue with detailed information about the error or try to build the project manually. this is just a helper script to make the process easier.
+* If something goes wrong, i suggest you open an issue with detailed information about the error or try to build the project manually. this is just a helper script to make the process easier.
 
 
 
