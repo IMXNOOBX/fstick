@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip install pyserial
+
 RUN curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
 
 ENV PATH=$PATH:/root/bin
@@ -35,9 +37,11 @@ RUN python /setup_flags.py
 # Compile the sketch
 RUN arduino-cli compile --fqbn m5stack:esp32:m5stack_stickc_plus /fstick
 
+RUN ls /fstick
+
 FROM python:3.9-slim
 
-COPY --from=builder /fstick/build /fstick/build
+COPY --from=builder /fstick/build /fstick/build 
 
 WORKDIR /fstick
 

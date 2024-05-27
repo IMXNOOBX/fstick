@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 import subprocess
@@ -16,30 +17,43 @@ def check_docker():
         print(e)
         return False
     
-def build_docker_image():
-    current_dir = os.path.abspath(os.getcwd())
-    parent_dir = os.path.dirname(current_dir)
+def build_docker_image(nocache):
+    if not os.path.exists('Dockerfile'):
+        current_dir = os.path.abspath(os.getcwd())
+        parent_dir = os.path.dirname(current_dir)
 
-    print("Building Docker image...")
+        print("Building Docker image...")
 
-    os.chdir(parent_dir)
+        os.chdir(parent_dir)
+        if not os.path.exists('Dockerfile'):
+            raise Exception("Could not find Dockerfile. Please run this script from the root of the repository.")
+        
 
     # docker build -t fstick-build .
-    subprocess.run(['docker', 'build', '-t', 'fstick', '.'], check=True)
-    print("Docker image built. Exporting firmware...")
+    subprocess.run(
+        nocache and 
+            ['docker', 'build', '--no-cache', '-t', 'fstick-build', '.'] or
+            ['docker', 'build', '-t', 'fstick-build', '.'], 
+        # capture_output=True, text=True,
+        check=True
+    )
+    
+    print("Docker image built.")
+
+def export_docker_image():
+    print("Exporting firmware...")
 
     # docker create --name temp-fstick-build fstick-build
     subprocess.run(['docker', 'create', '--name', 'temp-fstick-build', 'fstick-build'], check=True)
     print("Docker container created.")
 
-    # docker cp temp-fstick-build:/root/fstick/fstick.ino .
-    subprocess.run(['docker', 'cp', 'temp-fstick-build:/root/fstick/fstick.ino', '.'], check=True)
+    # docker cp temp-fstick-build:/fstick/build .
+    subprocess.run(['docker', 'cp', 'temp-fstick:/fstick/build', '.'], check=True)
     print("Firmware exported.")
 
-    # docker rm temp-fstick-build
+    # docker rm temp-fstick
     subprocess.run(['docker', 'rm', 'temp-fstick-build'], check=True)
     print("Docker container removed.")
-
 
 def install_esptool():
     print("Installing esptool...")
@@ -91,8 +105,12 @@ def flash_firmware(bootloader_path, partitions_path, firmware_path, serial_port)
         print(f"Error flashing firmware: {e}")
         return False
 
-
 def main():
+    parser = argparse.ArgumentParser(description="Automatic build/flash of the FStick firmware.")
+    parser.add_argument("--flash", help="Skip the build process and flash the firmware directly", action="store_true")
+    parser.add_argument("--export", help="Skip the build process to the export", action="store_true")
+    parser.add_argument("--nocache", help="Disables the cache in the build process", action="store_true")
+
     if sys.platform == 'linux' or sys.platform == 'linux2':
         print("Running on Linux")
     elif sys.platform == 'win32':
@@ -100,19 +118,30 @@ def main():
     else:
         raise Exception(f'Unsupported OS ({sys.platform})')
     
-    if not check_docker():
-        raise Exception("Docker is not installed or not accessible. Please follow https://github.com/IMXNOOBX/fstick#-automatic-build")
+    args = parser.parse_args()
 
-    build_docker_image()
+    if not args.flash and not args.export:
+        if not check_docker():
+            raise Exception("Docker is not installed or not accessible. Please follow https://github.com/IMXNOOBX/fstick#-automatic-build")
+
+        try: 
+            build_docker_image(args.nocache)
+            export_docker_image()
+        except Exception as e:
+            print(f"Error building Docker image: {e}")
+            exit(1)
+
+    if args.export:
+        export_docker_image()
+    
 
     bootloader_path = '../build/fstick.ino.bootloader.bin'
     partitions_path = '../build/fstick.ino.partitions.bin'
     firmware_path = '../build/fstick.ino.bin'
 
     if not os.path.exists(firmware_path) or not os.path.exists(partitions_path) or not os.path.exists(bootloader_path):
-        print(f"Could not find firmware file '{firmware_path}'. Please build the firmware first. See README.md for instructions.")
+        print(f"Could not find firmware file '{firmware_path}'. Please build the firmware first. See https://github.com/IMXNOOBX/fstick#-automatic-build for instructions.")
         exit(0)
-
 
     serial_port = select_serial_port()
     while serial_port is None:
