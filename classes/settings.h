@@ -89,7 +89,7 @@ public:
 
     void toggleBattSaver() {
         this->battery_saver = !this->battery_saver;
-        battery.setBT(this->battery_saver);
+        battery.setLI(millis());
 
         notify.send();
         this->save();
@@ -189,7 +189,7 @@ private:
             return;
         }
 
-        battery.setBT(this->battery_saver);
+        battery.setLI(millis());
         notify.led.is_enabled = this->led_enable;
         notify.beeper.is_enabled = this->sound_enable;
         
