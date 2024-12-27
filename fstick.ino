@@ -82,12 +82,12 @@ MenuAction ma_sub_settings[] = {
     {"Led", []() { cfg.toggleLed(); }, ActionType::TOGGLE, false, nullptr, &cfg.led_enable },
     {"Time", ActionType::ACTION_MENU, &cfg.b_is_selecting_time, []() { cfg.set_hour(); }, []() { cfg.set_hour(true); }, []() { cfg.set_hour(false, true); }, []() { cfg.set_hour(false, false, true); } },
     {"Rotate Screen", []() { cfg.switchRotation(); }, ActionType::TOGGLE, false, nullptr },
-	#if !defined(PLUS2)
-    	{"Restart", []() { M5.Axp.DeepSleep(5); } },
-    	{"Shutdown", []() { M5.Axp.PowerOff(); } },
-	#else
+	#if defined(PLUS2)
 	    {"Restart", []() { StickCP2.Power.timerSleep(5); } },
 		{"Shutdown", []() { StickCP2.Power.powerOff(); } },
+	#else
+    	{"Restart", []() { M5.Axp.DeepSleep(5); } },
+    	{"Shutdown", []() { M5.Axp.PowerOff(); } },
 	#endif
 };
 
@@ -114,11 +114,11 @@ MenuRenderer mainMenu(NAME, mi_menu, sizeof(mi_menu) / sizeof(mi_menu[0]));
  * @brief Display startup menu
  */
 void setup() {
-	#if !defined(PLUS2)
-		M5.begin();
-	#else
+	#if defined(PLUS2)
 		auto m5cfg = M5.config();
 		StickCP2.begin(m5cfg);
+	#else
+		M5.begin();
 	#endif
 	
 	#ifdef DEV
@@ -223,8 +223,11 @@ void loop() {
 	if (cfg.getSecretMode()) 
 		return;
 
-#if !defined(PLUS2)
-    if (M5.Axp.GetBtnPress()) {
+	#if defined(PLUS2)
+		if (StickCP2.Power.getBtnWasPressed()) {
+	#else
+		if (M5.Axp.GetBtnPress()) {
+	#endif
 		#ifdef DEV
 			logger.log(Logger::INFO, "Pressed Axp button to navigate to the next option");
 		#endif
@@ -233,10 +236,6 @@ void loop() {
         mainMenu.next_option();
 		battery.restoreBrightness();
     }
-#else
-	// fstick.ino:215:21: error: 'class m5::Power_Class' has no member named 'wasReleased'
-	// if (StickCP2.Power.wasReleased()) {
-#endif
 
 	if (M5.BtnB.wasReleased()) {
 		#ifdef DEV
@@ -255,8 +254,6 @@ void loop() {
 
 		battery.setLI(millis());
         mainMenu.select();
-		// mainMenu.render(true);
-		// mainMenu.render_feature(); // Not clean but should do its job
 		battery.restoreBrightness();
     }
 

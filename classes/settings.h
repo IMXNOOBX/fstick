@@ -32,13 +32,19 @@ public:
 	}
 
 	void setClock(uint8_t hour, uint8_t minute, uint8_t second) {
-        #if !defined(PLUS2)
-            RTC_TimeTypeDef TimeStruct;
-            TimeStruct.Hours = hour;
-            TimeStruct.Minutes = minute;
-            TimeStruct.Seconds = second;
-            M5.Rtc.SetTime(&TimeStruct);
-        #endif
+		#if defined(PLUS2)
+			auto dt = M5.Rtc.getDateTime();
+			dt.time.hours = hour;
+			dt.time.minutes = minute;
+			dt.time.seconds = second;
+			M5.Rtc.setDateTime(dt);
+		#else
+			RTC_TimeTypeDef TimeStruct;
+			TimeStruct.Hours = hour;
+			TimeStruct.Minutes = minute;
+			TimeStruct.Seconds = second;
+			M5.Rtc.SetTime(&TimeStruct);
+		#endif
 		this->save();
 	}
 
