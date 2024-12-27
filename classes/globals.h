@@ -1,19 +1,9 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-// #include <M5Unified.h>
+#include <M5Unified.h>
 
-#if defined(PLUS)
-	#include <M5StickCPlus.h>
-	#include <M5Display.h>
-
-	#define DEVICE "M5StickCPlus"
-	#define SCREEN_WIDTH 240
-	#define SCREEN_HEIGHT 135
-	// #define M5_LED 9
-	#define SCREEN M5.Lcd
-	#define BUZZER M5.Beep
-#elif defined(PLUS2)
+#if defined(PLUS2)
 	#include <M5StickCPlus2.h>
 
 	#define DEVICE "M5StickCPlus2"
@@ -23,6 +13,16 @@
 	#define BACKLIGHT 27
 	#define SCREEN StickCP2.Display
 	#define BUZZER StickCP2.Speaker
+#elif defined(PLUS)
+	#include <M5StickCPlus.h>
+	#include <M5Display.h>
+
+	#define DEVICE "M5StickCPlus"
+	#define SCREEN_WIDTH 240
+	#define SCREEN_HEIGHT 135
+	// #define M5_LED 9
+	#define SCREEN M5.Lcd
+	#define BUZZER M5.Beep
 #else
 	#include <M5StickC.h>
 	#include <M5Display.h>
