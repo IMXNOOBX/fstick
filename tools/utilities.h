@@ -6,8 +6,9 @@ namespace utilities
 			auto dt = M5.Rtc.getDateTime();
 			String time = String(dt.time.hours) + ":" + String(dt.time.minutes) + ":" + String(dt.time.seconds);
 		#else
-			M5.Rtc.GetBm8563Time();
-			String time = String(M5.Rtc.Hour) + ":" + String(M5.Rtc.Minute) + ":" + String(M5.Rtc.Second);
+			RTC_TimeTypeDef RTC_TimeStruct;
+			M5.Rtc.GetTime(&RTC_TimeStruct);
+			String time = String(RTC_TimeStruct.Hours) + ":" + String(RTC_TimeStruct.Minutes) + ":" + String(RTC_TimeStruct.Seconds);
 		#endif
 		if (time.length() < 8)
 			time += "  ";

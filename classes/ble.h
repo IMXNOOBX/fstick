@@ -35,21 +35,18 @@ public:
 
 	void advertiseApple() {
 		for (int i = 0; i < 3; i++) {
-
 			NimBLEAdvertisementData advData = getAppleAdvertisementData();
 
 			adv->setAdvertisementData(advData);
 			adv->setMinInterval(0x20);
 			adv->setMaxInterval(0x20);
-			adv->setMinPreferred(0x20);
-			adv->setMaxPreferred(0x20);
 
 			adv->start();
 			notify.send();
 			delay(20);
 			adv->stop();
 
-			logger.log(Logger::INFO, "Sending Apple (" + String(i) + ") advertisement packet with " + String(advData.getPayload().c_str()) + " payload");
+			logger.log(Logger::INFO, "Sending Apple (" + String(i) + ") advertisement packet");
 		}
 	}
 
@@ -60,15 +57,13 @@ public:
 			adv->setAdvertisementData(advData);
 			adv->setMinInterval(0x20);
 			adv->setMaxInterval(0x20);
-			adv->setMinPreferred(0x20);
-			adv->setMaxPreferred(0x20);
 
 			adv->start();
 			notify.send();
 			delay(20);
 			adv->stop();
 
-			logger.log(Logger::INFO, "Sending Windows (" + String(i) + ") advertisement packet with " + String(advData.getPayload().c_str()) + " payload");
+			logger.log(Logger::INFO, "Sending Windows (" + String(i) + ") advertisement packet");
 		}
 	}
 
@@ -79,15 +74,13 @@ public:
 			adv->setAdvertisementData(advData);
 			adv->setMinInterval(0x20);
 			adv->setMaxInterval(0x20);
-			adv->setMinPreferred(0x20);
-			adv->setMaxPreferred(0x20);
 
 			adv->start();
 			notify.send();
 			delay(20);
 			adv->stop();
 
-			logger.log(Logger::INFO, "Sending Android (" + String(i) + ") advertisement packet with " + String(advData.getPayload().c_str()) + " payload");
+			logger.log(Logger::INFO, "Sending Android (" + String(i) + ") advertisement packet");
 		}
 	}
 
@@ -98,15 +91,13 @@ public:
 			adv->setAdvertisementData(advData);
 			adv->setMinInterval(0x20);
 			adv->setMaxInterval(0x20);
-			adv->setMinPreferred(0x20);
-			adv->setMaxPreferred(0x20);
 
 			adv->start();
 			notify.send();
 			delay(20);
 			adv->stop();
 			
-			logger.log(Logger::INFO, "Sending Samsung (" + String(i) + ") advertisement packet with " + String(advData.getPayload().c_str()) + " payload");
+			logger.log(Logger::INFO, "Sending Samsung (" + String(i) + ") advertisement packet");
 		}
 	}
 
@@ -206,7 +197,7 @@ private:
 		packet[i++] = 0x10; // Type ???
 		esp_fill_random(&packet[i], 3);
 
-		oAdvertisementData.addData(std::string((char *)packet, 17));
+		oAdvertisementData.addData(packet, 17);
 		return oAdvertisementData;
 	}
 
@@ -233,12 +224,11 @@ private:
 		}
 		i += display_name_len;
 
-		oAdvertisementData.addData(std::string((char *)packet, size));
-
+		oAdvertisementData.addData(packet, size);
+		free(packet);
 		return oAdvertisementData;
 	}
 
-	// https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/3cb7a817b1bc5269203a0322ae85b412802aa5ec/applications/external/ble_spam/protocols/fastpair.c#L239
 	NimBLEAdvertisementData getAndroidAdvertisementData() {
 		NimBLEAdvertisementData oAdvertisementData = NimBLEAdvertisementData();
 		uint8_t packet[14];
@@ -262,7 +252,7 @@ private:
 		packet[i++] = 0x0A; // AD Type (Tx Power Level)
 		packet[i++] = (rand() % 120) - 100; // -100 to +20 dBm
 
-		oAdvertisementData.addData(std::string((char *)packet, 14));
+		oAdvertisementData.addData(packet, 14);
 		return oAdvertisementData;
 	}
 
@@ -288,19 +278,9 @@ private:
 		packet[i++] = 0x43;
 
 		const uint32_t model = samsum_models[rand() % samsum_models_count].value; // Action Type
-
 		packet[i++] = (model >> 0x00) & 0xFF;
-		/*
-		packet[i++] = (model >> 0x08) & 0xFF;
-		packet[i++] = (model >> 0x00) & 0xFF;
-		
-		packet[i++] = 2; // Size
-		packet[i++] = 0x0A; // AD Type (Tx Power Level)
-		packet[i++] = (rand() % 120) - 100; // -100 to +20 dBm
-		*/
 
-		oAdvertisementData.addData(std::string((char *)packet, 14));
-	
+		oAdvertisementData.addData(packet, 14);
 		return oAdvertisementData;
 	}
 };

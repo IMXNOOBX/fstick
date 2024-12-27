@@ -8,12 +8,12 @@ public:
 
 	void beep() {
 		if (!is_enabled) return;
-		#if !defined(PLUS2)
+		#if defined(PLUS2)
+			BUZZER.tone(4500, 50);
+		#elif defined(PLUS)
 			BUZZER.tone(4500);
 			delay(50);
 			BUZZER.mute();
-		#else
-			BUZZER.tone(4500, 50);
 		#endif
 	}
 
@@ -35,23 +35,42 @@ public:
 class Led {
 public:
     Led() {
-		pinMode(M5_LED, OUTPUT);
-		digitalWrite(M5_LED, HIGH);
+		#if defined(PLUS2)
+			pinMode(M5_LED, OUTPUT);
+			digitalWrite(M5_LED, HIGH);
+		#else
+			pinMode(M5_LED, OUTPUT);
+			digitalWrite(M5_LED, HIGH);
+		#endif
     }
 
     void on() {
-		digitalWrite(M5_LED, LOW);
+		#if defined(PLUS2)
+			digitalWrite(M5_LED, LOW);
+		#else
+			digitalWrite(M5_LED, LOW);
+		#endif
     }
 
 	void off() {
-		digitalWrite(M5_LED, HIGH);
+		#if defined(PLUS2)
+			digitalWrite(M5_LED, HIGH);
+		#else
+			digitalWrite(M5_LED, HIGH);
+		#endif
     }
 
 	void flash() {
 		if (!is_enabled) return;
-		digitalWrite(M5_LED, LOW);
-		delay(10);
-		digitalWrite(M5_LED, HIGH);
+		#if defined(PLUS2)
+			digitalWrite(M5_LED, LOW);
+			delay(10);
+			digitalWrite(M5_LED, HIGH);
+		#else
+			digitalWrite(M5_LED, LOW);
+			delay(10);
+			digitalWrite(M5_LED, HIGH);
+		#endif
     }
 
 	void flash(int times) {

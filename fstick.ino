@@ -17,7 +17,7 @@
  * This notice applies to all files within this repository
  */
 
-#define PLUS
+// #define PLUS
 // #define PLUS2
 #define DEV // Mostly to disable battery saver and some debug messages
 #include "classes/globals.h"
@@ -147,17 +147,17 @@ void setup() {
 	mainMenu.topBar();
 
 	// Logo
-	#if !defined(PLUS) && !defined(PLUS2)
-		SCREEN.drawBitmap(5, 20, 70, 70, (uint16_t*)logo);
-		SCREEN.setCursor(5, 95);
-		SCREEN.setTextSize(1);
-		SCREEN.print(NAME);
-		SCREEN.setCursor(5, 105);
-		SCREEN.setTextSize(1);
-		SCREEN.println(VERSION);
-		SCREEN.setCursor(5, 115);
-		SCREEN.println(DEVICE);
-	#else
+	// #if !defined(PLUS) && !defined(PLUS2)
+	// SCREEN.drawBitmap(5, 20, 70, 70, (uint16_t*)logo);
+	// SCREEN.setCursor(5, 95);
+	// SCREEN.setTextSize(1);
+	// SCREEN.print(NAME);
+	// SCREEN.setCursor(5, 105);
+	// SCREEN.setTextSize(1);
+	// SCREEN.println(VERSION);
+	// SCREEN.setCursor(5, 115);
+	// SCREEN.println(DEVICE);
+	// #else
 		SCREEN.drawBitmap(10, 20, 105, 105, (uint16_t*)logo);
 		SCREEN.setCursor(120, 40);
 		SCREEN.setTextSize(2);
@@ -167,7 +167,7 @@ void setup() {
 		SCREEN.println(VERSION);
 		SCREEN.setCursor(120, 70);
 		SCREEN.println(DEVICE);
-	#endif
+	// #endif
 
 	/**
 	 * @brief initialize classes
@@ -236,7 +236,8 @@ void loop() {
 		return;
 
 	#if defined(PLUS2)
-		if (StickCP2.Power.getBtnWasPressed()) {
+		// if (StickCP2.Btn.wasPressed()) {
+    if (digitalRead(35) == LOW){
 	#else
 		if (M5.Axp.GetBtnPress()) {
 	#endif
