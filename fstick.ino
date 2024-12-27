@@ -147,16 +147,28 @@ void setup() {
 	mainMenu.topBar();
 
 	// Logo
-	SCREEN.drawBitmap(10, 20, 105, 105, (uint16_t*)logo);
+	#if !defined(PLUS) && !defined(PLUS2)
+		SCREEN.drawBitmap(5, 20, 70, 70, (uint16_t*)logo);
+		SCREEN.setCursor(5, 95);
+		SCREEN.setTextSize(1);
+		SCREEN.print(NAME);
+		SCREEN.setCursor(5, 105);
+		SCREEN.setTextSize(1);
+		SCREEN.println(VERSION);
+		SCREEN.setCursor(5, 115);
+		SCREEN.println(DEVICE);
+	#else
+		SCREEN.drawBitmap(10, 20, 105, 105, (uint16_t*)logo);
+		SCREEN.setCursor(120, 40);
+		SCREEN.setTextSize(2);
+		SCREEN.print(NAME);
+		SCREEN.setCursor(120, 60);
+		SCREEN.setTextSize(1);
+		SCREEN.println(VERSION);
+		SCREEN.setCursor(120, 70);
+		SCREEN.println(DEVICE);
+	#endif
 
-	SCREEN.setCursor(120, 40);
-	SCREEN.setTextSize(2);
-	SCREEN.print(NAME);
-	SCREEN.setCursor(120, 60);
-	SCREEN.setTextSize(1);
-	SCREEN.println(VERSION);
-	SCREEN.setCursor(120, 70);
-	SCREEN.println(DEVICE);
 	/**
 	 * @brief initialize classes
 	 */

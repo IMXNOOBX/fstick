@@ -132,14 +132,25 @@ public:
 
 		if (this->subm_actions == nullptr && this->subm_options == nullptr)
 		{
-			SCREEN.setTextSize(2);
-			SCREEN.setCursor(10, 20);
-			SCREEN.setTextColor(BLUE);
-			SCREEN.print(title);
-			SCREEN.setTextColor(WHITE);
+			#if !defined(PLUS) && !defined(PLUS2)
+				SCREEN.setTextSize(1);
+				SCREEN.setCursor(5, 20);
+				SCREEN.setTextColor(BLUE);
+				SCREEN.print(title);
+				SCREEN.setTextColor(WHITE);
 
-			SCREEN.setTextSize(menu_options[menu_selected].name.length() >= 8 ? 3 : 4);
-			SCREEN.setCursor(20, 60);
+				SCREEN.setTextSize(menu_options[menu_selected].name.length() >= 8 ? 1 : 2);
+				SCREEN.setCursor(5, 40);
+			#else
+				SCREEN.setTextSize(2);
+				SCREEN.setCursor(10, 20);
+				SCREEN.setTextColor(BLUE);
+				SCREEN.print(title);
+				SCREEN.setTextColor(WHITE);
+
+				SCREEN.setTextSize(menu_options[menu_selected].name.length() >= 8 ? 3 : 4);
+				SCREEN.setCursor(20, 60);
+			#endif
 			SCREEN.print(menu_options[menu_selected].name);
 
 			SCREEN.setTextSize(1);
