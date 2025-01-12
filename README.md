@@ -45,7 +45,8 @@ Thanks to all the donors for supporting this project! ❤
 1. Clone the repo using `git clone https://github.com/IMXNOOBX/fstick.git`
 2. Download the [**Arduino IDE**](https://www.arduino.cc/en/software) and install it or use visual studio code with the [**Arduino extension**](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino)
 3. Run the python script `python3 setup.py` to be able to to build the project
-4. In your Arduino IDE or VSCode extension go to the main file `fstick.ino` and click on the build button in the top Left/Right in Arduino/VSCode respectively.
+4. Download the dependencies for your board using the Arduino Library Manager [**CHECK HERE**](./LIBRARIES.md)
+5. In your Arduino IDE or VSCode extension go to the main file `fstick.ino` and click on the build button in the top Left/Right in Arduino/VSCode respectively.
 
 ## 🧶 Contribute/Issues
 Feel free to contribute or open any issue for the project, just make sure to read the [**CONTRIBUTE.md**](./CONTRIBUTE.md) file first and you follow the steps acordingly.
