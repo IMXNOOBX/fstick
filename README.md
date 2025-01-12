@@ -8,6 +8,9 @@ This is a simple project to play around with the [M5StickC Plus](https://m5stack
 Thanks to all the donors for supporting this project! ❤
 >🌟 [**Killer74-hub**](https://github.com/Killer74-hub) for a generous donation to keep this project going! Thank you so much! 
 
+> [!IMPORTANT]
+> If you are a developer or are really interested on the project check out [**`development`**](/tree/develop) branch for the latest updates and features.
+
 ## 🪀 Usage
 * The device has three different buttons, we will call them TOP (the one on the top), M5 (the one in the front) and BOTTOM (the one on the bottom).
 * To Select an option, press the M5 button.
